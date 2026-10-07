@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Nurse Dashboard - ULS Clinic System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System <span>Prototype v5 (HTML/CSS)</span></h1>
+        <nav aria-label="Switch role"><a href="doctor-dashboard.html">Doctor</a><a href="nurse-dashboard.html"
+                class="on">Nurse</a><a href="student-dashboard.html">Student</a><a
+                href="employee-dashboard.html">Employee</a><a href="index.html">Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Nurse</h4><a href="nurse-dashboard.html" class="on">Dashboard</a><a
+                    href="medical-records.html">Medical Records</a><a href="inventory.html">Inventory</a><a
+                    href="statistics.html">Statistics</a>
+            </nav>
+        </aside>
+        <main>
+            <h2>Nurse Dashboard</h2>
+            <p class="sub">Today: October 7, 2026</p>
+            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
+                backend.</p>
+            <section class="cards">
+                <article class="card ok"><small>Students cleared</small><b>3,980</b></article>
+                <article class="card warn"><small>Incomplete requirements</small><b>2,387</b></article>
+                <article class="card bad"><small>Expired / out of stock</small><b>3</b></article>
+                <article class="card warn"><small>Low stock</small><b>4</b></article>
+            </section>
+            <section class="box">
+                <h3>Inventory Alerts</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Stock</th>
+                            <th>Expiry</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sinutret</td>
+                            <td class="c-crit">0</td>
+                            <td class="c-warn">2026-10-30</td>
+                            <td><span class="pill red">OUT</span></td>
+                        </tr>
+                        <tr>
+                            <td>Amoxicillin 500mg</td>
+                            <td class="c-warn">80</td>
+                            <td class="c-warn">2026-11-20</td>
+                            <td><span class="pill yellow">LOW</span></td>
+                        </tr>
+                        <tr>
+                            <td>Oral Rehydration</td>
+                            <td class="c-warn">50</td>
+                            <td class="c-warn">2026-10-25</td>
+                            <td><span class="pill yellow">EXPIRING</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section class="box">
+                <h3>Upcoming Group Schedules</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Service</th>
+                            <th>Group</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Oct 15</td>
+                            <td>Dental</td>
+                            <td>BS IT 3rd Year</td>
+                        </tr>
+                        <tr>
+                            <td>Oct 20</td>
+                            <td>Vaccination</td>
+                            <td>Engineering (OJT)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
