@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Statistics - ULS Clinic System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System <span>Prototype v5 (HTML/CSS)</span></h1>
+        <nav aria-label="Switch role"><a href="doctor-dashboard.html" class="on">Doctor</a><a
+                href="nurse-dashboard.html">Nurse</a><a href="student-dashboard.html">Student</a><a
+                href="employee-dashboard.html">Employee</a><a href="index.html">Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Doctor</h4><a href="doctor-dashboard.html">Dashboard</a><a href="visits.html">Consultations &amp;
+                    Checkups</a><a href="consultation-form.html">+ New Visit</a><a href="medical-records.html">Student
+                    Records</a><a href="statistics.html" class="on">Statistics</a>
+            </nav>
+        </aside>
+        <main>
+            <h2>Statistics</h2>
+            <p class="sub">Raw visit data converted to graphs to spot outbreaks. Charts here are static samples.</p>
+            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
+                backend.</p>
+            <div class="toolbar"><select aria-label="Period">
+                    <option>All time</option>
+                    <option>This month</option>
+                    <option>This week</option>
+                </select><select aria-label="College">
+                    <option>All colleges</option>
+                    <option>IT</option>
+                    <option>Engineering</option>
+                </select><select aria-label="Group">
+                    <option>Students</option>
+                    <option>Deans</option>
+                    <option>Full-Time Faculty</option>
+                    <option>Part-Time/City Faculty</option>
+                    <option>Maintenance</option>
+                </select></div>
+            <div class="alert">Possible outbreak: URI/flu and viral conjunctivitis cases are rising this week.</div>
+            <div class="two">
+                <section class="box">
+                    <h3>Cases by Condition Category</h3>
+                    <div class="pad">
+                        <div class="bar"><b>URI / Flu</b><i style="width:75%"></i><em>45</em></div>
+                        <div class="bar"><b>Wounds</b><i style="width:30%"></i><em>18</em></div>
+                        <div class="bar"><b>Viral conjunctivitis</b><i style="width:22%"></i><em>13</em></div>
+                        <div class="bar"><b>Mental health (aggregate)</b><i style="width:15%"></i><em>9</em></div>
+                        <div class="bar"><b>Metabolic</b><i style="width:12%"></i><em>7</em></div>
+                        <div class="bar"><b>Neurological</b><i style="width:8%"></i><em>5</em></div>
+                    </div>
+                </section>
+                <section class="box">
+                    <h3>Cases per College</h3>
+                    <div class="pad">
+                        <div class="bar"><b>Engineering</b><i style="width:70%"></i><em>51</em></div>
+                        <div class="bar"><b>Business</b><i style="width:55%"></i><em>40</em></div>
+                        <div class="bar"><b>IT</b><i style="width:40%"></i><em>29</em></div>
+                        <div class="bar"><b>Nursing</b><i style="width:30%"></i><em>22</em></div>
+                    </div>
+                </section>
+            </div>
+            <section class="box">
+                <h3>BMI Distribution</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="c-warn">Underweight</td>
+                            <td>34</td>
+                        </tr>
+                        <tr>
+                            <td class="c-good">Normal</td>
+                            <td>260</td>
+                        </tr>
+                        <tr>
+                            <td class="c-warn">Overweight</td>
+                            <td>110</td>
+                        </tr>
+                        <tr>
+                            <td class="c-bad">Obese</td>
+                            <td>46</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Patient Record: Maria Dizon - ULS Clinic System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System <span>Prototype v5 (HTML/CSS)</span></h1>
+        <nav aria-label="Switch role"><a href="doctor-dashboard.html">Doctor</a><a href="nurse-dashboard.html"
+                class="on">Nurse</a><a href="student-dashboard.html">Student</a><a
+                href="employee-dashboard.html">Employee</a><a href="index.html">Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Nurse</h4><a href="nurse-dashboard.html">Dashboard</a><a href="medical-records.html">Medical
+                    Records</a><a href="inventory.html">Inventory</a><a href="statistics.html">Statistics</a>
+            </nav>
+        </aside>
+        <main>
+            <h2>Patient Record: Maria Dizon</h2>
+            <p class="sub">2026-00123 | IT | BSIT 3rd Year</p>
+            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
+                backend.</p>
+            <section class="cards">
+                <article class="card"><small>Age / Sex (auto)</small><b>20 / F</b></article>
+                <article class="card ok"><small>BMI (auto)</small><b>21.5</b></article>
+                <article class="card ok"><small>BP status (auto)</small><b>Normal</b></article>
+                <article class="card"><small>Record opened</small><b>2026-10-07</b></article>
+            </section>
+            <div class="two">
+                <section class="box">
+                    <h3>Requirements</h3>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>Physical Exam</td>
+                                <td><span class="pill green">&#10003;</span></td>
+                            </tr>
+                            <tr>
+                                <td>Dental Examination</td>
+                                <td><span class="pill green">&#10003;</span></td>
+                            </tr>
+                            <tr>
+                                <td>Vaccination (Hep B, Tetanus, Influenza, COVID-19, MMR)</td>
+                                <td><span class="pill green">5/5</span></td>
+                            </tr>
+                            <tr>
+                                <td>Laboratory Results</td>
+                                <td><span class="pill green">&#10003;</span></td>
+                            </tr>
+                            <tr>
+                                <td>Medical Certificate</td>
+                                <td><span class="pill green">&#10003;</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <section class="box">
+                    <h3>Visit History</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Diagnosis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-10-07</td>
+                                <td>Consult</td>
+                                <td>Upper Respiratory Infection</td>
+                            </tr>
+                            <tr>
+                                <td>2026-08-02</td>
+                                <td>Checkup</td>
+                                <td>Normal / Well</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+            <a class="btn sec" href="medical-records.html">Back to records</a>
+        </main>
+    </div>
+</body>
+
+</html>
