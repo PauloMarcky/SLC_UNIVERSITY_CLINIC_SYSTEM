@@ -9,16 +9,36 @@
 </head>
 
 <body>
-    <main class="login">
-        <h2>ULS Clinic System</h2>
-        <p class="note">Visual only. Real login needs a backend.</p>
-        <form class="f"><label for="u">ID number</label><input id="u" placeholder="e.g. 2026-00123"><label
-                for="p">Password</label><input id="p" type="password"></form>
-        <a class="btn" href="doctor-dashboard.html">Enter as Doctor</a><a class="btn sec"
-            href="nurse-dashboard.html">Enter as Nurse</a>
-        <a class="btn sec" href="student-dashboard.html">Enter as Student</a><a class="btn sec"
-            href="employee-dashboard.html">Enter as Employee</a>
-    </main>
+<main class="login">
+    <h2>ULS Clinic System</h2>
+    <p class="note">Visual only. Real login needs a backend.</p>
+    <form class="f">
+        <label for="u">ID number</label>
+        <input id="u" placeholder="e.g. 2026-00123">
+        <label for="p">Password</label>
+        <div class="pw">
+            <input id="p" type="password">
+            <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
+        </div>
+    </form>
+    <div class="login-actions">
+        <a class="btn sec" href="doctor-dashboard.html">Enter as Doctor</a>
+        <a class="btn sec" href="nurse-dashboard.html">Enter as Nurse</a>
+        <a class="btn sec" href="student-dashboard.html">Enter as Student</a>
+        <a class="btn sec" href="employee-dashboard.html">Enter as Employee</a>
+    </div>
+</main>
+
+<script>
+    const input = document.getElementById('p');
+    const toggle = document.querySelector('.pw-toggle');
+
+    toggle.onclick = function () {
+        const hidden = input.type === 'password';
+        input.type = hidden ? 'text' : 'password';
+        toggle.textContent = hidden ? 'Hide' : 'Show';
+    };
+</script>
 </body>
 
-</html>
+</html> 

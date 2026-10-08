@@ -29,7 +29,21 @@
                 backend.</p>
             <div class="alert">Red = expired or expiring within 60 days. Low and out-of-stock items support timely
                 re-ordering and budget requests.</div>
-            <div class="toolbar"><a class="btn" href="#">+ Stock In</a><a class="btn sec" href="#">Reorder Report</a>
+            <div class="toolbar">
+                <a class="btn" href="#">+ Stock In</a>
+                <a class="btn sec" href="#">Reorder Report</a>
+                <div class="filter">
+                    <label for="statusFilter">Filter</label>
+                    <select id="statusFilter">
+                        <option value="">All statuses</option>
+                        <option>OK</option>
+                        <option>LOW</option>
+                        <option>EXPIRING</option>
+                        <option>EXPIRED</option>
+                        <option>OUT</option>
+                    </select>
+                </div>
+                <input type="search" class="search" placeholder="Search medicine by name or category…" aria-label="Search inventory">
             </div>
             <section class="box">
                 <table>

@@ -62,6 +62,8 @@ a {
     background: #fff;
     color: var(--g);
     font-weight: 600
+
+
 }
 
 .layout {
@@ -419,22 +421,38 @@ tbody tr:hover {
 }
 
 .login {
-    max-width: 400px;
+    max-width: 520px;
     margin: 8vh auto;
     background: #fff;
     border: 1px solid var(--bd);
     border-radius: 8px;
-    padding: 26px
+    padding: 36px;
+    font-size: 16px
 }
 
 .login .f {
-    margin-top: 10px
+    margin-top: 12px
 }
 
 .login .btn {
     display: block;
     text-align: center;
-    margin-top: 8px
+    margin-top: 10px;
+    padding: 12px 16px;
+    font-size: 15px
+}
+
+.login h2 {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 26px
+}
+
+.login .note {
+    display: block;
+    text-align: center;
+    margin: 6px auto 18px
 }
 
 .modal[hidden] {
@@ -520,3 +538,60 @@ body.modal-open {
         grid-template-columns: 1fr
     }
 }
+
+.toolbar .filter {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px
+}
+
+.toolbar .filter label {  /* for the the lil status in inv */
+    font-size: 11px;
+    color: var(--m);
+    text-transform: uppercase;
+    letter-spacing: .4px
+}
+
+.toolbar .filter {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px
+}
+
+.btn.sec:hover {
+    background: var(--g);
+    color: #fff;
+    border-color: var(--g)
+}
+
+.pw {   /* for the password toggle in login */
+    position: relative
+}
+
+.pw input {
+    padding-right: 38px
+}
+
+.pw-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 4px 6px;
+    color: #9ca3af
+}
+
+.pw-toggle.on {
+    color: var(--g)
+}
+
+.pw-toggle:hover {
+    color: var(--g)
+}
+
