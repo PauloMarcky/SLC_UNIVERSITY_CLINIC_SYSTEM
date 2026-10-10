@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Doctor Dashboard - ULS Clinic System</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/ui.js" defer></script>
+    <link rel="stylesheet" href="css/certificates.css">
+    <script src="js/clinic-api.js" defer></script>
+    <script src="js/certificate-dashboard.js" defer></script>
 </head>
 
 <body>
@@ -20,14 +24,20 @@
             <nav aria-label="Menu">
                 <h4>Doctor</h4><a href="doctor-dashboard.html" class="on">Dashboard</a><a
                     href="visits.html">Consultations &amp; Checkups</a><a href="consultation-form.html">+ New
-                    Visit</a><a href="medical-records.html">Student Records</a><a href="statistics.html">Statistics</a>
+                    Visit</a><a href="medical-records.html">Student Records</a><a href="certificates.html">Certificate Approval</a><a href="statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
             <h2>Doctor Dashboard</h2>
+            <section class="box certificate-panel" id="dashboard-certificates" aria-labelledby="dashboard-certificate-title">
+                <h3 id="dashboard-certificate-title">Certificate Approval</h3>
+                <p id="dashboard-certificate-summary" class="certificate-note" role="status">Loading certificate requests…</p>
+                <div class="certificate-actions"><a class="btn" href="certificates.html?status=Pending%20Approval">Review Pending Certificates</a><a class="btn sec" href="certificates.html?status=Approved">Approved Certificates</a></div>
+                <div id="dashboard-certificate-queue" class="certificate-detail"></div>
+                <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
+            </section>
             <p class="sub">Today: October 7, 2026</p>
-            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
-                backend.</p>
+            <p class="note">Certificate requests use saved clinic records. Other dashboard figures and visit tools are sample prototypes.</p>
             <section class="cards">
                 <article class="card ok"><small>Today's patients</small><b>24</b></article>
                 <article class="card"><small>Consultations (sickness)</small><b>17</b></article>
