@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Consultations and Checkups - ULS Clinic System</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/ui.js" defer></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System <span>Prototype v5 (HTML/CSS)</span></h1>
+        <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Doctor</h4><a href="../doctor/dashboard.html">Dashboard</a><a href="../doctor/visits.html"
+                    class="on">Consultations &amp; Checkups</a><a href="../doctor/consultation-form.html">+ New Visit</a><a
+                    href="../nurse/medical-records.html">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
+            </nav>
+        </aside>
+        <main>
+            <h2>Consultations and Checkups</h2>
+            <p class="sub">Logs are kept separately: sickness consultations vs. wellness checkups</p>
+            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
+                backend.</p>
+            <div class="toolbar"><input placeholder="Search patient (name or ID)" aria-label="Search"><select
+                    aria-label="College">
+                    <option>All colleges</option>
+                    <option>IT</option>
+                    <option>Engineering</option>
+                </select><a class="btn" href="../doctor/consultation-form.html">+ New Visit</a></div>
+            <section class="box">
+                <h3>Medical Consultations (sickness)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Patient</th>
+                            <th>College</th>
+                            <th>Type</th>
+                            <th>Complaint</th>
+                            <th>Diagnosis</th>
+                            <th>BP</th>
+                            <th>BMI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-10-07</td>
+                            <td><a href="../nurse/record-detail.html">Maria Dizon</a></td>
+                            <td>IT</td>
+                            <td>Consult</td>
+                            <td>Cough and colds</td>
+                            <td>Upper Respiratory Infection</td>
+                            <td class="c-good">118/76</td>
+                            <td class="c-good">21.5</td>
+                        </tr>
+                        <tr>
+                            <td>2026-10-07</td>
+                            <td><a href="../nurse/record-detail.html">Paolo Reyes</a></td>
+                            <td>Engineering</td>
+                            <td>Consult</td>
+                            <td>Wound</td>
+                            <td>Wound / Injury</td>
+                            <td class="c-warn">132/84</td>
+                            <td class="c-warn">27.1</td>
+                        </tr>
+                        <tr>
+                            <td>2026-10-07</td>
+                            <td>Student (hidden)</td>
+                            <td>Law</td>
+                            <td><span class="pill purple">Confidential</span></td>
+                            <td>Panic attack</td>
+                            <td class="c-conf">Mental Health - Anxiety</td>
+                            <td class="c-warn">130/85</td>
+                            <td class="c-good">21.5</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section class="box">
+                <h3>Wellness Checkups</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Patient</th>
+                            <th>College</th>
+                            <th>Type</th>
+                            <th>Complaint</th>
+                            <th>Diagnosis</th>
+                            <th>BP</th>
+                            <th>BMI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2026-10-07</td>
+                            <td>Angela Cruz</td>
+                            <td>Nursing</td>
+                            <td>Checkup</td>
+                            <td>Routine</td>
+                            <td>Normal / Well</td>
+                            <td class="c-good">110/70</td>
+                            <td class="c-good">20.8</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

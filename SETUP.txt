@@ -1,0 +1,256 @@
+============================================================================
+SLC UNIVERSITY CLINIC SYSTEM - LOCAL SETUP
+============================================================================
+
+Complete instructions to run the backend on your own machine.
+
+============================================================================
+PREREQUISITES (INSTALL ONCE)
+============================================================================
+
+  Node.js 22 LTS or newer   https://nodejs.org
+  MySQL 8.x                 https://dev.mysql.com/downloads/mysql/
+                            (or XAMPP / WAMP if you prefer)
+  Git                       https://git-scm.com
+
+Verify each one is installed by opening PowerShell and running:
+
+  node --version
+  npm --version
+  mysql --version
+
+
+============================================================================
+STEP 1 - CLONE THE REPOSITORY
+============================================================================
+
+  git clone https://github.com/PauloMarcky/SLC_UNIVERSITY_CLINIC_SYSTEM.git
+  cd SLC_UNIVERSITY_CLINIC_SYSTEM\backend
+
+
+============================================================================
+STEP 2 - INSTALL DEPENDENCIES
+============================================================================
+
+  npm install
+
+This downloads mysql2 and creates the node_modules folder.
+
+
+============================================================================
+STEP 3 - CREATE THE DATABASE
+============================================================================
+
+Start the MySQL command line:
+
+  mysql -u root -p
+
+Enter the MySQL root password you set during installation.
+
+At the mysql> prompt, run these two commands. Replace the path with
+wherever you cloned the repository. Use FORWARD SLASHES (/) not
+backslashes - MySQL requires this on Windows.
+
+  source C:/Users/YOUR_NAME/path/to/SLC_UNIVERSITY_CLINIC_SYSTEM/backend/database/schema.sql
+  source C:/Users/YOUR_NAME/path/to/SLC_UNIVERSITY_CLINIC_SYSTEM/backend/database/seed.sql
+
+Example (if cloned to Desktop):
+
+  source C:/Users/paulo/Desktop/WEB_PROJECTS/SLC_UNIVERSITY_CLINIC_SYSTEM/backend/database/schema.sql
+  source C:/Users/paulo/Desktop/WEB_PROJECTS/SLC_UNIVERSITY_CLINIC_SYSTEM/backend/database/seed.sql
+
+Verify it worked:
+
+  USE clinic;
+  SHOW TABLES;
+  SELECT * FROM patients;
+
+Expected:
+  - 6 tables (certificate_history, certificates, notifications,
+    patients, sessions, users)
+  - 4 patients (Maria Dizon, Paolo Reyes, Angela Cruz, Jose Ramos)
+
+Exit MySQL:
+
+  exit
+
+
+============================================================================
+STEP 4 - CREATE THE .env FILE
+============================================================================
+
+Still inside the backend folder:
+
+  Copy-Item .env.example .env
+
+Open the new file and set your MySQL credentials:
+
+  notepad .env
+
+Change these two lines to match your MySQL install:
+
+  DB_USER=root
+  DB_PASSWORD=your_mysql_root_password
+
+Save and close Notepad.
+
+
+============================================================================
+STEP 5 - CREATE THE DEFAULT STAFF ACCOUNTS
+============================================================================
+
+  npm run seed-users
+
+Expected output:
+
+  Created nurse account: nurse1 (Default Nurse).
+  Created doctor account: doctor1 (Default Doctor).
+
+  Default password for both accounts: clinic-dev-2026
+  Change these credentials before any real deployment.
+
+
+============================================================================
+STEP 6 - START THE SERVER
+============================================================================
+
+  npm start
+
+Expected output:
+
+  Clinic server: http://127.0.0.1:3000
+
+
+============================================================================
+STEP 7 - OPEN IN BROWSER
+============================================================================
+
+Open this URL:
+
+  http://127.0.0.1:3000
+
+Log in with either account:
+
+  Username: nurse1     Password: clinic-dev-2026    Role: Nurse
+  Username: doctor1    Password: clinic-dev-2026    Role: Doctor
+
+
+============================================================================
+DAILY WORKFLOW (AFTER FIRST SETUP)
+============================================================================
+
+Every time you want to work on the project:
+
+  cd SLC_UNIVERSITY_CLINIC_SYSTEM\backend
+  npm run dev
+
+npm run dev auto-reloads the server when files change - no need to
+restart manually.
+
+To stop the server: press Ctrl + C in the terminal.
+
+
+============================================================================
+CHEAT SHEET - FIRST-TIME SETUP IN ONE GO
+============================================================================
+
+  git clone https://github.com/PauloMarcky/SLC_UNIVERSITY_CLINIC_SYSTEM.git
+  cd SLC_UNIVERSITY_CLINIC_SYSTEM\backend
+  npm install
+  mysql -u root -p
+  (at the mysql> prompt)
+    source C:/full/path/backend/database/schema.sql
+    source C:/full/path/backend/database/seed.sql
+    exit
+  Copy-Item .env.example .env
+  (edit .env - set DB_USER and DB_PASSWORD)
+  npm run seed-users
+  npm start
+
+
+============================================================================
+TROUBLESHOOTING
+============================================================================
+
+ER_ACCESS_DENIED_ERROR
+  Wrong DB_USER or DB_PASSWORD in .env. Use the same password that
+  works when you run: mysql -u root -p
+
+ER_BAD_DB_ERROR: Unknown database 'clinic'
+  Step 3 did not run successfully. Re-run the source schema.sql command.
+
+EADDRINUSE: address already in use 3000
+  Something else is using port 3000 (VPN services sometimes do).
+  Add PORT=3001 to .env and try again.
+
+Cannot find module 'mysql2'
+  Run: npm install (from the backend folder).
+
+mysql: command not found
+  MySQL's bin folder is not on your system PATH. Either add it, or
+  open MySQL from its install folder directly.
+
+Duplicate key name 'certificates_status' when running schema.sql
+  Harmless. The schema was already applied. Continue.
+
+Login redirects to a blank page or 404
+  The frontend JavaScript redirect paths may still be the old ones.
+  Open the browser console (F12) and share the error message.
+
+
+============================================================================
+IMPORTANT NOTES
+============================================================================
+
+1. Each teammate has their OWN database.
+
+   Certificates created on your machine are not visible on anyone
+   else's machine. This is normal for local development - it lets
+   everyone work without interfering with each other.
+
+2. Never commit .env.
+
+   It contains your MySQL password. .gitignore already excludes it.
+   The .env.example file is the version that gets committed.
+
+3. Running npm test wipes the database.
+
+   Tests truncate every table. Any certificates, sessions, or extra
+   users you created will be deleted. After running tests, run:
+
+     npm run seed-users
+
+   to restore the default accounts.
+
+4. Default password is for local development only.
+
+   clinic-dev-2026 is written in the repository and visible to
+   everyone. Change it before deploying anywhere public. You can
+   override it by setting DEFAULT_STAFF_PASSWORD in .env.
+
+5. Student and Employee dashboards are prototypes.
+
+   student-dashboard.html and employee-dashboard.html have hardcoded
+   sample data and no login path. Students and employees are modeled
+   as PATIENTS in the database, not as users who log in. This is
+   expected behavior for now.
+
+
+============================================================================
+WHAT IS ALREADY IN THE REPO
+============================================================================
+
+  backend/database/schema.sql       - the DDL (all tables + triggers)
+  backend/database/seed.sql         - sample patients
+  backend/.env.example              - config template
+  backend/scripts/seed-users.js     - creates nurse1 and doctor1
+  backend/db.js                     - MySQL connection pool
+  backend/store.js                  - all database operations (async)
+  backend/app.js                    - HTTP server and API
+  backend/package.json              - npm scripts
+  SETUP.md                          - rendered version of this file
+  SETUP.txt                         - this file
+
+============================================================================
+END OF SETUP
+============================================================================
