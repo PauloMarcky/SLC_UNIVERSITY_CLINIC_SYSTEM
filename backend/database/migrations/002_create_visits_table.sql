@@ -2,8 +2,6 @@
 -- Standalone run:  mysql -u root -p clinic < visits.sql
 -- For schema.sql: paste the CREATE TABLE block after the `notifications` table.
 
-USE clinic;
-
 CREATE TABLE IF NOT EXISTS visits (
   id               INT PRIMARY KEY AUTO_INCREMENT,
   patient_id       VARCHAR(50)   NOT NULL,
