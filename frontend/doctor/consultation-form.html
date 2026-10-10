@@ -7,6 +7,8 @@
     <title>New Consultation / Checkup - ULS Clinic System</title>
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
+    <script src="../js/today.js" defer></script>
 </head>
 
 <body>
@@ -35,7 +37,7 @@
                             <option>Consultation (sickness)</option>
                             <option>Checkup (wellness)</option>
                         </select></div>
-                    <div class="f"><label for="d">Date (auto)</label><input id="d" value="2026-10-07" readonly></div>
+                    <div class="f"><label for="d">Date (auto)</label><input id="d" value="2026-10-07" data-today="iso" readonly></div>
                     <div class="f full"><label for="c">Complaint / reason</label><input id="c"></div>
                     <div class="f"><label for="bp">Blood pressure</label><input id="bp" placeholder="120/80"></div>
                     <div class="f"><label for="bs">BP status (auto)</label><input id="bs" value="Computed on save"

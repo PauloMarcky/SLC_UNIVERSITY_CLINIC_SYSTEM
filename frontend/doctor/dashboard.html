@@ -7,6 +7,7 @@
     <title>Doctor Dashboard - ULS Clinic System</title>
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/ui.js" defer></script>
+    <script src="../js/today.js" defer></script>
     <link rel="stylesheet" href="../css/certificates.css">
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/certificate-dashboard.js" defer></script>
@@ -34,7 +35,7 @@
                 <div id="dashboard-certificate-queue" class="certificate-detail"></div>
                 <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
             </section>
-            <p class="sub">Today: October 7, 2026</p>
+            <p class="sub">Today: <span data-today="long">October 7, 2026</span></p>
             <p class="note">Certificate requests use saved clinic records. Other dashboard figures and visit tools are sample prototypes.</p>
             <section class="cards">
                 <article class="card ok"><small>Today's patients</small><b>24</b></article>

@@ -7,6 +7,7 @@
     <title>Nurse Dashboard - ULS Clinic System</title>
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/ui.js" defer></script>
+    <script src="../js/today.js" defer></script>
     <link rel="stylesheet" href="../css/certificates.css">
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/certificate-dashboard.js" defer></script>
@@ -33,7 +34,7 @@
                 <div class="certificate-actions"><a class="btn" href="../shared/certificates.html">Manage Certificates</a><a class="btn sec" href="../shared/certificates.html?status=Returned%20for%20Revision">Returned for Revision</a></div>
                 <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
             </section>
-            <p class="sub">Today: October 7, 2026</p>
+            <p class="sub">Today: <span data-today="long">October 7, 2026</span></p>
             <p class="note">Certificate requests use saved clinic records. Other dashboard figures and inventory tools are sample prototypes.</p>
             <section class="cards">
                 <article class="card ok"><small>Students cleared</small><b>3,980</b></article>

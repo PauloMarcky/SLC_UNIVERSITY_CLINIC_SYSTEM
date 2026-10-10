@@ -48,17 +48,22 @@
             chart: '<path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/>',
             logout: '<path d="M10 4H4v16h6M9 12h12M17 8l4 4-4 4"/>'
         };
-        sidebar.querySelectorAll('a').forEach(function (link) {
-            var href = link.getAttribute('href');
-            var name = /dashboard/.test(href) ? 'dashboard' : /consultation-form/.test(href) ? 'add' : /visits/.test(href) ? 'visits' : /inventory/.test(href) ? 'inventory' : /statistics|reports/.test(href) ? 'chart' : /index/.test(href) ? 'logout' : 'records';
-            var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            icon.setAttribute('viewBox', '0 0 24 24');
-            icon.setAttribute('class', 'nav-icon');
-            icon.setAttribute('aria-hidden', 'true');
-            icon.innerHTML = paths[name];
-            link.prepend(icon);
-            if (link.classList.contains('on')) link.setAttribute('aria-current', 'page');
-        });
+        function decorateNav(aside) {
+            aside.querySelectorAll('a').forEach(function (link) {
+                if (link.querySelector('.nav-icon')) return;
+                var href = link.getAttribute('href');
+                var name = /dashboard/.test(href) ? 'dashboard' : /consultation-form/.test(href) ? 'add' : /visits/.test(href) ? 'visits' : /inventory/.test(href) ? 'inventory' : /statistics|reports/.test(href) ? 'chart' : /index/.test(href) ? 'logout' : 'records';
+                var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('class', 'nav-icon');
+                icon.setAttribute('aria-hidden', 'true');
+                icon.innerHTML = paths[name];
+                link.prepend(icon);
+                if (link.classList.contains('on')) link.setAttribute('aria-current', 'page');
+            });
+        }
+        decorateNav(sidebar);
+        window.ClinicUI = { decorateNav: decorateNav };
     }
     document.querySelectorAll('table').forEach(function (table, index) {
         var region = document.createElement('div');
