@@ -17,6 +17,7 @@ import {
   certificate as mapCertificate
 } from './store.js';
 import { renderCertificate } from './certificate-template.js';
+import { listVisits, createVisit } from './visits-store.js';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FRONTEND_ROOT = resolve(PROJECT_ROOT, 'frontend');
@@ -211,7 +212,8 @@ export function createClinicServer(options = {}) {
       return json(response, 200, { ok: true }, { 'Set-Cookie': cookie('', true) });
     }
 
-    if (!['nurse', 'doctor'].includes(current.user.role)) throw new HttpError(403, 'Clinic staff access required.'); if (path === '/api/patients' && method === 'GET') {
+    if (!['nurse', 'doctor'].includes(current.user.role)) throw new HttpError(403, 'Clinic staff access required.'); 
+    if (path === '/api/patients' && method === 'GET') {
       const search = (url.searchParams.get('search') || '').trim().slice(0, 200);
       const [patients] = await pool.execute(
         `SELECT id, name, college, course, year, category FROM patients
@@ -220,6 +222,22 @@ export function createClinicServer(options = {}) {
         [search, search]
       );
       return json(response, 200, { patients });
+    }
+
+    if (path === '/api/visits') {
+      if (method === 'GET') {
+        const visits = await listVisits({
+          search: url.searchParams.get('search') || '',
+          type: url.searchParams.get('type') || '',
+          college: url.searchParams.get('college') || ''
+        }, current.user);
+        return json(response, 200, { visits });
+      }
+      if (method === 'POST') {
+        const body = await readJson(request);
+        const visit = await createVisit(body, current.user);
+        return json(response, 201, { visit });
+      }
     }
 
     if (path === '/api/certificates') {
