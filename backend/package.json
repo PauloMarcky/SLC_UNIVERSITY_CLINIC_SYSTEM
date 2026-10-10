@@ -1,0 +1,19 @@
+{
+  "name": "slc-university-clinic-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env start.js",
+    "dev": "node --watch --env-file-if-exists=.env start.js",
+    "create-user": "node --env-file-if-exists=.env create-user.js",
+    "seed-users": "node --env-file-if-exists=.env scripts/seed-users.js",
+    "test": "node --env-file-if-exists=.env --test tests/*.test.js"
+  },
+  "dependencies": {
+    "mysql2": "^3.24.5"
+  }
+}

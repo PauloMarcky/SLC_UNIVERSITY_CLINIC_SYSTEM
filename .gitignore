@@ -1,7 +1,16 @@
-node_modules/
-data/
-*.sqlite
-*.sqlite-shm
-*.sqlite-wal
+
+# Brud Code workspace history
+.brud/
+
+# Environment files (secrets — never commit)
 .env
-coverage/
+.env.local
+.env.*.local
+
+# Legacy SQLite artifacts (pre-MySQL migration)
+*.sqlite
+*.sqlite3
+backend/data/
+
+# Dependencies
+node_modules/
