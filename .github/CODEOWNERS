@@ -1,0 +1,15 @@
+# SLC University Clinic System — Code Owners
+# Frontend team owns all frontend files.
+# Backend team owns all backend files.
+# Project-level files owned by the leader.
+
+# Backend — any backend team member can review
+/backend/    @PauloMarcky @benedict003 @mathW1zzard
+
+# Frontend — any frontend team member can review
+/frontend/   @BolisayTrentMeynard @GhostOfCharles @thrdzxc @jhadelorenz650-650
+
+# Project-level files — leader only
+/SETUP.md    @PauloMarcky
+/SETUP.txt   @PauloMarcky
+/.gitignore  @PauloMarcky
