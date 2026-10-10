@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Nurse Dashboard - ULS Clinic System</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/ui.js" defer></script>
+    <link rel="stylesheet" href="css/certificates.css">
+    <script src="js/clinic-api.js" defer></script>
+    <script src="js/certificate-dashboard.js" defer></script>
 </head>
 
 <body>
@@ -20,14 +24,19 @@
             <nav aria-label="Menu">
                 <h4>Nurse</h4><a href="nurse-dashboard.html" class="on">Dashboard</a><a
                     href="medical-records.html">Medical Records</a><a href="inventory.html">Inventory</a><a
-                    href="statistics.html">Statistics</a>
+                    href="statistics.html">Statistics</a><a href="certificates.html">Certificates</a>
             </nav>
         </aside>
         <main>
             <h2>Nurse Dashboard</h2>
+            <section class="box certificate-panel" id="dashboard-certificates" aria-labelledby="dashboard-certificate-title">
+                <h3 id="dashboard-certificate-title">Certificate Management</h3>
+                <p id="dashboard-certificate-summary" class="certificate-note" role="status">Loading your certificate records…</p>
+                <div class="certificate-actions"><a class="btn" href="certificates.html">Manage Certificates</a><a class="btn sec" href="certificates.html?status=Returned%20for%20Revision">Returned for Revision</a></div>
+                <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
+            </section>
             <p class="sub">Today: October 7, 2026</p>
-            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
-                backend.</p>
+            <p class="note">Certificate requests use saved clinic records. Other dashboard figures and inventory tools are sample prototypes.</p>
             <section class="cards">
                 <article class="card ok"><small>Students cleared</small><b>3,980</b></article>
                 <article class="card warn"><small>Incomplete requirements</small><b>2,387</b></article>
