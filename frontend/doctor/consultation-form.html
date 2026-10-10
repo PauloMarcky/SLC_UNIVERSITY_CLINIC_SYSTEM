@@ -36,11 +36,17 @@
                         <div><label style="display:inline-block;margin-right:20px;font-weight:normal"><input type="radio" name="ptype" value="new" checked style="width:auto"> New patient</label>
                         <label style="display:inline-block;font-weight:normal"><input type="radio" name="ptype" value="existing" style="width:auto"> Existing patient</label></div></div>
 
-                    <div class="f full" data-mode="existing" style="display:none"><label for="psearch">Find existing patient (name or ID)</label><input id="psearch"
-                            list="patient-list" autocomplete="off" placeholder="Start typing a name or ID, then pick from the list">
+                    <div class="f full" data-mode="existing" style="display:none"><label for="psearch">Patient name (or ID)</label><input id="psearch"
+                            list="patient-list" autocomplete="off" placeholder="Type the name, then pick from the list">
                         <datalist id="patient-list"></datalist>
                         <span class="hint" id="patient-hint"></span></div>
 
+                    <div class="f" data-mode="existing" style="display:none"><label for="xid">Patient ID (auto)</label><input id="xid" readonly placeholder="Filled in when you pick a patient"></div>
+                    <div class="f" data-mode="existing" style="display:none"><label for="xcollege">College (auto)</label><input id="xcollege" readonly></div>
+                    <div class="f" data-mode="existing" style="display:none"><label for="xcourse">Course (auto)</label><input id="xcourse" readonly></div>
+                    <div class="f" data-mode="existing" style="display:none"><label for="xyear">Year level (auto)</label><input id="xyear" readonly></div>
+
+                    <div class="f" data-mode="new"><label for="pid">Patient ID</label><input id="pid" maxlength="50" placeholder="e.g. 2026-00123"></div>
                     <div class="f" data-mode="new"><label for="pcat">Patient type</label><select id="pcat">
                             <option value="student">Student</option>
                             <option value="employee">Employee</option>
@@ -58,7 +64,7 @@
                         </select></div>
                     <div class="f" data-mode="new"><label for="pcourse">Course</label><input id="pcourse" maxlength="100" placeholder="BSIT"></div>
                     <div class="f" data-mode="new"><label for="pyear">Year level</label><input id="pyear" maxlength="20" placeholder="3"></div>
-                    <div class="f full hint" data-mode="new">A new patient is added automatically with a generated ID.</div>
+                    <div class="f full hint" data-mode="new">Enter the patient's ID number. It must not already be in the system.</div>
                     <div class="f"><label for="t">Visit type</label><select id="t">
                             <option value="Consultation">Consultation (sickness)</option>
                             <option value="Checkup">Checkup (wellness)</option>

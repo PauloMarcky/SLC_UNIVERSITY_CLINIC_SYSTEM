@@ -1,8 +1,6 @@
 import { pool, withTransaction } from './db.js';
 import { HttpError, patient } from './store.js';
 
-console.log('visits-store: auto patient ID version loaded');
-
 const VISIT_TYPES = ['Consultation', 'Checkup'];
 const DIAGNOSES = [
   'URI / Flu', 'Wound', 'Neurological',
@@ -55,8 +53,8 @@ function bmiOf(weightKg, heightCm) {
 
 function bpStatusOf(systolic, diastolic) {
   if (systolic >= 140 || diastolic >= 90) return 'Hypertension Stage 2';
-  if (systolic >= 130 || diastolic >= 85) return 'Hypertension Stage 1';
-  if (systolic >= 120 || diastolic >= 80) return 'Elevated';
+  if (systolic >= 130 || diastolic >= 80) return 'Hypertension Stage 1';
+  if (systolic >= 120) return 'Elevated';
   return 'Normal';
 }
 
@@ -115,20 +113,13 @@ async function listVisits({ search = '', type = '', college = '' }, actor) {
   return rows.map(row => rowToVisit(row, actor.role));
 }
 
-// Next free patient ID: students get YYYY-00001, 2026-00002 ...; employees get EMP-00001 ...
-async function nextPatientId(category, connection) {
-  const prefix = category === 'employee' ? 'EMP' : String(new Date().getFullYear());
-  const [rows] = await connection.execute(
-    'SELECT id FROM patients WHERE id REGEXP ? ORDER BY id DESC LIMIT 1 FOR UPDATE',
-    [`^${prefix}-[0-9]{5}$`]
-  );
-  const last = rows[0] ? Number(rows[0].id.split('-')[1]) : 0;
-  return `${prefix}-${String(last + 1).padStart(5, '0')}`;
-}
-
 async function createVisit(body, actor) {
   if (actor.role !== 'doctor') throw new HttpError(403, 'Only a doctor can record a visit.');
-  const givenPatientId = text(body.patientId, 'Patient ID', 50);
+  const isNew = body.isNew === true;
+  const givenPatientId = text(body.patientId, 'Patient ID', 50, true);
+  if (isNew && !/^[A-Za-z0-9._-]+$/.test(givenPatientId)) {
+    throw new HttpError(400, 'Patient ID may only contain letters, numbers, dots, dashes, and underscores.');
+  }
   const visitType = text(body.visitType, 'Visit type', 20, true);
   if (!VISIT_TYPES.includes(visitType)) throw new HttpError(400, 'Select a valid visit type.');
   const diagnosis = text(body.diagnosis, 'Diagnosis category', 100, true);
@@ -143,9 +134,9 @@ async function createVisit(body, actor) {
   const confidential = body.confidential === true || body.confidential === 'true' ||
     diagnosis.startsWith('Mental health') ? 1 : 0;
 
-  // Patient details are only used when this patient is not in the database yet.
+  // Patient details are only used when a new patient is being added.
   const newPatient = {
-    name: text(body.patientName, 'Patient name', 200),
+    name: text(body.patientName, 'Patient name', 200, isNew),
     college: text(body.college, 'College', 100),
     course: text(body.course, 'Course', 100),
     year: text(body.year, 'Year', 20),
@@ -153,15 +144,19 @@ async function createVisit(body, actor) {
   };
 
   const visitId = await withTransaction(async connection => {
-    let patientId = givenPatientId;
-    // No ID typed (or an ID not in the database yet): add the patient automatically.
-    if (!patientId || !(await patient(patientId, connection))) {
-      if (!newPatient.name) throw new HttpError(400, 'Patient name is required for a new patient.');
-      if (!patientId) patientId = await nextPatientId(newPatient.category, connection);
+    const patientId = givenPatientId;
+    const existing = await patient(patientId, connection);
+    if (isNew) {
+      // New patient: the ID is typed by the doctor and must not be in use yet.
+      if (existing) {
+        throw new HttpError(409, 'A patient with this ID already exists. Choose "Existing patient" instead.');
+      }
       await connection.execute(
         'INSERT INTO patients(id, name, college, course, year, category) VALUES(?,?,?,?,?,?)',
         [patientId, newPatient.name, newPatient.college, newPatient.course, newPatient.year, newPatient.category]
       );
+    } else if (!existing) {
+      throw new HttpError(400, 'Select an existing patient record.');
     }
     const [result] = await connection.execute(
       `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
