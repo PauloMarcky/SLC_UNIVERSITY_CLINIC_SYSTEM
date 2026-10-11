@@ -1,51 +1,81 @@
-/* Statistics page only. Loaded after style.css; the shared style.css is not changed. */
-
+/* Statistics components inherit the shared clinic palette in both themes. */
 .alert[hidden] { display:none; }
-.alert .alert-sub { display:block; margin-top:4px; font-size:.875rem; opacity:.9; }
-.alert.is-clear { background:#e3f4ec; border-color:#a9d9c1; border-left-color:#4aa77c; color:#14583b; }
+.alert .alert-sub { display:block; margin-top:6px; font-size:.875rem; }
+.alert.is-clear {
+    background:var(--success-bg,#e7f5ed);
+    border-color:var(--bd,#dbe5ef);
+    border-left-color:var(--success,#256b4a);
+    color:var(--success,#256b4a);
+}
 
-.stat-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
-.stat-total { font-size:.875rem; font-weight:600; color:var(--m); white-space:nowrap; }
-
-.stat-list { padding:6px 0; }
+.stat-head { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:6px 16px; }
+.stat-total { font-size:.8125rem; font-weight:600; color:var(--m); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.stat-list { padding:4px 0; container-type:inline-size; }
 .stat-row {
     display:grid;
-    grid-template-columns:minmax(150px,1.1fr) minmax(80px,1.6fr) 112px 104px;
+    grid-template-columns:minmax(150px,1.1fr) minmax(60px,1.6fr) 104px 94px;
     grid-template-areas:"label track value trend";
     align-items:center;
     gap:14px;
-    margin:0;
-    padding:11px 8px;
+    min-width:0;
+    margin:3px 0;
+    padding:13px 12px;
     border-radius:10px;
+    transition:background-color .18s ease,box-shadow .18s ease;
 }
-.stat-row.no-trend { grid-template-columns:minmax(100px,1fr) minmax(60px,1.2fr) 100px; grid-template-areas:"label track value"; }
-.stat-row.head { padding-top:2px; padding-bottom:6px; font-size:.8125rem; font-weight:600; color:var(--m); border-bottom:1px solid var(--bd); border-radius:0; margin-bottom:4px; }
-.stat-row.is-selected { background:#edf5fd; }
-.stat-row.is-rising { background:#fff6f5; }
+.stat-row.no-trend { grid-template-columns:minmax(90px,1fr) minmax(50px,1.2fr) 98px; grid-template-areas:"label track value"; }
+.stat-row.head {
+    padding-top:2px;
+    padding-bottom:10px;
+    font-size:.75rem;
+    font-weight:600;
+    color:var(--m);
+    border-bottom:1px solid var(--bd);
+    border-radius:0;
+    margin-bottom:6px;
+}
+.stat-row.head .stat-label,.stat-row.head .stat-value { color:var(--m); font-size:inherit; }
+.stat-row.is-selected { background:var(--gl); box-shadow:inset 3px 0 var(--g); }
+.stat-row.is-rising { background:var(--danger-bg,#fff0f1); box-shadow:inset 3px 0 var(--danger,#a83446); }
 
-.stat-box-gap { margin-bottom:22px; }
-.stat-label { grid-area:label; font-size:.9375rem; color:var(--t); }
-.stat-label .pill { margin-left:8px; vertical-align:middle; }
-.stat-track { grid-area:track; height:12px; border-radius:6px; background:#eaf0f7; overflow:hidden; }
-.stat-fill { display:block; height:100%; min-width:3px; border-radius:6px; background:linear-gradient(90deg,#70b5d6,#397cb7); }
-.stat-value { grid-area:value; text-align:right; font-size:.9375rem; color:var(--t); white-space:nowrap; }
-.stat-value small { font-size:.8125rem; color:var(--m); margin-left:4px; }
-.stat-trend { grid-area:trend; font-size:.875rem; font-weight:600; color:var(--m); white-space:nowrap; }
-.stat-trend.up { color:#8a5a00; }
-.stat-trend.flag { color:#b42318; font-weight:700; }
-.stat-trend.down { color:#1d6b4a; }
+.stat-box-gap { margin-bottom:24px; }
+.stat-label { grid-area:label; min-width:0; font-size:.9375rem; color:var(--t); overflow-wrap:anywhere; }
+.stat-label .pill { margin-left:6px; vertical-align:middle; }
+.stat-track { grid-area:track; min-width:0; height:10px; border-radius:999px; background:var(--surface-soft,#eaf0f7); overflow:hidden; }
+.stat-fill { display:block; height:100%; min-width:3px; border-radius:inherit; background:var(--g,#2869a7); }
+.stat-value { grid-area:value; text-align:right; font-size:.9375rem; font-weight:600; color:var(--t); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.stat-value small { font-size:.75rem; font-weight:400; color:var(--m); margin-left:4px; }
+.stat-trend { grid-area:trend; font-size:.8125rem; font-weight:600; color:var(--m); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.stat-trend.up { color:var(--warning,#8a5a00); }
+.stat-trend.flag { color:var(--danger,#a83446); font-weight:700; }
+.stat-trend.down { color:var(--success,#256b4a); }
 
-/* BMI bar colours: the category name is always written next to the bar, colour is only a second cue. */
-.fill-under { background:#397cb7; }
-.fill-normal { background:#3f9d77; }
-.fill-over { background:#d19a1f; }
-.fill-obese { background:#c24a4a; }
+/* Category labels and counts remain visible; bar colour is a secondary cue. */
+.fill-under { background:var(--g,#2869a7); }
+.fill-normal { background:var(--success,#256b4a); }
+.fill-over { background:var(--warning,#8a5a00); }
+.fill-obese { background:var(--danger,#a83446); }
+.stat-empty { padding:30px 12px; text-align:center; color:var(--m); font-size:.9375rem; }
+.stat-foot { padding:0 22px 20px; font-size:.8125rem; color:var(--m); line-height:1.6; }
 
-.stat-empty { padding:22px 8px; text-align:center; color:var(--m); font-size:.9375rem; }
-.stat-foot { padding:0 22px 18px; font-size:.875rem; color:var(--m); line-height:1.5; }
+@media (hover:hover) {
+    .stat-row:not(.head):not(.is-selected):not(.is-rising):hover { background:var(--surface-hover,var(--gl)); }
+}
 
-@media (max-width:640px) {
+/* A chart can be narrow inside a two-column desktop grid as well as on a phone. */
+@container (max-width:580px) {
     .stat-row.head { display:none; }
-    .stat-row { grid-template-columns:1fr auto auto; grid-template-areas:"label value trend" "track track track"; gap:8px 12px; }
-    .stat-row.no-trend { grid-template-columns:1fr auto; grid-template-areas:"label value" "track track"; }
+    .stat-row { grid-template-columns:minmax(0,1fr) auto auto; grid-template-areas:"label value trend" "track track track"; gap:9px 10px; }
+    .stat-row.no-trend { grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"label value" "track track"; }
 }
+@media (max-width:900px) {
+    .stat-row.head { display:none; }
+    .stat-row { grid-template-columns:minmax(0,1fr) auto auto; grid-template-areas:"label value trend" "track track track"; gap:9px 10px; }
+    .stat-row.no-trend { grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"label value" "track track"; }
+}
+@media (max-width:420px) {
+    .stat-row { grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"label label" "value trend" "track track"; padding:12px 8px; }
+    .stat-row:not(.no-trend) .stat-value { text-align:left; }
+    .stat-row:not(.no-trend) .stat-trend { text-align:right; }
+}
+@media (prefers-reduced-motion:reduce) { .stat-row { transition:none; } }

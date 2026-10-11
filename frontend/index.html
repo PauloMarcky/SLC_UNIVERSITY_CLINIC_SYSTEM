@@ -8,20 +8,24 @@
     <link rel="stylesheet" href="css/login.css">
     <script src="js/login-theme.js"></script>
     <script src="js/ui.js" defer></script>
+    <script src="js/login-effects.js" defer></script>
     <script src="js/clinic-api.js" defer></script>
     <script src="js/staff-login.js" defer></script>
 </head>
 <body class="login-page">
-    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle light mode" aria-pressed="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
-        <span>Light mode</span>
-    </button>
-    <main class="login">
+    <div class="login-birds" aria-hidden="true"></div>
+    <main class="login" aria-labelledby="portal-title">
+        <div class="theme-switch" role="group" aria-label="Appearance">
+            <button type="button" class="theme-option" data-theme-choice="light" aria-label="Use light mode" aria-pressed="true" title="Light mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+            </button>
+            <button type="button" class="theme-option" data-theme-choice="dark" aria-label="Use dark mode" aria-pressed="false" title="Dark mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.7 13.3A8.8 8.8 0 0 1 10.7 3.2 9 9 0 1 0 20.7 13.3Z"/></svg>
+            </button>
+        </div>
         <div class="login-brand">
-            <span class="login-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 4.2-8.8 11-8.8 11S3.2 13 3.2 8.8A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"/><path d="M4.5 12h4l1.5-3 2.6 6 1.7-3h5.2"/></svg>
-            </span>
-            <h1>ULS Clinic Portal</h1>
+            <img class="login-brand-image" src="css/docmema-transparent.png" alt="Stethoscope, heart and heartbeat" width="1774" height="887">
+            <h1 id="portal-title">ULS Clinic Portal</h1>
             <p>University Health Services</p>
         </div>
         <div class="login-divider" aria-hidden="true"></div>
