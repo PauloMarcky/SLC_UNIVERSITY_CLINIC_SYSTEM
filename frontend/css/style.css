@@ -16,7 +16,7 @@
     padding:0
 }
 body {
-    font:14px/1.6 'Segoe UI Variable Text','Segoe UI',Arial,sans-serif;
+    font:1rem/1.6 'Segoe UI Variable Text','Segoe UI',Arial,sans-serif;
     color:var(--t);
     background:radial-gradient(ellipse at 95% 0%,#e5f1fc 0,transparent 48%),linear-gradient(135deg,#f7fafc,#f0f5fa);
     min-height:100vh
@@ -53,7 +53,7 @@ button {
     flex-wrap:wrap
 }
 .topbar h1 {
-    font-size:17px;
+    font-size:1.125rem;
     letter-spacing:-.3px;
     position:relative;
     padding-left:48px
@@ -66,7 +66,7 @@ button {
     color:var(--g);
     border:1px solid #d4e7f8;
     border-radius:12px;
-    font-size:30px;
+    font-size:1.875rem;
     font-weight:500;
     width:36px;
     height:36px;
@@ -76,7 +76,7 @@ button {
 }
 .topbar h1 span {
     display:block;
-    font-size:11px;
+    font-size:0.8125rem;
     font-weight:400;
     letter-spacing:.3px;
     color:var(--m)
@@ -93,7 +93,7 @@ button {
     padding:8px 12px;
     text-decoration:none;
     color:var(--m);
-    font-size:12px;
+    font-size:0.8125rem;
     font-weight:600;
     border-radius:8px
 }
@@ -117,7 +117,7 @@ button {
     min-height:100vh
 }
 .layout>aside,.app>aside {
-    width:246px;
+    width:272px;
     flex-shrink:0;
     padding:28px 16px;
     background:#ffffffcf;
@@ -129,7 +129,7 @@ aside nav {
     gap:6px
 }
 aside h4 {
-    font-size:11px;
+    font-size:0.8125rem;
     text-transform:uppercase;
     letter-spacing:1.8px;
     color:var(--m);
@@ -144,7 +144,7 @@ aside a {
     border-radius:11px;
     color:#526980;
     text-decoration:none;
-    font-size:13px;
+    font-size:0.875rem;
     font-weight:500;
     line-height:1.5
 }
@@ -171,13 +171,13 @@ aside a.on {
     stroke-linejoin:round
 }
 .app aside h1 {
-    font-size:19px;
+    font-size:1.25rem;
     padding-left:48px;
     position:relative;
     margin-bottom:12px
 }
 .app aside p {
-    font-size:12px;
+    font-size:0.8125rem;
     color:var(--m);
     margin:0 12px 28px
 }
@@ -196,7 +196,7 @@ h2 {
     line-height:1.3
 }
 h3 {
-    font-size:14px;
+    font-size:0.9375rem;
     font-weight:650;
     line-height:1.5
 }
@@ -208,7 +208,7 @@ h3 {
     display:block;
     width:fit-content;
     max-width:100%;
-    font-size:11px;
+    font-size:0.8125rem;
     color:#64778b;
     background:#edf3f8;
     border:1px solid #e0e9f1;
@@ -239,13 +239,13 @@ h3 {
 }
 .card small,.grid .card span {
     display:block;
-    font-size:12px;
+    font-size:0.8125rem;
     color:var(--m);
     font-weight:500
 }
 .card b,.grid .card strong {
     display:block;
-    font-size:29px;
+    font-size:1.8125rem;
     line-height:1.4;
     font-weight:650;
     letter-spacing:-.5px;
@@ -317,13 +317,13 @@ h3 {
 table {
     width:100%;
     border-collapse:collapse;
-    font-size:13px;
+    font-size:0.875rem;
     text-align:left
 }
 th {
     background:#f0f5fa;
     color:#516a82;
-    font-size:11px;
+    font-size:0.8125rem;
     font-weight:650;
     letter-spacing:.4px;
     padding:14px 18px;
@@ -378,7 +378,7 @@ td a:hover {
     display:inline-block;
     padding:4px 10px;
     border-radius:7px;
-    font-size:11px;
+    font-size:0.8125rem;
     font-weight:650;
     line-height:1.5
 }
@@ -411,7 +411,7 @@ td a:hover {
     border-radius:9px;
     text-decoration:none;
     color:var(--m);
-    font-size:12px
+    font-size:0.8125rem
 }
 .tabs a:hover,.tabs a.on {
     background:#e7f1fc;
@@ -477,7 +477,7 @@ textarea {
     color:#fff;
     border-radius:9px;
     font:inherit;
-    font-size:13px;
+    font-size:0.875rem;
     font-weight:600;
     text-decoration:none;
     cursor:pointer;
@@ -514,7 +514,7 @@ textarea {
 }
 .f label,.filters label {
     display:block;
-    font-size:12px;
+    font-size:0.8125rem;
     font-weight:600;
     color:#526a80;
     margin-bottom:7px
@@ -536,7 +536,7 @@ input[type=checkbox],input[type=radio] {
     border:1px solid #cce0f3;
     color:#37658e;
     border-radius:10px;
-    font-size:13px
+    font-size:0.875rem
 }
 .alert {
     padding:14px 18px;
@@ -546,7 +546,7 @@ input[type=checkbox],input[type=radio] {
     margin-bottom:22px;
     background:#fff3f4;
     color:#954252;
-    font-size:13px
+    font-size:0.875rem
 }
 .alert a {
     color:inherit;
@@ -561,7 +561,7 @@ input[type=checkbox],input[type=radio] {
 }
 .bar b {
     font-weight:500;
-    font-size:12px;
+    font-size:0.8125rem;
     margin:0;
     letter-spacing:0
 }
@@ -572,7 +572,7 @@ input[type=checkbox],input[type=radio] {
 }
 .bar em {
     font-style:normal;
-    font-size:12px;
+    font-size:0.8125rem;
     color:var(--m);
     text-align:right
 }
@@ -590,8 +590,6 @@ input[type=checkbox],input[type=radio] {
     border:1px solid #ffffffeb;
     border-radius:24px;
     box-shadow:0 24px 70px #335e8720;
-    backdrop-filter:blur(22px);
-    -webkit-backdrop-filter:blur(22px)
 }
 .clinic-mark {
     width:54px;
@@ -603,24 +601,24 @@ input[type=checkbox],input[type=radio] {
     background:#e4f1fc;
     border:1px solid #cbe0f3;
     color:var(--g);
-    font-size:38px;
+    font-size:2.375rem;
     font-weight:400;
     line-height:1
 }
 .eyebrow {
-    font-size:10px;
+    font-size:0.8125rem;
     letter-spacing:2px;
     font-weight:700;
     color:var(--g);
     margin-bottom:10px
 }
 .login h2 {
-    font-size:28px
+    font-size:1.75rem
 }
 .login-intro {
     color:var(--m);
     margin:9px 0 22px;
-    font-size:13px
+    font-size:0.875rem
 }
 .login .f {
     margin:20px 0
@@ -638,14 +636,14 @@ input[type=checkbox],input[type=radio] {
 }
 .login .note {
     margin:19px 0 0;
-    font-size:11px;
+    font-size:0.8125rem;
     background:transparent;
     border:0;
     padding:0;
     line-height:1.6
 }
 .role-label {
-    font-size:12px;
+    font-size:0.8125rem;
     color:var(--m);
     margin-bottom:10px
 }
@@ -665,7 +663,6 @@ input[type=checkbox],input[type=radio] {
     position:absolute;
     inset:0;
     background:#17334f70;
-    backdrop-filter:blur(5px)
 }
 .modal-card {
     position:relative;
@@ -687,7 +684,7 @@ input[type=checkbox],input[type=radio] {
     border-bottom:1px solid var(--bd)
 }
 .modal-head h3 {
-    font-size:18px
+    font-size:1.125rem
 }
 .modal-x {
     background:white;
@@ -695,7 +692,7 @@ input[type=checkbox],input[type=radio] {
     border-radius:9px;
     min-width:40px;
     min-height:40px;
-    font-size:23px;
+    font-size:1.5rem;
     color:var(--m)
 }
 .modal-x:hover {
@@ -712,7 +709,7 @@ body.modal-open {
 }
 .menu-toggle {
     margin-bottom:16px;
-    font-size:12px
+    font-size:0.8125rem
 }
 .sidebar-collapsed>aside {
     display:none
@@ -741,7 +738,7 @@ body.modal-open {
         padding:18px 22px
     }
     .layout>aside,.app>aside {
-        width:218px;
+        width:244px;
         padding:22px 12px
     }
     .two {
@@ -758,7 +755,7 @@ body.modal-open {
         padding:18px 16px
     }
     .topbar h1 {
-        font-size:15px
+        font-size:1rem
     }
     .topbar nav {
         width:100%;
@@ -768,7 +765,7 @@ body.modal-open {
         flex:1;
         text-align:center;
         padding:8px 6px;
-        font-size:11px
+        font-size:0.8125rem
     }
     .layout,.app {
         flex-direction:column
@@ -788,7 +785,7 @@ body.modal-open {
         padding:0 12px 6px
     }
     aside a {
-        font-size:12px;
+        font-size:0.8125rem;
         padding:10px
     }
     .layout>main,.app>main {
@@ -815,7 +812,7 @@ body.modal-open {
         gap:12px
     }
     .card b,.grid .card strong {
-        font-size:25px
+        font-size:1.5625rem
     }
     .box>h3 {
         padding:16px
@@ -868,7 +865,7 @@ body.modal-open {
         overflow:visible
     }
     table {
-        font-size:10px
+        font-size:0.8125rem
     }
     td,th {
         white-space:normal;
@@ -912,14 +909,10 @@ h1,h2,h3 {
 }
 .topbar,.layout>aside,.app>aside {
     background:rgba(244,249,255,.76);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
     border-color:rgba(255,255,255,.6);
 }
 .topbar {
     background:rgba(244,249,255,.56);
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
     box-shadow:0 4px 18px #031e5712;
 }
 .topbar nav { background:rgba(235,243,255,.68); }
@@ -936,8 +929,6 @@ aside a.on,.topbar nav a.on {
 }
 .layout>main>.sub,.app main>header>.sub { color:#f0f6ff; }
 .card,.box {
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
     border-color:rgba(255,255,255,.75);
 }
 .cards .card,.grid .card {
@@ -977,3 +968,308 @@ aside h4,.app aside p,.topbar h1 span { color:#3b5475; }
     .layout>main>h2,.app main>header>h2,.layout>main>.sub { color:#172e50; text-shadow:none; }
     .card,.box { background:#fff; backdrop-filter:none; box-shadow:none; }
 }
+
+/* ULS header and blue page (style test, Oct 2026): white header with the university seal, plain light background (no photo), Log out at the bottom of the sidebar. Kept last so it overrides the themes above. */
+:root { --surface:rgba(255,255,255,.96); }
+body::before { background:linear-gradient(135deg,#f5f8fd,#e4ecf8); }
+.layout>main>h2,.app main>header>h2 { color:#12307a; text-shadow:none; }
+.layout>main>.sub,.app main>header>.sub { color:#3b5475; }
+.card,.box { border-color:#d6e0f0; }
+.topbar {
+    min-height:76px;
+    padding:10px 32px;
+    background:#fff;
+    border-bottom:0;
+    box-shadow:0 2px 12px rgba(0,0,0,.15);
+}
+.topbar h1 {
+    font-size:1.125rem;
+    color:#12307a;
+    padding-left:68px;
+    min-height:54px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+.topbar h1 span { display:none; }
+.topbar h1:before {
+    content:'';
+    width:54px;
+    height:54px;
+    top:50%;
+    transform:translateY(-50%);
+    border:0;
+    border-radius:0;
+    background:url('../assets/uls-logo.png') center / contain no-repeat;
+}
+.topbar h1:after {
+    content:'University of La Salette, Santiago City';
+    font-size:0.8125rem;
+    font-weight:400;
+    letter-spacing:0;
+    color:#5b6b95;
+}
+.topbar nav { background:#eef3fb; }
+.layout>aside,.app>aside {
+    background:#fff;
+}
+.sidebar-logout {
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid #e1e7f5;
+}
+aside .sidebar-logout a { color:#b42318; }
+aside .sidebar-logout a:hover { background:#fdecea; color:#b42318; }
+.cards .card,.grid .card { background:rgba(255,255,255,.96); }
+.box>h3 { background:#f3f7fd; }
+.topbar { justify-content:flex-start; }
+.topbar nav { margin-left:auto; }
+.topbar .menu-toggle {
+    width:44px;
+    height:44px;
+    margin:0;
+    padding:0;
+    display:grid;
+    place-items:center;
+    flex-shrink:0;
+    background:#fff;
+    color:#12307a;
+    border:1px solid #d6e0f0;
+    border-radius:12px;
+}
+.topbar .menu-toggle:hover { background:#eef3fb; }
+
+@media (max-width:760px) {
+    .topbar { padding:10px 16px; gap:12px; }
+    .topbar h1 { flex:1 1 0; min-width:0; padding-left:52px; min-height:44px; font-size:1rem; }
+    .topbar h1:before { width:44px; height:44px; }
+    .topbar h1:after { font-size:0.8125rem; }
+}
+@media (max-width:520px) {
+    .topbar h1:after { display:none; }
+}
+.topbar .menu-toggle[hidden],.menu-toggle[hidden] { display:none; }
+aside { position:relative; }
+aside .menu-close {
+    position:absolute;
+    top:14px;
+    right:12px;
+    width:36px;
+    height:36px;
+    margin:0;
+    padding:0;
+    display:grid;
+    place-items:center;
+    background:#fff;
+    color:#12307a;
+    border:1px solid #d6e0f0;
+    border-radius:10px;
+}
+aside .menu-close:hover { background:#eef3fb; }
+
+/* Readability pass (Oct 2026): 16px base, no text under 13px, solid surfaces (no blur), roomier spacing. */
+table,aside a,.btn,.menu-toggle { font-size:.9375rem; }
+th { font-size:.8125rem; }
+.cards,.grid { gap:20px; }
+.card { padding:24px; }
+td { padding:16px 18px; }
+.cards .card,.grid .card { background:#fff; }
+.note,.hint,.alert { line-height:1.55; }
+
+/* Dashboard layout: title and quick actions share one row; stat cards come first. */
+.page-head { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:20px; }
+.page-head h2 { color:#12307a; text-shadow:none; }
+.page-head .sub { color:#3b5475; margin:4px 0 0; font-size:1rem; }
+.page-head .toolbar { margin:0; }
+.card-sub { display:block; margin-top:2px; font-size:.8125rem; color:#1555ba; font-weight:600; }
+main>.note { margin-top:4px; }
+
+/* Consultations and Checkups: both tables share one column layout; BP/BMI carry a text cue, not just color. */
+.visit-table { table-layout:fixed; min-width:900px; }
+.visit-table td { white-space:normal; }
+.cue { display:block; font-size:.8125rem; font-weight:600; }
+.c-good .cue { color:#1d6b4a; }
+.c-warn .cue { color:#8a5a00; }
+td .pill { margin-left:6px; }
+h3 .pill { margin-left:8px; vertical-align:middle; }
+.filters { margin-bottom:6px; }
+.filters>.grow { flex:2; }
+.filters>.filters-clear { flex:0 0 auto; min-width:0; }
+.filters label { font-size:.875rem; }
+select { padding-right:2.4rem; }
+.filter-count { margin:0 2px 14px; font-size:.875rem; color:var(--m); }
+.no-match td { text-align:center; color:var(--m); padding:24px 16px; }
+
+.filters input,.filters select,.filters .btn { height:48px; min-height:48px; }
+
+/* New Consultation form: sections, vitals row, required marks, inline errors, sticky action bar. */
+.f label { font-size:.875rem; }
+input::placeholder,textarea::placeholder { color:#5f7184; }
+.visit-form { overflow:visible; }
+.form-section + .form-section { border-top:1px solid var(--bd); }
+.form-section > h3 { padding:20px 24px 0; font-size:1.0625rem; color:#12307a; }
+.form-section > .form { padding-top:14px; }
+.form-vitals { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.req { color:#b42318; margin-left:3px; font-weight:700; }
+.field-error { margin-top:6px; font-size:.875rem; font-weight:600; color:#b42318; }
+input[aria-invalid="true"],select[aria-invalid="true"] { border-color:#b42318; background:#fff7f6; }
+.conf-toggle { display:flex; gap:14px; align-items:flex-start; padding:14px 16px; border:1px solid #c9d6ec; border-radius:12px; background:#f7f4fd; cursor:pointer; font-size:1rem; color:var(--t); }
+.conf-toggle input { width:22px; height:22px; margin-top:2px; flex:none; accent-color:#5b3f9a; }
+.conf-toggle small { display:block; font-weight:400; color:var(--m); font-size:.875rem; margin-top:2px; }
+.save-banner { margin-bottom:20px; padding:14px 18px; border-radius:12px; background:#e3f4ec; border:1px solid #a9d9c1; color:#14583b; font-size:1rem; }
+.save-banner a { margin-left:6px; font-weight:600; }
+.form-actions { position:sticky; bottom:0; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:14px 24px; background:rgba(255,255,255,.98); border-top:1px solid var(--bd); border-radius:0 0 18px 18px; box-shadow:0 -6px 16px rgba(10,30,100,.06); }
+.form-actions-note { font-size:.875rem; color:var(--m); }
+@media (max-width:1000px) { .form-vitals { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:560px) { .form-vitals { grid-template-columns:1fr; } }
+
+/* Medical Records: working tabs, text status pills, legend, read-only tag. */
+.tabs { overflow-x:auto; flex-wrap:nowrap; white-space:nowrap; }
+.tabs a { font-size:.9375rem; flex:none; }
+.pill.neutral { background:#e8eef8; color:#244977; }
+.readonly-tag { margin-left:10px; vertical-align:middle; }
+.readonly-tag[hidden] { display:none; }
+.legend { padding:14px 24px 4px; font-size:.875rem; color:var(--m); }
+.legend .pill { margin:0 4px 0 8px; }
+.legend .pill:first-child { margin-left:0; }
+.filters-check { flex:0 0 auto; min-width:0; display:flex; align-items:center; height:48px; }
+.check-inline { display:inline-flex; align-items:center; gap:10px; margin:0; font-size:1rem; color:var(--t); cursor:pointer; }
+.check-inline input { width:22px; height:22px; accent-color:#1555ba; }
+.record-table { min-width:0; }
+.record-table th,.record-table td { padding:14px 10px; }
+.record-table th { white-space:normal; line-height:1.3; }
+.record-table .pill { white-space:nowrap; padding:3px 8px; }
+
+/* Brand in the sidebar (Oct 2026): the seal and name live at the top of the sidebar card, so the wide top bar is gone on desktop. Phones keep the top bar (it holds the menu button). */
+.sidebar-brand { display:flex; align-items:center; gap:12px; padding:2px 0 16px 4px; margin-bottom:12px; border-bottom:1px solid #e1e7f5; color:#12307a; }
+.sidebar-brand .brand-seal { width:44px; height:44px; flex:none; background:url('../assets/uls-logo.png') center / contain no-repeat; }
+.sidebar-brand .brand-text { display:flex; flex-direction:column; min-width:0; line-height:1.3; white-space:nowrap; }
+.sidebar-brand .brand-name { font-size:.875rem; font-weight:700; color:#12307a; }
+.sidebar-brand .brand-sub { font-size:.8125rem; color:#5b6b95; }
+@media (min-width:761px) {
+    .topbar { display:contents; }
+    .topbar h1,.topbar nav { display:none; }
+    .topbar .menu-toggle { margin:16px 0 0 20px; }
+    .layout,.app { min-height:0; }
+}
+@media (max-width:760px) {
+    .sidebar-brand { display:none; }
+}
+
+/* Hide-menu row (Oct 2026): sits at the bottom of the sidebar, styled like a menu item, just above Log out. */
+aside .menu-close {
+    position:static;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    height:auto;
+    margin:0 0 4px;
+    padding:12px 13px;
+    background:transparent;
+    border:1px solid transparent;
+    border-radius:11px;
+    color:#526980;
+    font:inherit;
+    font-size:.9375rem;
+    font-weight:600;
+    text-align:left;
+    justify-content:flex-start;
+    box-shadow:none;
+    transform:none;
+    cursor:pointer;
+}
+aside .menu-close svg { width:19px; height:19px; flex:none; stroke-width:1.7; }
+aside .menu-close:hover { background:#f0f6fc; color:#1d4ed8; border-color:transparent; box-shadow:none; transform:none; }
+aside .menu-close:focus-visible { outline:2px solid #1d4ed8; outline-offset:2px; }
+
+/* Table and certificate-card polish (Oct 2026) */
+.box>h3 { background:#fff; }
+.c-good,.c-warn,.c-bad,.c-conf,.c-crit { background:none; }
+.c-crit { color:#a3283b; font-weight:700; }
+.c-good::before,.c-warn::before,.c-bad::before,.c-crit::before { content:""; display:inline-block; width:8px; height:8px; margin-right:8px; border-radius:50%; background:currentColor; vertical-align:middle; }
+.visit-table td::before { display:none; }
+td>.pill:first-child { margin-left:0; }
+/* The scroll wrapper added by ui.js must not round its own corners under the title bar (it clipped the header band). The card itself still clips the bottom corners. */
+.box>.table-scroll { border-radius:0; }
+.fixed-table { table-layout:fixed; min-width:640px; }
+.fixed-table td { white-space:normal; }
+
+/* Dashboard certificate card: plain heading, text on the left, buttons on the right. */
+#dashboard-certificates { display:grid; grid-template-columns:minmax(0,1fr) auto; column-gap:24px; align-items:center; padding:22px 24px; }
+#dashboard-certificates>h3 { grid-column:1; margin:0 0 2px; padding:0; border:0; background:none; }
+#dashboard-certificates>.certificate-note { grid-column:1; margin:0; padding:0; }
+#dashboard-certificates>.certificate-actions { grid-column:2; grid-row:1 / span 2; }
+#dashboard-certificates>.certificate-detail,#dashboard-certificates>.certificate-notifications { grid-column:1 / -1; }
+#dashboard-certificates>:empty { display:none; }
+@media (max-width:760px) {
+    #dashboard-certificates { grid-template-columns:1fr; padding:18px; }
+    #dashboard-certificates>.certificate-actions { grid-column:1; grid-row:auto; margin-top:14px; }
+}
+
+/* Phones (Oct 2026): the menu is a slide-over drawer with a dimmed backdrop instead of a block that pushes the page down. */
+@media (max-width:760px) {
+    .topbar { position:sticky; top:0; z-index:30; }
+    .layout>aside,.app>aside {
+        position:fixed;
+        top:0;
+        bottom:0;
+        left:0;
+        z-index:60;
+        width:min(300px,86vw);
+        overflow-y:auto;
+        padding:22px 16px;
+        border:0;
+        border-radius:0 20px 20px 0;
+        background:#fff;
+        box-shadow:0 0 40px rgba(10,30,100,.28);
+    }
+    .layout:not(.sidebar-collapsed)::before,.app:not(.sidebar-collapsed)::before {
+        content:"";
+        position:fixed;
+        inset:0;
+        z-index:55;
+        background:rgba(15,30,70,.45);
+    }
+    body.drawer-open { overflow:hidden; }
+    aside nav { display:flex; flex-direction:column; gap:6px; }
+    aside h4 { padding:0 13px 6px; }
+    aside a { font-size:.9375rem; padding:12px 13px; }
+    .sidebar-brand { display:flex; }
+    .visit-table { min-width:1100px; }
+    /* Header title scales down slightly so it stays on one line on small phones (never below 13px). */
+    .topbar h1 { font-size:clamp(.8125rem,4.1vw,1rem); line-height:1.25; }
+}
+
+/* Dropdown arrow (Oct 2026): custom chevron with room from the edge, same on every page. */
+select:not([multiple]):not([size]) {
+    -webkit-appearance:none;
+    appearance:none;
+    padding-right:2.75rem;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2312307a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 16px center;
+    background-size:16px;
+    cursor:pointer;
+}
+
+/* Clickable rows (Oct 2026): rows that have a link or a View/Review button show a pointer; see ui.js. */
+tbody tr:has(a[href]:not([data-logout])) td,
+tbody tr:has(.certificate-actions button:not(:disabled)) td { cursor:pointer; }
+
+/* New Visit: patient choice (new / existing) and the hint under the patient search. */
+.choice { display:flex; flex-wrap:wrap; gap:12px; margin-top:6px; }
+.choice label { display:flex; align-items:center; gap:10px; margin:0; padding:12px 18px; border:1px solid #c9d6ec; border-radius:12px; background:#fff; cursor:pointer; font-size:1rem; font-weight:600; color:var(--t); }
+.choice input { width:20px; height:20px; margin:0; flex:none; accent-color:#12307a; }
+.choice label:has(input:checked) { border-color:#12307a; background:#eef3fb; }
+.label-text { display:block; font-size:.875rem; font-weight:600; color:#526a80; margin-bottom:7px; }
+.field-hint { margin:6px 0 0; font-size:.875rem; color:var(--m); }
+.field-hint:empty { display:none; }
+
+/* Make the hidden attribute win over component display rules (message boxes, banners). */
+.note[hidden], .save-banner[hidden], .field-error[hidden] { display: none; }
+
+/* Fix: patient choice buttons (beat the general .f input / .f label rules). */
+.f .choice { display:flex; flex-wrap:wrap; gap:12px; }
+.f .choice label { display:inline-flex; align-items:center; gap:10px; width:auto; margin:0; padding:12px 18px; white-space:nowrap; font-size:1rem; }
+.f .choice input[type="radio"] { width:20px; height:20px; min-width:20px; padding:0; margin:0; flex:none; }

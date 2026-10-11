@@ -1,0 +1,51 @@
+/* Statistics page only. Loaded after style.css; the shared style.css is not changed. */
+
+.alert[hidden] { display:none; }
+.alert .alert-sub { display:block; margin-top:4px; font-size:.875rem; opacity:.9; }
+.alert.is-clear { background:#e3f4ec; border-color:#a9d9c1; border-left-color:#4aa77c; color:#14583b; }
+
+.stat-head { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+.stat-total { font-size:.875rem; font-weight:600; color:var(--m); white-space:nowrap; }
+
+.stat-list { padding:6px 0; }
+.stat-row {
+    display:grid;
+    grid-template-columns:minmax(150px,1.1fr) minmax(80px,1.6fr) 112px 104px;
+    grid-template-areas:"label track value trend";
+    align-items:center;
+    gap:14px;
+    margin:0;
+    padding:11px 8px;
+    border-radius:10px;
+}
+.stat-row.no-trend { grid-template-columns:minmax(100px,1fr) minmax(60px,1.2fr) 100px; grid-template-areas:"label track value"; }
+.stat-row.head { padding-top:2px; padding-bottom:6px; font-size:.8125rem; font-weight:600; color:var(--m); border-bottom:1px solid var(--bd); border-radius:0; margin-bottom:4px; }
+.stat-row.is-selected { background:#edf5fd; }
+.stat-row.is-rising { background:#fff6f5; }
+
+.stat-box-gap { margin-bottom:22px; }
+.stat-label { grid-area:label; font-size:.9375rem; color:var(--t); }
+.stat-label .pill { margin-left:8px; vertical-align:middle; }
+.stat-track { grid-area:track; height:12px; border-radius:6px; background:#eaf0f7; overflow:hidden; }
+.stat-fill { display:block; height:100%; min-width:3px; border-radius:6px; background:linear-gradient(90deg,#70b5d6,#397cb7); }
+.stat-value { grid-area:value; text-align:right; font-size:.9375rem; color:var(--t); white-space:nowrap; }
+.stat-value small { font-size:.8125rem; color:var(--m); margin-left:4px; }
+.stat-trend { grid-area:trend; font-size:.875rem; font-weight:600; color:var(--m); white-space:nowrap; }
+.stat-trend.up { color:#8a5a00; }
+.stat-trend.flag { color:#b42318; font-weight:700; }
+.stat-trend.down { color:#1d6b4a; }
+
+/* BMI bar colours: the category name is always written next to the bar, colour is only a second cue. */
+.fill-under { background:#397cb7; }
+.fill-normal { background:#3f9d77; }
+.fill-over { background:#d19a1f; }
+.fill-obese { background:#c24a4a; }
+
+.stat-empty { padding:22px 8px; text-align:center; color:var(--m); font-size:.9375rem; }
+.stat-foot { padding:0 22px 18px; font-size:.875rem; color:var(--m); line-height:1.5; }
+
+@media (max-width:640px) {
+    .stat-row.head { display:none; }
+    .stat-row { grid-template-columns:1fr auto auto; grid-template-areas:"label value trend" "track track track"; gap:8px 12px; }
+    .stat-row.no-trend { grid-template-columns:1fr auto; grid-template-areas:"label value" "track track"; }
+}

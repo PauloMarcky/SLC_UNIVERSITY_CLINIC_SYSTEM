@@ -27,24 +27,28 @@
             </nav>
         </aside>
         <main>
-            <h2>Nurse Dashboard</h2>
-            <section class="box certificate-panel" id="dashboard-certificates" aria-labelledby="dashboard-certificate-title">
-                <h3 id="dashboard-certificate-title">Certificate Management</h3>
-                <p id="dashboard-certificate-summary" class="certificate-note" role="status">Loading your certificate records…</p>
-                <div class="certificate-actions"><a class="btn" href="../shared/certificates.html">Manage Certificates</a><a class="btn sec" href="../shared/certificates.html?status=Returned%20for%20Revision">Returned for Revision</a></div>
-                <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
-            </section>
-            <p class="sub">Today: <span data-today="long">October 7, 2026</span></p>
-            <p class="note">Certificate requests use saved clinic records. Other dashboard figures and inventory tools are sample prototypes.</p>
+            <div class="page-head">
+                <div>
+                    <h2>Nurse Dashboard</h2>
+                    <p class="sub" data-today="full">Saturday, October 10, 2026</p>
+                </div>
+            </div>
             <section class="cards">
                 <article class="card ok"><small>Students cleared</small><b>3,980</b></article>
                 <article class="card warn"><small>Incomplete requirements</small><b>2,387</b></article>
                 <article class="card bad"><small>Expired / out of stock</small><b>3</b></article>
                 <article class="card warn"><small>Low stock</small><b>4</b></article>
             </section>
+            <section class="box certificate-panel" id="dashboard-certificates" aria-labelledby="dashboard-certificate-title">
+                <h3 id="dashboard-certificate-title">Certificate Management</h3>
+                <p id="dashboard-certificate-summary" class="certificate-note" role="status">Loading your certificate records…</p>
+                <div class="certificate-actions"><a class="btn" href="../shared/certificates.html">Manage Certificates</a><a class="btn sec" href="../shared/certificates.html?status=Returned%20for%20Revision">Returned for Revision</a></div>
+                <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
+            </section>
             <section class="box">
                 <h3>Inventory Alerts</h3>
-                <table>
+                <table class="fixed-table">
+                    <colgroup><col style="width:34%"><col style="width:16%"><col style="width:24%"><col style="width:26%"></colgroup>
                     <thead>
                         <tr>
                             <th>Medicine</th>
@@ -77,7 +81,8 @@
             </section>
             <section class="box">
                 <h3>Upcoming Group Schedules</h3>
-                <table>
+                <table class="fixed-table">
+                    <colgroup><col style="width:18%"><col style="width:42%"><col style="width:40%"></colgroup>
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -99,6 +104,7 @@
                     </tbody>
                 </table>
             </section>
+            <p class="note">Certificate requests use saved clinic records. Other dashboard figures and inventory tools are sample prototypes.</p>
         </main>
     </div>
 </body>

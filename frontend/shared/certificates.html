@@ -39,8 +39,8 @@
             <section class="box" aria-labelledby="certificate-list-title">
                 <h3 id="certificate-list-title">Certificate records</h3>
                 <div class="toolbar certificate-toolbar">
-                    <label for="certificate-search">Search</label><input id="certificate-search" type="search" placeholder="Patient name or ID">
-                    <label for="certificate-filter">Status</label><select id="certificate-filter"><option value="">All statuses</option><option>Draft</option><option>Pending Approval</option><option>Returned for Revision</option><option>Approved</option></select>
+                    <div class="cf grow"><label for="certificate-search">Search</label><input id="certificate-search" type="search" placeholder="Patient name or ID"></div>
+                    <div class="cf"><label for="certificate-filter">Status</label><select id="certificate-filter"><option value="">All statuses</option><option>Draft</option><option>Pending Approval</option><option>Returned for Revision</option><option>Approved</option></select></div>
                     <button class="btn sec" id="refresh-certificates" type="button">Refresh</button>
                 </div>
                 <table><thead><tr><th>Patient Name</th><th>Certificate Type</th><th>Date Requested</th><th>Status</th><th>Actions</th></tr></thead><tbody id="certificate-rows"><tr><td colspan="5" class="certificate-empty">Loading certificate records…</td></tr></tbody></table>

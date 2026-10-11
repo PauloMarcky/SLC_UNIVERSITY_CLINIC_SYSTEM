@@ -23,16 +23,19 @@
             </nav>
         </aside>
         <main>
-            <h2>Medicine Inventory</h2>
-            <p class="sub">Managed by nurse. Auto-deducts when the doctor prescribes (needs backend).</p>
-            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
-                backend.</p>
+            <div class="page-head">
+                <div>
+                    <h2>Medicine Inventory</h2>
+                    <p class="sub">Managed by nurse. Auto-deducts when the doctor prescribes (needs backend).</p>
+                </div>
+            </div>
             <div class="alert">Red = expired or expiring within 60 days. Low and out-of-stock items support timely
                 re-ordering and budget requests.</div>
             <div class="toolbar"><a class="btn" href="#">+ Stock In</a><a class="btn sec" href="#">Reorder Report</a>
             </div>
             <section class="box">
-                <table>
+                <table class="fixed-table">
+                    <colgroup><col style="width:22%"><col style="width:17%"><col style="width:10%"><col style="width:9%"><col style="width:12%"><col style="width:15%"><col style="width:15%"></colgroup>
                     <thead>
                         <tr>
                             <th>Medicine</th>
@@ -102,6 +105,8 @@
                     </tbody>
                 </table>
             </section>
+            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
+                backend.</p>
         </main>
     </div>
 </body>
