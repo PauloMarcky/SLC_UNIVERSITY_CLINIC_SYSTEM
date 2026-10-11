@@ -313,3 +313,45 @@ export {
   transition,
   rowToCertificate as certificate
 };
+
+async function getPatientRecord(id, actor) {
+  const patientId = cleanText(id, 'Patient ID', 50, true);
+  const record = await patient(patientId);
+
+  if (!record) throw new HttpError(404, 'Patient record not found.');
+
+  const [visits] = await pool.execute(
+    `SELECT v.id, v.visit_type, v.visit_date, v.complaint,
+            v.systolic, v.diastolic, v.weight_kg, v.height_cm,
+            v.bmi, v.bmi_status, v.bp_status, v.diagnosis,
+            v.notes, v.confidential, v.created_by_name, v.created_at
+     FROM visits v
+     WHERE v.patient_id = ?
+       AND (? = 'doctor' OR v.confidential = 0)
+     ORDER BY v.visit_date DESC, v.id DESC`,
+    [patientId, actor.role]
+  );
+
+  return {
+    ...record,
+    visits: visits.map(row => ({
+      id: row.id,
+      visitType: row.visit_type,
+      visitDate: row.visit_date,
+      complaint: Number(row.confidential) === 1 ? 'Confidential' : row.complaint,
+      bp: `${row.systolic}/${row.diastolic}`,
+      bpStatus: row.bp_status,
+      weightKg: Number(row.weight_kg),
+      heightCm: Number(row.height_cm),
+      bmi: Number(row.bmi),
+      bmiStatus: row.bmi_status,
+      diagnosis: Number(row.confidential) === 1 ? 'Confidential' : row.diagnosis,
+      notes: Number(row.confidential) === 1 ? '' : row.notes || '',
+      confidential: Number(row.confidential) === 1,
+      createdByName: row.created_by_name,
+      createdAt: row.created_at
+    }))
+  };
+}
+
+export { getPatientRecord };
