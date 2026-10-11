@@ -13,6 +13,13 @@
     var shell = document.querySelector('.layout, .app');
     var main = document.querySelector('main');
     var topbar = document.querySelector('.topbar');
+    // Archived staff pages use the same presentation shell, with their original links.
+    if (shell && main && !topbar) {
+        topbar = document.createElement('header');
+        topbar.className = 'topbar';
+        topbar.append(document.createElement('h1'));
+        document.body.prepend(topbar);
+    }
     if (main && topbar) {
         var pageHeading = main.querySelector(':scope > h2, :scope > header > h2, :scope > .page-head h2, :scope > .certificate-heading h2');
         var headerTitle = topbar.querySelector('h1');
@@ -24,6 +31,7 @@
     }
     if (main) {
         main.id = main.id || 'main-content';
+        main.tabIndex = -1;
         var skip = document.createElement('a');
         skip.className = 'skip-link';
         skip.href = '#' + main.id;
@@ -50,10 +58,14 @@
             toggle.setAttribute('aria-label', expanded ? 'Hide navigation' : 'Show navigation');
             toggle.title = expanded ? 'Hide navigation' : 'Show navigation';
             document.body.classList.toggle('drawer-open', expanded && mobile.matches);
+            sidebar.inert = !expanded;
+            main.inert = expanded && mobile.matches;
         }
         setExpanded(!mobile.matches);
         toggle.addEventListener('click', function () {
-            setExpanded(toggle.getAttribute('aria-expanded') !== 'true');
+            var expanded = toggle.getAttribute('aria-expanded') !== 'true';
+            setExpanded(expanded);
+            if (expanded && mobile.matches) sidebar.querySelector('a, button')?.focus();
         });
         mobile.addEventListener('change', function () { setExpanded(!mobile.matches); });
         // Phones: tap the dimmed workspace or press Escape to close the navigation drawer.
@@ -68,13 +80,22 @@
                 setExpanded(false);
                 toggle.focus();
             }
+            if (e.key === 'Tab' && mobile.matches && toggle.getAttribute('aria-expanded') === 'true') {
+                var controls = Array.from(topbar.querySelectorAll('a[href], button:not(:disabled)'))
+                    .concat(Array.from(sidebar.querySelectorAll('a[href], button:not(:disabled)')))
+                    .filter(function (item) { return item.getClientRects().length && !item.closest('[hidden]'); });
+                var first = controls[0], last = controls[controls.length - 1];
+                var outside = !controls.includes(document.activeElement);
+                if (e.shiftKey && (document.activeElement === first || outside)) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && (document.activeElement === last || outside)) { e.preventDefault(); first.focus(); }
+            }
         });
         // Keep the ULS seal and system name above the role navigation on every account page.
-        if (shell.classList.contains('layout') && !sidebar.querySelector('.clinic-sidebar-brand')) {
+        if (!sidebar.querySelector('.clinic-sidebar-brand')) {
             var brand = document.createElement('div');
             brand.className = 'clinic-sidebar-brand';
             brand.title = 'University of La Salette, Santiago City - Clinic Management System';
-            brand.innerHTML = '<img src="../css/school-logo.png" alt="University of La Salette seal"><span>ULS CLINIC<br>MANAGEMENT SYSTEM</span>';
+            brand.innerHTML = '<img src="../assets/uls-logo.png" alt="University of La Salette seal" width="602" height="584"><span>ULS CLINIC<br>MANAGEMENT SYSTEM</span>';
             sidebar.prepend(brand);
         }
         var topbarLogout = topbar && topbar.querySelector('a[data-logout]');
@@ -131,7 +152,8 @@
         if (target.tagName === 'A' && (e.ctrlKey || e.metaKey || e.shiftKey)) { window.open(target.href, '_blank'); return; }
         target.click();
     });
-    document.querySelectorAll('table').forEach(function (table, index) {
+    function enhanceTable(table, index) {
+        if (table.closest('.table-scroll')) return;
         var region = document.createElement('div');
         region.className = 'table-scroll';
         region.tabIndex = 0;
@@ -140,6 +162,34 @@
         region.setAttribute('aria-label', (heading ? heading.textContent : 'Data table ' + (index + 1)) + ' — scroll horizontally');
         table.before(region);
         region.append(table);
-        table.querySelectorAll('th').forEach(function (th) { th.setAttribute('scope', 'col'); });
+        table.querySelectorAll('th').forEach(function (th) {
+            if (!th.hasAttribute('scope')) th.setAttribute('scope', 'col');
+        });
+    }
+    document.querySelectorAll('table').forEach(enhanceTable);
+    // Certificate queues are populated asynchronously; give new tables the same scroll region.
+    if (main) new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+            mutation.addedNodes.forEach(function (node) {
+                if (node.nodeType !== 1 || node.classList.contains('table-scroll')) return;
+                if (node.matches('table')) enhanceTable(node, 0);
+                else node.querySelectorAll('table').forEach(enhanceTable);
+            });
+        });
+    }).observe(main, { childList: true, subtree: true });
+    // Keep keyboard focus inside existing custom dialogs without changing their submit logic.
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Tab') return;
+        var dialog = document.querySelector('.modal:not([hidden]) [role="dialog"]');
+        if (!dialog) return;
+        var items = Array.from(dialog.querySelectorAll('a[href],button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]'))
+            .filter(function (item) { return item.getClientRects().length && !item.closest('[hidden]'); });
+        if (!items.length) return;
+        var first = items[0], last = items[items.length - 1];
+        if (event.shiftKey && (document.activeElement === first || !dialog.contains(document.activeElement))) {
+            event.preventDefault(); last.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+            event.preventDefault(); first.focus();
+        }
     });
 })();
