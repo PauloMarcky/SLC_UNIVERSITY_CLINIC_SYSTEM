@@ -78,14 +78,15 @@
             sidebar.prepend(brand);
         }
         var topbarLogout = topbar && topbar.querySelector('a[data-logout]');
-        if (topbarLogout && !sidebar.querySelector('.sidebar-logout')) {
-            var accountNav = document.createElement('nav');
-            accountNav.className = 'sidebar-logout';
-            accountNav.setAttribute('aria-label', 'Account');
-            var sidebarLogout = topbarLogout.cloneNode(true);
-            sidebarLogout.textContent = 'Log out';
-            accountNav.append(sidebarLogout);
-            sidebar.append(accountNav);
+        if (topbarLogout) {
+            var topbarAccountNav = topbarLogout.closest('nav');
+            var menuNav = sidebar.querySelector('nav:not(.sidebar-logout)');
+            var sidebarLogout = sidebar.querySelector('a[data-logout]');
+            if (menuNav) {
+                if (sidebarLogout && sidebarLogout !== topbarLogout) topbarLogout.remove();
+                else menuNav.append(topbarLogout);
+            }
+            if (topbarAccountNav && !topbarAccountNav.querySelector('a')) topbarAccountNav.remove();
         }
         if (topbar) topbar.prepend(toggle);
         else main.prepend(toggle);
