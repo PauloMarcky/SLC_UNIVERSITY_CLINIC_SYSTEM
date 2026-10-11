@@ -18,7 +18,7 @@
             links: [
                 ['Dashboard', '../doctor/dashboard.html'],
                 ['Consultations & Checkups', '../doctor/visits.html'],
-                ['+ New Visit', '../doctor/consultation-form.html'],
+                ['New Visit', '../doctor/consultation-form.html'],
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Certificate Approval', '../shared/certificates.html'],
                 ['Statistics', '../doctor/statistics.html']
@@ -37,7 +37,8 @@
         const heading = nav.querySelector('h4');
         // certificates.js looks these two elements up by id, so keep the ids when they exist.
         const keepDashboardId = !!document.getElementById('sidebar-dashboard');
-        nav.querySelectorAll('a').forEach(link => link.remove());
+        const logoutLink = nav.querySelector('a[data-logout]');
+        nav.querySelectorAll('a:not([data-logout])').forEach(link => link.remove());
         if (heading) heading.textContent = menu.title;
         const current = PARENT_PAGE[location.pathname] || location.pathname;
         menu.links.forEach(function (item, index) {
@@ -51,6 +52,7 @@
             }
             nav.append(link);
         });
+        if (logoutLink) nav.append(logoutLink);
         // ui.js draws the menu icons; ask it to do the same for the new links.
         if (window.ClinicUI && typeof window.ClinicUI.decorateNav === 'function') {
             window.ClinicUI.decorateNav(nav.closest('aside'));
