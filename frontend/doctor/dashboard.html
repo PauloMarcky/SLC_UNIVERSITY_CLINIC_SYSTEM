@@ -22,12 +22,24 @@
         <aside>
             <nav aria-label="Menu">
                 <h4>Doctor</h4><a href="../doctor/dashboard.html" class="on">Dashboard</a><a
-                    href="../doctor/visits.html">Consultations &amp; Checkups</a><a href="../doctor/consultation-form.html">+ New
+                    href="../doctor/visits.html">Consultations &amp; Checkups</a><a href="../doctor/consultation-form.html">New
                     Visit</a><a href="../nurse/medical-records.html">Student Records</a><a href="../shared/certificates.html">Certificate Approval</a><a href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
-            <h2>Doctor Dashboard</h2>
+            <div class="page-head">
+                <div>
+                    <h2>Doctor Dashboard</h2>
+                    <p class="sub" data-today="full">Saturday, October 10, 2026</p>
+                </div>
+                <div class="toolbar"><button type="button" class="btn" data-open-visit="Consultation (sickness)">+ New Consultation</button><button type="button" class="btn sec" data-open-visit="Checkup (wellness)">+ New Checkup</button></div>
+            </div>
+            <section class="cards">
+                <article class="card ok"><small>Today's patients</small><b>24</b></article>
+                <article class="card"><small>Consultations (sickness)</small><b>17</b></article>
+                <article class="card"><small>Checkups (wellness)</small><b>7</b></article>
+                <article class="card pu"><small>Confidential</small><b>2</b><span class="card-sub">Names hidden</span></article>
+            </section>
             <section class="box certificate-panel" id="dashboard-certificates" aria-labelledby="dashboard-certificate-title">
                 <h3 id="dashboard-certificate-title">Certificate Approval</h3>
                 <p id="dashboard-certificate-summary" class="certificate-note" role="status">Loading certificate requests…</p>
@@ -35,21 +47,10 @@
                 <div id="dashboard-certificate-queue" class="certificate-detail"></div>
                 <ul class="certificate-notifications" id="dashboard-certificate-notifications"></ul>
             </section>
-            <p class="sub">Today: <span data-today="long">October 7, 2026</span></p>
-            <p class="note">Certificate requests use saved clinic records. Other dashboard figures and visit tools are sample prototypes.</p>
-            <section class="cards">
-                <article class="card ok"><small>Today's patients</small><b>24</b></article>
-                <article class="card"><small>Consultations (sickness)</small><b>17</b></article>
-                <article class="card"><small>Checkups (wellness)</small><b>7</b></article>
-                <article class="card pu"><small>Confidential</small><b>2</b></article>
-            </section>
-            <div class="toolbar"><button type="button" class="btn" data-open-visit="Consultation (sickness)">+ New
-                    Consultation</button><button type="button" class="btn sec" data-open-visit="Checkup (wellness)">+ New
-                    Checkup</button><a class="btn sec" href="../doctor/statistics.html">Open
-                    Statistics</a></div>
             <section class="box">
                 <h3>Recent Visits (walk-in sickness cases need no appointment)</h3>
-                <table>
+                <table class="visit-table">
+                    <colgroup><col style="width:10%"><col style="width:13%"><col style="width:11%"><col style="width:11%"><col style="width:14%"><col style="width:21%"><col style="width:10%"><col style="width:10%"></colgroup>
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -70,8 +71,8 @@
                             <td>Consult</td>
                             <td>Cough and colds</td>
                             <td>Upper Respiratory Infection</td>
-                            <td class="c-good">118/76</td>
-                            <td class="c-good">21.5</td>
+                            <td class="c-good">118/76<span class="cue">● Normal</span></td>
+                            <td class="c-good">21.5<span class="cue">● Normal</span></td>
                         </tr>
                         <tr>
                             <td>2026-10-07</td>
@@ -80,8 +81,8 @@
                             <td>Consult</td>
                             <td>Wound</td>
                             <td>Wound / Injury</td>
-                            <td class="c-warn">132/84</td>
-                            <td class="c-warn">27.1</td>
+                            <td class="c-warn">132/84<span class="cue">▲ Elevated</span></td>
+                            <td class="c-warn">27.1<span class="cue">▲ Over</span></td>
                         </tr>
                         <tr>
                             <td>2026-10-07</td>
@@ -89,16 +90,17 @@
                             <td>Law</td>
                             <td><span class="pill purple">Confidential</span></td>
                             <td>Panic attack</td>
-                            <td class="c-conf">Mental Health - Anxiety</td>
-                            <td class="c-warn">130/85</td>
-                            <td class="c-good">21.5</td>
+                            <td><span class="pill purple">Mental Health - Anxiety</span></td>
+                            <td class="c-warn">130/85<span class="cue">▲ Elevated</span></td>
+                            <td class="c-good">21.5<span class="cue">● Normal</span></td>
                         </tr>
                     </tbody>
                 </table>
             </section>
             <section class="box">
                 <h3>Scheduled Wellness Services</h3>
-                <table>
+                <table class="fixed-table">
+                    <colgroup><col style="width:15%"><col style="width:40%"><col style="width:25%"><col style="width:20%"></colgroup>
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -123,6 +125,7 @@
                     </tbody>
                 </table>
             </section>
+            <p class="note">Certificate requests use saved clinic records. Other dashboard figures and visit tools are sample prototypes.</p>
         </main>
     </div>
     <div class="modal" id="visit-modal" hidden>

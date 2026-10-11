@@ -21,34 +21,45 @@
         <aside>
             <nav aria-label="Menu">
                 <h4>Doctor</h4><a href="../doctor/dashboard.html">Dashboard</a><a href="../doctor/visits.html"
-                    class="on">Consultations &amp; Checkups</a><a href="../doctor/consultation-form.html">+ New Visit</a><a
-                    href="../doctor/medical-records.html">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
+                    class="on">Consultations &amp; Checkups</a><a href="../doctor/consultation-form.html">New Visit</a><a
+                    href="../nurse/medical-records.html">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
-            <h2>Consultations and Checkups</h2>
-            <p class="sub">Logs are kept separately: sickness consultations vs. wellness checkups</p>
+            <div class="page-head">
+                <div>
+                    <h2>Consultations and Checkups</h2>
+                    <p class="sub">Logs are kept separately: sickness consultations vs. wellness checkups</p>
+                </div>
+                <div class="toolbar"><a class="btn" href="../doctor/consultation-form.html">+ New Visit</a></div>
+            </div>
+            <div class="save-banner" id="saved-banner" role="status" hidden>Visit saved.</div>
             <p class="note" id="visits-message" role="alert" hidden></p>
-            <div class="toolbar"><input id="visit-search" placeholder="Search patient (name or ID)" aria-label="Search"><select
-                    id="visit-college" aria-label="College">
-                    <option value="">All colleges</option>
-                    <option>IT</option>
-                    <option>CMAP</option>
-                    <option>Nursing</option>
-                    <option>Education</option>
-                    <option>Law</option>
-                    <option>Engineering</option>
-                    <option>Business</option>
-                </select><a class="btn" href="../doctor/consultation-form.html">+ New Visit</a></div>
+            <div class="filters" role="search">
+                <div class="grow"><label for="visit-search">Search</label><input id="visit-search" type="search"
+                        placeholder="Patient name or ID" autocomplete="off"></div>
+                <div><label for="visit-college">College</label><select id="visit-college">
+                        <option value="">All colleges</option>
+                        <option>IT</option>
+                        <option>CMAP</option>
+                        <option>Nursing</option>
+                        <option>Education</option>
+                        <option>Law</option>
+                        <option>Engineering</option>
+                        <option>Business</option>
+                    </select></div>
+                <div class="filters-clear"><button type="button" class="btn sec" id="visit-clear">Clear</button></div>
+            </div>
+            <p class="filter-count" id="visit-count" role="status" aria-live="polite"></p>
             <section class="box">
                 <h3>Medical Consultations (sickness)</h3>
-                <table>
+                <table class="visit-table">
+                    <colgroup><col style="width:12%"><col style="width:18%"><col style="width:12%"><col style="width:15%"><col style="width:19%"><col style="width:12%"><col style="width:12%"></colgroup>
                     <thead>
                         <tr>
                             <th>Date</th>
                             <th>Patient</th>
                             <th>College</th>
-                            <th>Type</th>
                             <th>Complaint</th>
                             <th>Diagnosis</th>
                             <th>BP</th>
@@ -60,13 +71,13 @@
             </section>
             <section class="box">
                 <h3>Wellness Checkups</h3>
-                <table>
+                <table class="visit-table">
+                    <colgroup><col style="width:12%"><col style="width:18%"><col style="width:12%"><col style="width:15%"><col style="width:19%"><col style="width:12%"><col style="width:12%"></colgroup>
                     <thead>
                         <tr>
                             <th>Date</th>
                             <th>Patient</th>
                             <th>College</th>
-                            <th>Type</th>
                             <th>Complaint</th>
                             <th>Diagnosis</th>
                             <th>BP</th>
