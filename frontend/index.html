@@ -10,74 +10,66 @@
     <script src="js/ui.js" defer></script>
     <script src="js/clinic-api.js" defer></script>
     <script src="js/staff-login.js" defer></script>
-    <style>
-        .role-row {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 8px 4px;
-            margin-top: 18px;
-            font-size: 15px;
-        }
-        .role-row .role-sep { opacity: .35; padding: 0 2px; }
-        .role-link {
-            background: none;
-            border: 0;
-            padding: 4px 6px;
-            font: inherit;
-            color: inherit;
-            opacity: .6;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: opacity .12s ease, border-color .12s ease;
-        }
-        .role-link:hover { opacity: 1; }
-        .role-link[aria-pressed="true"] {
-            opacity: 1;
-            font-weight: 600;
-            border-bottom-color: currentColor;
-        }
-    </style>
 </head>
 <body class="login-page">
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle light mode" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+        <span>Light mode</span>
+    </button>
     <main class="login">
-        <div class="login-tools">
-            <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle light mode" aria-pressed="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
-                <span>Dark mode</span>
-            </button>
-            <svg class="clinic-mark" viewBox="110 330 850 410" fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-                <path d="M166 382c-18 13-33 24-24 47 13 31 60 64 98 98 24 22 39 27 56 15 20-13 10-36 0-61-16-42-29-91-50-116-20-25-37-14-58-1"/>
-                <path d="M238 521c22 17 48-4 55-25" stroke-width="7"/>
-                <path d="M293 541c57 48 129 61 187 37 53-22 117-75 95-125-15-36-57-42-87-17-32-27-74-17-87 15-21 52 38 105 79 130 33 22 68 34 97 21l28 61 15-107 20 51h43l41-181 32 289 26-159 20 75 13-43h77"/>
-                <circle cx="915" cy="587" r="23"/>
-                <circle cx="915" cy="587" r="10" fill="currentColor" stroke="none"/>
-            </svg>
+        <div class="login-brand">
+            <span class="login-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 8.8c0 4.2-8.8 11-8.8 11S3.2 13 3.2 8.8A4.7 4.7 0 0 1 12 6.5a4.7 4.7 0 0 1 8.8 2.3Z"/><path d="M4.5 12h4l1.5-3 2.6 6 1.7-3h5.2"/></svg>
+            </span>
+            <h1>ULS Clinic Portal</h1>
+            <p>University Health Services</p>
         </div>
-        <p class="eyebrow">UNIVERSITY HEALTH SERVICES</p>
+        <div class="login-divider" aria-hidden="true"></div>
+        <h2 id="login-heading">Welcome back</h2>
+        <p class="login-intro" id="login-subtitle">Select your portal and enter your credentials.</p>
 
-        <h2 id="login-heading">Sign in</h2>
-        <p class="login-intro" id="login-subtitle">Choose your portal, then enter your credentials.</p>
-
-        <nav class="role-row" aria-label="Choose portal">
-            <button type="button" class="role-link" data-role="doctor"  aria-pressed="false">Doctor</button>
-            <span class="role-sep" aria-hidden="true">·</span>
-            <button type="button" class="role-link" data-role="nurse"   aria-pressed="false">Nurse</button>
-            <span class="role-sep" aria-hidden="true">·</span>
-            <button type="button" class="role-link" data-role="student" aria-pressed="false">Student</button>
-            <span class="role-sep" aria-hidden="true">·</span>
-            <button type="button" class="role-link" data-role="employee" aria-pressed="false">Employee</button>
+        <nav class="login-portals" aria-label="Choose portal">
+            <button type="button" class="role-link" data-role="doctor" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-3A3.5 3.5 0 0 0 5 18.5V20"/><circle cx="10" cy="7" r="3.5"/><path d="M17 8h5m-2.5-2.5v5M17 15a3 3 0 1 0 3 3v-1"/></svg>
+                <span>Doctor</span>
+            </button>
+            <button type="button" class="role-link" data-role="nurse" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/><path d="M8 4V2m8 2V2"/></svg>
+                <span>Nurse</span>
+            </button>
+            <button type="button" class="role-link" data-role="student" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5L2 9Z"/><path d="M6 11v5c3.5 3 8.5 3 12 0v-5M22 9v6"/></svg>
+                <span>Student</span>
+            </button>
+            <button type="button" class="role-link" data-role="employee" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M17 11a3 3 0 1 0-1-5.8M18 14a4 4 0 0 1 3 4v2"/></svg>
+                <span>Employee</span>
+            </button>
         </nav>
 
         <form class="f" id="staff-login">
-            <label for="u">ID number</label>
-            <input id="u" name="username" autocomplete="username" placeholder="Staff ID or username" required>
-            <label for="p">Password</label>
-            <input id="p" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+            <div class="login-field">
+                <label for="u">ID number</label>
+                <div class="input-with-icon">
+                    <svg class="input-leading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>
+                    <input id="u" name="username" autocomplete="username" placeholder="Enter your ID or username" required>
+                </div>
+            </div>
+            <div class="login-field">
+                <label for="p">Password</label>
+                <div class="input-with-icon password-field">
+                    <svg class="input-leading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v3"/></svg>
+                    <input class="password-input" id="p" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+                    <button type="button" class="password-toggle" id="password-toggle" aria-label="Show password" aria-pressed="false">
+                        <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+                        <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 3 18 18M10.6 6.2A10.8 10.8 0 0 1 12 6c6.4 0 10 6 10 6a17 17 0 0 1-3 3.5M6.2 6.2C3.5 8 2 12 2 12s3.6 6 10 6c1.2 0 2.3-.2 3.3-.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+                    </button>
+                </div>
+            </div>
             <p class="alert" id="login-message" role="alert" hidden></p>
-            <button class="btn" type="submit">Sign in</button>
+            <button class="btn login-submit" type="submit">Sign in</button>
         </form>
+        <p class="login-footer">Authorized access only</p>
     </main>
 </body>
 </html>
