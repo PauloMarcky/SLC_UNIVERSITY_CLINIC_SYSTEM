@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+
     <title>Patient Record: Maria Dizon - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
@@ -19,22 +20,25 @@
     <div class="layout">
         <aside>
             <nav aria-label="Menu">
-                <h4>Nurse</h4><a href="../nurse/dashboard.html">Dashboard</a><a href="../nurse/medical-records.html">Medical
-                    Records</a><a href="../nurse/inventory.html">Inventory</a><a href="../doctor/statistics.html">Statistics</a>
+                <h4>Nurse</h4><a href="../nurse/dashboard.html">Dashboard</a><a
+                    href="../nurse/medical-records.html">Medical
+                    Records</a><a href="../nurse/inventory.html">Inventory</a><a
+                    href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
-            <h2>Patient Record: Maria Dizon</h2>
-            <p class="sub">2026-00123 | IT | BSIT 3rd Year</p>
-            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
+            <h2 id="patient-name">Patient Record</h2>
+            <p class="sub" id="patient-info">Loading patient information...</p>
+            <p class="note" id="record-status">Static prototype: sample data only. Search, auto-calculation, saving and
+                alerts need a
                 backend.</p>
-            <section class="cards">
+            <section class="cards" id="patient-summary">
                 <article class="card"><small>Age / Sex (auto)</small><b>20 / F</b></article>
                 <article class="card ok"><small>BMI (auto)</small><b>21.5</b></article>
                 <article class="card ok"><small>BP status (auto)</small><b>Normal</b></article>
                 <article class="card"><small>Record opened</small><b>2026-10-07</b></article>
             </section>
-            <div class="two">
+            <div class="two" id="record-content">
                 <section class="box">
                     <h3>Requirements</h3>
                     <table>
@@ -88,6 +92,7 @@
                 </section>
             </div>
             <a class="btn sec" href="../nurse/medical-records.html">Back to records</a>
+            <script src="../js/record-detail.js" defer></script>
         </main>
     </div>
 </body>
