@@ -5,6 +5,15 @@
     const roleLinks = [...document.querySelectorAll('.role-link')];
     const form = document.getElementById('staff-login');
     const message = document.getElementById('login-message');
+    const password = document.getElementById('p');
+    const passwordToggle = document.getElementById('password-toggle');
+
+    passwordToggle.addEventListener('click', () => {
+        const showPassword = password.type === 'password';
+        password.type = showPassword ? 'text' : 'password';
+        passwordToggle.setAttribute('aria-pressed', String(showPassword));
+        passwordToggle.setAttribute('aria-label', showPassword ? 'Hide password' : 'Show password');
+    });
 
     const PORTALS = {
         doctor: {
