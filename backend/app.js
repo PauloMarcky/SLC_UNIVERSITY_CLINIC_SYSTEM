@@ -14,7 +14,8 @@ import {
   createCertificate,
   updateCertificate,
   transition,
-  certificate as mapCertificate
+  certificate as mapCertificate,
+  getPatientRecord
 } from './store.js';
 import { renderCertificate } from './certificate-template.js';
 import { listVisits, createVisit } from './visits-store.js';
@@ -222,6 +223,13 @@ export function createClinicServer(options = {}) {
         [search, search]
       );
       return json(response, 200, { patients });
+    }
+
+    const patientRecordMatch = path.match(/^\/api\/patients\/([^/]+)\/record$/);
+    if (patientRecordMatch && method === 'GET') {
+      const patientId = decodeURIComponent(patientRecordMatch[1]);
+      const record = await getPatientRecord(patientId, current.user);
+      return json(response, 200, { record });
     }
 
     if (path === '/api/visits') {
