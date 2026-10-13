@@ -151,6 +151,11 @@
         });
         if (first) { first.focus(); return; }
 
+        // Prescription: stop if a medicine was typed but never added to the list.
+        const rxBuilder = window.PrescriptionBuilder;
+        const rxError = rxBuilder ? rxBuilder.validate() : '';
+        if (rxError) { message(rxError, true); return; }
+
         const patientFields = mode === 'existing'
             ? { patientId: selected.id, isNew: false }
             : {
@@ -169,7 +174,8 @@
                 body: Object.assign({}, patientFields, {
                     visitType: $('t').value, visitDate: $('d').value, complaint: $('c').value,
                     bp: $('bp').value, weight: $('w').value, height: $('h').value,
-                    diagnosis: dx.value, notes: $('n').value, confidential: conf.checked
+                    diagnosis: dx.value, notes: $('n').value, confidential: conf.checked,
+                    prescription: rxBuilder ? rxBuilder.getPayload() : null   // null = nothing prescribed
                 })
             });
             window.location.assign('/doctor/visits.html?saved=1');
