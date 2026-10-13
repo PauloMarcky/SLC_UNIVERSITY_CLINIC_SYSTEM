@@ -1,4 +1,5 @@
 -- Prescription + inventory tables (MySQL 8 / MariaDB 10.5+).
+-- Tables use utf8mb4_unicode_ci to match patients/visits (mixing collations breaks JOINs on patient_id).
 -- Run once:  mysql -u <user> -p <database> < 002_prescriptions.sql
 --
 -- Notes
@@ -17,7 +18,7 @@ CREATE TABLE IF NOT EXISTS medicines (
   active        TINYINT(1)   NOT NULL DEFAULT 1,
   created_at    VARCHAR(32)  NOT NULL,
   UNIQUE KEY uq_medicine_name (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- One row per delivery/lot. Stock of a medicine = sum of its batches.
 CREATE TABLE IF NOT EXISTS medicine_batches (
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS medicine_batches (
   CONSTRAINT chk_batch_qty CHECK (quantity >= 0),
   KEY ix_batch_fefo (medicine_id, expiry_date),
   CONSTRAINT fk_batch_medicine FOREIGN KEY (medicine_id) REFERENCES medicines(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Prescription header: one per visit. status: pending -> dispensed | cancelled
 CREATE TABLE IF NOT EXISTS prescriptions (
@@ -50,7 +51,7 @@ CREATE TABLE IF NOT EXISTS prescriptions (
   KEY ix_rx_visit (visit_id),
   KEY ix_rx_patient (patient_id),
   KEY ix_rx_status (status, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- What the doctor ordered.
 CREATE TABLE IF NOT EXISTS prescription_items (
@@ -65,7 +66,7 @@ CREATE TABLE IF NOT EXISTS prescription_items (
   KEY ix_item_rx (prescription_id),
   CONSTRAINT fk_item_rx FOREIGN KEY (prescription_id) REFERENCES prescriptions(id),
   CONSTRAINT fk_item_medicine FOREIGN KEY (medicine_id) REFERENCES medicines(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- What was physically handed out, and from which batch (an item can span batches).
 CREATE TABLE IF NOT EXISTS dispense_lines (
@@ -76,7 +77,7 @@ CREATE TABLE IF NOT EXISTS dispense_lines (
   KEY ix_line_item (item_id),
   CONSTRAINT fk_line_item FOREIGN KEY (item_id) REFERENCES prescription_items(id),
   CONSTRAINT fk_line_batch FOREIGN KEY (batch_id) REFERENCES medicine_batches(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Every in/out/adjustment (FR-7.10). change_qty is signed.
 CREATE TABLE IF NOT EXISTS stock_movements (
@@ -91,4 +92,4 @@ CREATE TABLE IF NOT EXISTS stock_movements (
   created_at  VARCHAR(32)  NOT NULL,
   KEY ix_move_medicine (medicine_id, id),
   KEY ix_move_batch (batch_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
