@@ -1,5 +1,6 @@
 import { pool, withTransaction } from './db.js';
 import { HttpError, patient } from './store.js';
+import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions-store.js';
 
 const VISIT_TYPES = ['Consultation', 'Checkup'];
 const DIAGNOSES = [
@@ -131,6 +132,7 @@ async function createVisit(body, actor) {
   const visitDate = validDate(body.visitDate);
   const complaint = text(body.complaint, 'Complaint', 500, true);
   const notes = text(body.notes, 'Notes', 5000);
+  const rxItems = parseItems(body.prescription);   // validated before anything is saved
   const confidential = body.confidential === true || body.confidential === 'true' ||
     diagnosis.startsWith('Mental health') ? 1 : 0;
 
@@ -143,7 +145,7 @@ async function createVisit(body, actor) {
     category: body.category === 'employee' ? 'employee' : 'student'
   };
 
-  const visitId = await withTransaction(async connection => {
+  const created = await withTransaction(async connection => {
     const patientId = givenPatientId;
     const existing = await patient(patientId, connection);
     if (isNew) {
@@ -169,10 +171,16 @@ async function createVisit(body, actor) {
         actor.id, actor.name, new Date().toISOString()
       ]
     );
-    return result.insertId;
+    // Same transaction: if stock is short or the prescription is invalid, the visit is not saved either.
+    const rxId = await createPrescriptionInTx(
+      connection, { visitId: result.insertId, patientId, items: rxItems }, actor
+    );
+    return { visitId: result.insertId, rxId };
   });
-  const [rows] = await pool.execute(`${SELECT_VISIT} WHERE v.id = ?`, [visitId]);
-  return rowToVisit(rows[0], actor.role);
+  const [rows] = await pool.execute(`${SELECT_VISIT} WHERE v.id = ?`, [created.visitId]);
+  const visit = rowToVisit(rows[0], actor.role);
+  visit.prescription = created.rxId ? await getPrescription(created.rxId, actor) : null;
+  return visit;
 }
 
 export { listVisits, createVisit };

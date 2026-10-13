@@ -19,6 +19,9 @@ import {
 } from './store.js';
 import { renderCertificate } from './certificate-template.js';
 import { listVisits, createVisit } from './visits-store.js';
+import { listMedicines, listBatches, receiveStock, adjustStock, listMovements, reorderList } from './inventory-store.js';
+import { getPrescription, listPrescriptions, listForPatient, dispensePrescription, cancelPrescription } from './prescriptions-store.js';
+import { renderPrescription } from './prescription-template.js';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FRONTEND_ROOT = resolve(PROJECT_ROOT, 'frontend');
@@ -248,6 +251,55 @@ export function createClinicServer(options = {}) {
       }
     }
 
+    // ---- Inventory (nurse and doctor, per FR-1.3) ----
+    if (path === '/api/medicines' && method === 'GET') {
+      const medicines = await listMedicines({
+        search: url.searchParams.get('search') || '',
+        category: url.searchParams.get('category') || '',
+        status: url.searchParams.get('status') || ''
+      });
+      return json(response, 200, { medicines });
+    }
+    const batchesMatch = path.match(/^\/api\/medicines\/(\d+)\/batches$/);
+    if (batchesMatch && method === 'GET') {
+      return json(response, 200, { batches: await listBatches(idFrom(batchesMatch[1])) });
+    }
+    if (path === '/api/inventory/receive' && method === 'POST') {
+      const result = await receiveStock(await readJson(request), current.user);
+      return json(response, 201, result);
+    }
+    if (path === '/api/inventory/adjust' && method === 'POST') {
+      const result = await adjustStock(await readJson(request), current.user);
+      return json(response, 200, result);
+    }
+    if (path === '/api/inventory/movements' && method === 'GET') {
+      const medicineId = url.searchParams.get('medicineId');
+      const movements = await listMovements({ medicineId: medicineId ? idFrom(medicineId) : null });
+      return json(response, 200, { movements });
+    }
+    if (path === '/api/inventory/reorder' && method === 'GET') {
+      return json(response, 200, { items: await reorderList() });
+    }
+
+    // ---- Prescriptions ----
+    if (path === '/api/prescriptions' && method === 'GET') {
+      const prescriptions = await listPrescriptions({ status: url.searchParams.get('status') || 'pending' }, current.user);
+      return json(response, 200, { prescriptions });
+    }
+    const rxActionMatch = path.match(/^\/api\/prescriptions\/(\d+)\/(dispense|cancel)$/);
+    if (rxActionMatch && method === 'POST') {
+      const id = idFrom(rxActionMatch[1]);
+      const prescription = rxActionMatch[2] === 'dispense'
+        ? await dispensePrescription(id, current.user)
+        : await cancelPrescription(id, await readJson(request), current.user);
+      return json(response, 200, { prescription });
+    }
+    const patientRxMatch = path.match(/^\/api\/patients\/([^/]+)\/prescriptions$/);
+    if (patientRxMatch && method === 'GET') {
+      const prescriptions = await listForPatient(decodeURIComponent(patientRxMatch[1]), current.user);
+      return json(response, 200, { prescriptions });
+    }
+
     if (path === '/api/certificates') {
       if (method === 'GET') {
         const status = url.searchParams.get('status');
@@ -378,6 +430,16 @@ export function createClinicServer(options = {}) {
         }
         response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         response.end(renderCertificate(certificate, config, { official }));
+        return;
+      }
+      const rxPrintMatch = url.pathname.match(/^\/prescriptions\/(\d+)\/print$/);
+      if (rxPrintMatch && request.method === 'GET') {
+        const current = await requireSession(request);
+        if (!['nurse', 'doctor'].includes(current.user.role)) throw new HttpError(403, 'Clinic staff access required.');
+        const rx = await getPrescription(idFrom(rxPrintMatch[1]), current.user);
+        if (rx.patientId === null) throw new HttpError(403, 'This prescription belongs to a confidential visit.');
+        response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        response.end(renderPrescription(rx, config));
         return;
       }
       if (!['GET', 'HEAD'].includes(request.method)) throw new HttpError(405, 'Method not allowed.');
