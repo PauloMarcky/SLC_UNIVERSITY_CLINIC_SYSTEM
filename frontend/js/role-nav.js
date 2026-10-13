@@ -17,11 +17,32 @@
             title: 'Doctor',
             links: [
                 ['Dashboard', '../doctor/dashboard.html'],
-                ['Consultations & Checkups', '../doctor/visits.html'],
                 ['New Visit', '../doctor/consultation-form.html'],
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Certificate Approval', '../shared/certificates.html'],
-                ['Statistics', '../doctor/statistics.html']
+                ['User Management', '../doctor/users.html']
+            ],
+            order: [['link', 0], ['group', 0], ['link', 1], ['link', 2], ['link', 3], ['group', 1], ['link', 4]],
+            groups: [
+                {
+                    title: 'Consultations & Checkups',
+                    icon: '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/>',
+                    pages: ['/doctor/visits.html', '/doctor/screening.html', '/doctor/checkup.html', '/doctor/consultation.html'],
+                    links: [
+                        ['Screening', '../doctor/screening.html'],
+                        ['Checkup', '../doctor/checkup.html'],
+                        ['Consultation', '../doctor/consultation.html']
+                    ]
+                },
+                {
+                    title: 'Statistics',
+                    icon: '<path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/>',
+                    pages: ['/doctor/statistics-checkup.html', '/doctor/statistics-consultation.html', '/doctor/statistics.html'],
+                    links: [
+                        ['Statistics for Check up', '../doctor/statistics-checkup.html'],
+                        ['Statistics for Consultation', '../doctor/statistics-consultation.html']
+                    ]
+                }
             ]
         }
     };
@@ -39,19 +60,44 @@
         const keepDashboardId = !!document.getElementById('sidebar-dashboard');
         const logoutLink = nav.querySelector('a[data-logout]');
         nav.querySelectorAll('a:not([data-logout])').forEach(link => link.remove());
+        nav.querySelectorAll('.nav-group').forEach(group => group.remove());
         if (heading) heading.textContent = menu.title;
         const current = PARENT_PAGE[location.pathname] || location.pathname;
-        menu.links.forEach(function (item, index) {
+        const makeLink = function (item, currentPath) {
             const link = document.createElement('a');
             link.textContent = item[0];
             link.setAttribute('href', item[1]);
-            if (index === 0 && keepDashboardId) link.id = 'sidebar-dashboard';
-            if (new URL(item[1], location.href).pathname === current) {
+            if (item[0] === 'Dashboard' && keepDashboardId) link.id = 'sidebar-dashboard';
+            if (new URL(item[1], location.href).pathname === (currentPath || current)) {
                 link.classList.add('on');
                 link.setAttribute('aria-current', 'page');
             }
-            nav.append(link);
-        });
+            return link;
+        };
+        const appendGroup = function (group) {
+            const details = document.createElement('details');
+            details.className = 'nav-group';
+            const active = group.pages.includes(current);
+            details.open = true;
+            if (active) details.classList.add('has-active');
+            const summary = document.createElement('summary');
+            summary.innerHTML = '<svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + group.icon + '</svg><span>' + group.title + '</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"></path></svg>';
+            details.append(summary);
+            const children = document.createElement('div');
+            children.className = 'nav-children';
+            group.links.forEach(function (item) { children.append(makeLink(item)); });
+            details.append(children);
+            nav.append(details);
+        };
+        if (menu.order) {
+            menu.order.forEach(function (entry) {
+                if (entry[0] === 'group') appendGroup(menu.groups[entry[1]]);
+                else nav.append(makeLink(menu.links[entry[1]]));
+            });
+        } else {
+            menu.links.forEach(function (item) { nav.append(makeLink(item)); });
+            (menu.groups || []).forEach(appendGroup);
+        }
         if (logoutLink) nav.append(logoutLink);
         // ui.js draws the menu icons; ask it to do the same for the new links.
         if (window.ClinicUI && typeof window.ClinicUI.decorateNav === 'function') {
