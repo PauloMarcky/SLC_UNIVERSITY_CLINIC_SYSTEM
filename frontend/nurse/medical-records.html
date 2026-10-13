@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
+    <script src="../js/medical-records.js" defer></script>
 </head>
 
 <body>
@@ -25,22 +26,23 @@
             </nav>
         </aside>
         <main>
-            <h2>Medical Records</h2>
-            <p class="sub">Requirements per student. Doctor visits auto-fill Physical, Dental and Vaccine entries.
-                Doctor view is read-only.</p>
-            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
-                backend.</p>
-            <nav class="tabs" aria-label="College"><a class="on" href="#">All (6,367)</a><a href="#">IT (1,200)</a><a
-                    href="#">CMAP (900)</a><a href="#">Nursing (800)</a><a href="#">Education (700)</a><a href="#">Law
-                    (400)</a><a href="#">Engineering (1,000)</a><a href="#">Business (1,367)</a><a
-                    href="#emp">Employees</a></nav>
-            <div class="toolbar"><input placeholder="Search name or ID" aria-label="Search"><select
-                    aria-label="Page size">
-                    <option>25 per page</option>
-                    <option>50 per page</option>
-                </select></div>
+            <div class="page-head">
+                <div>
+                    <h2>Medical Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span></h2>
+                    <p class="sub">Requirements per student. Doctor visits auto-fill Physical, Dental and Vaccine entries. Doctor view is read-only.</p>
+                </div>
+            </div>
+            <nav class="tabs" id="mr-tabs" aria-label="College"><a class="on" aria-current="true" href="#" data-college="">All</a><a href="#emp">Employees</a></nav>
+            <div class="filters" role="search">
+                <div class="grow"><label for="mr-search">Search</label><input id="mr-search" type="search"
+                        placeholder="Student name or ID" autocomplete="off"></div>
+                <div class="filters-clear"><button type="button" class="btn sec" id="mr-clear">Clear</button></div>
+            </div>
+            <p class="filter-count" id="mr-count" role="status" aria-live="polite"></p>
             <section class="box">
-                <table>
+                <h3>Student requirements</h3>
+                <p class="legend">Students come from the database. Physical, Dental, Vaccines, Lab, Medical certificate and Cleared show &mdash; until the backend stores them.</p>
+                <table class="record-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -52,56 +54,19 @@
                             <th>Dental</th>
                             <th>Vaccines</th>
                             <th>Lab</th>
-                            <th>Med Cert</th>
+                            <th>Medical certificate</th>
                             <th>Cleared</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="mr-body">
                         <tr>
-                            <td>2026-00123</td>
-                            <td><a href="../nurse/record-detail.html">Maria Dizon</a></td>
-                            <td>IT</td>
-                            <td>BSIT</td>
-                            <td>3</td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill green">5/5</span></td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill green">Yes</span></td>
-                        </tr>
-                        <tr>
-                            <td>2025-00456</td>
-                            <td><a href="../nurse/record-detail.html">Paolo Reyes</a></td>
-                            <td>Engineering</td>
-                            <td>BSCE</td>
-                            <td>4</td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill red">&#9744;</span></td>
-                            <td><span class="pill yellow">3/5</span></td>
-                            <td><span class="pill red">&#9744;</span></td>
-                            <td><span class="pill red">&#9744;</span></td>
-                            <td><span class="pill red">No</span></td>
-                        </tr>
-                        <tr>
-                            <td>2024-00789</td>
-                            <td>Angela Cruz</td>
-                            <td>Nursing</td>
-                            <td>BSN</td>
-                            <td>2</td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill red">0/5</span></td>
-                            <td><span class="pill green">&#10003;</span></td>
-                            <td><span class="pill red">&#9744;</span></td>
-                            <td><span class="pill red">No</span></td>
+                            <td colspan="11">Loading students...</td>
                         </tr>
                     </tbody>
                 </table>
-                <p class="note">Pagination shown for layout only.</p>
             </section>
             <section class="box" id="emp">
-                <h3>Employees by Category (differing exposure and medical terms)</h3>
+                <h3>Employees by category <span class="pill yellow">Sample data</span></h3>
                 <table>
                     <thead>
                         <tr>
@@ -134,10 +99,9 @@
                     </tbody>
                 </table>
             </section>
+            <p class="note">Search and college tabs narrow the students loaded from the database. Saving requirements and alerts need a backend.</p>
         </main>
     </div>
 </body>
 
 </html>
-
-<script src="../js/medical-records.js" defer></script>
