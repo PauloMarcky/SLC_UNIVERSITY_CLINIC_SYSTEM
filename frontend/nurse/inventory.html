@@ -7,8 +7,11 @@
     <title>Medicine Inventory - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/prescription.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
+    <script src="../js/rx-api.js" defer></script>
+    <script src="../js/inventory.js" defer></script>
 </head>
 
 <body>
@@ -27,89 +30,108 @@
             <div class="page-head">
                 <div>
                     <h2>Medicine Inventory</h2>
-                    <p class="sub">Managed by nurse. Auto-deducts when the doctor prescribes (needs backend).</p>
+                    <p class="sub">Prescriptions from the doctor wait below. Dispensing deducts stock automatically, earliest-expiring batch first.</p>
                 </div>
             </div>
-            <div class="alert">Red = expired or expiring within 60 days. Low and out-of-stock items support timely
-                re-ordering and budget requests.</div>
-            <div class="toolbar"><a class="btn" href="#">+ Stock In</a><a class="btn sec" href="#">Reorder Report</a>
+            <p class="note" id="inv-message" role="alert" tabindex="-1" hidden></p>
+
+            <section class="box" aria-labelledby="queue-title">
+                <h3 id="queue-title">Prescriptions to dispense <span class="pill yellow" id="queue-count">0</span></h3>
+                <div id="queue"><p class="rx-empty">Loading…</p></div>
+            </section>
+
+            <div class="alert">Red = expired or out of stock. Yellow = low stock or expiring within 60 days. Expired stock is never dispensed.</div>
+            <div class="toolbar">
+                <button class="btn" type="button" id="btn-stockin">+ Stock In</button>
+                <button class="btn sec" type="button" id="btn-reorder">Reorder Report</button>
+            </div>
+            <div class="inv-search">
+                <input id="f-search" placeholder="Search medicine" aria-label="Search medicine">
+                <select id="f-category" aria-label="Category"><option value="">All categories</option></select>
+                <select id="f-status" aria-label="Status">
+                    <option value="">All statuses</option><option value="OK">OK</option><option value="LOW">Low</option>
+                    <option value="OUT">Out</option><option value="EXPIRING">Expiring soon</option><option value="EXPIRED">Expired</option>
+                </select>
             </div>
             <section class="box">
-                <table class="fixed-table">
-                    <colgroup><col style="width:22%"><col style="width:17%"><col style="width:10%"><col style="width:9%"><col style="width:12%"><col style="width:15%"><col style="width:15%"></colgroup>
+                <table>
                     <thead>
                         <tr>
-                            <th>Medicine</th>
-                            <th>Category</th>
-                            <th>Stock</th>
-                            <th>Unit</th>
-                            <th>Reorder at</th>
-                            <th>Expiry</th>
-                            <th>Status</th>
+                            <th>Medicine</th><th>Category</th><th>Stock (in date)</th><th>Unit</th>
+                            <th>Reorder at</th><th>Next expiry</th><th>Status</th><th></th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Paracetamol 500mg</td>
-                            <td>Analgesic</td>
-                            <td class="c-good">1200</td>
-                            <td>tab</td>
-                            <td>500</td>
-                            <td>2027-03-15</td>
-                            <td><span class="pill green">OK</span></td>
-                        </tr>
-                        <tr>
-                            <td>Amlodipine 5mg</td>
-                            <td>Antihypertensive</td>
-                            <td class="c-good">450</td>
-                            <td>tab</td>
-                            <td>200</td>
-                            <td class="c-bad">2026-09-30</td>
-                            <td><span class="pill red">EXPIRED</span></td>
-                        </tr>
-                        <tr>
-                            <td>Sinutret</td>
-                            <td>Decongestant</td>
-                            <td class="c-crit">0</td>
-                            <td>tab</td>
-                            <td>250</td>
-                            <td class="c-warn">2026-10-30</td>
-                            <td><span class="pill red">OUT</span></td>
-                        </tr>
-                        <tr>
-                            <td>Amoxicillin 500mg</td>
-                            <td>Antibiotic</td>
-                            <td class="c-warn">80</td>
-                            <td>cap</td>
-                            <td>300</td>
-                            <td class="c-warn">2026-11-20</td>
-                            <td><span class="pill yellow">LOW</span></td>
-                        </tr>
-                        <tr>
-                            <td>Oral Rehydration</td>
-                            <td>Rehydration</td>
-                            <td class="c-warn">50</td>
-                            <td>sachet</td>
-                            <td>200</td>
-                            <td class="c-warn">2026-10-25</td>
-                            <td><span class="pill yellow">EXPIRING</span></td>
-                        </tr>
-                        <tr>
-                            <td>Cetirizine 10mg</td>
-                            <td>Antihistamine</td>
-                            <td class="c-good">600</td>
-                            <td>tab</td>
-                            <td>200</td>
-                            <td>2027-06-01</td>
-                            <td><span class="pill green">OK</span></td>
-                        </tr>
-                    </tbody>
+                    <tbody id="med-body"><tr><td colspan="8">Loading…</td></tr></tbody>
                 </table>
             </section>
-            <p class="note">Static prototype: sample data only. Search, auto-calculation, saving and alerts need a
-                backend.</p>
         </main>
     </div>
+
+    <!-- Stock in -->
+    <dialog class="inv-dialog" id="dlg-stockin" aria-labelledby="dlg-stockin-title">
+        <form id="form-stockin" method="dialog" novalidate>
+            <h3 id="dlg-stockin-title">Stock In</h3>
+            <p class="field-error" id="stockin-error" role="alert" hidden></p>
+            <div class="form">
+                <div class="f full"><label for="si-med">Medicine</label>
+                    <select id="si-med"></select></div>
+                <div class="f full" data-new hidden><label for="si-name">New medicine name</label><input id="si-name" maxlength="150" placeholder="e.g. Ibuprofen 400mg"></div>
+                <div class="f" data-new hidden><label for="si-category">Category</label><input id="si-category" maxlength="80" placeholder="e.g. Analgesic"></div>
+                <div class="f" data-new hidden><label for="si-unit">Unit</label><input id="si-unit" maxlength="20" placeholder="tab, cap, sachet, ml"></div>
+                <div class="f" data-new hidden><label for="si-reorder">Reorder level</label><input id="si-reorder" type="number" min="0" step="1" value="100"></div>
+                <div class="f"><label for="si-lot">Lot / batch number</label><input id="si-lot" maxlength="60"></div>
+                <div class="f"><label for="si-qty">Quantity received</label><input id="si-qty" type="number" min="1" step="1"></div>
+                <div class="f"><label for="si-expiry">Expiry date</label><input id="si-expiry" type="date"></div>
+                <div class="f"><label for="si-supplier">Supplier</label><input id="si-supplier" maxlength="150"></div>
+            </div>
+            <div class="dlg-actions">
+                <button class="btn sec" type="button" data-close>Cancel</button>
+                <button class="btn" type="submit">Save stock</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Batches, adjustments and history -->
+    <dialog class="inv-dialog" id="dlg-batches" aria-labelledby="dlg-batches-title">
+        <h3 id="dlg-batches-title">Batches</h3>
+        <p class="field-error" id="batch-error" role="alert" hidden></p>
+        <table><thead><tr><th>Lot</th><th>Qty</th><th>Expiry</th><th>Supplier</th><th>Received</th><th></th></tr></thead>
+            <tbody id="batch-body"></tbody></table>
+        <form id="form-adjust" novalidate hidden>
+            <h4 id="adjust-title">Adjust stock</h4>
+            <div class="form">
+                <div class="f"><label for="ad-reason">Reason</label>
+                    <select id="ad-reason">
+                        <option value="damaged">Damaged</option>
+                        <option value="lost">Lost</option>
+                        <option value="expired_disposal">Disposal of expired stock</option>
+                        <option value="correction">Count correction (+/−)</option>
+                    </select></div>
+                <div class="f"><label for="ad-qty">Quantity</label><input id="ad-qty" type="number" step="1" required></div>
+                <div class="f full"><label for="ad-remark">Remark</label><input id="ad-remark" maxlength="60" placeholder="Required for count corrections"></div>
+            </div>
+            <div class="dlg-actions">
+                <button class="btn sec" type="button" id="ad-cancel">Cancel</button>
+                <button class="btn" type="submit">Apply adjustment</button>
+            </div>
+        </form>
+        <h4>Stock movement history</h4>
+        <table><thead><tr><th>When</th><th>Lot</th><th>Change</th><th>Reason</th><th>Ref</th><th>By</th></tr></thead>
+            <tbody id="move-body"></tbody></table>
+        <div class="dlg-actions"><button class="btn sec" type="button" data-close>Close</button></div>
+    </dialog>
+
+    <!-- Reorder report -->
+    <dialog class="inv-dialog" id="dlg-reorder" aria-labelledby="dlg-reorder-title">
+        <h3 id="dlg-reorder-title">Reorder / requisition list</h3>
+        <p class="inv-sub">Low, out-of-stock and fully expired items. Suggested order brings stock up to twice the reorder level.</p>
+        <table><thead><tr><th>Medicine</th><th>Category</th><th>Stock</th><th>Reorder at</th><th>Suggested order</th><th>Status</th></tr></thead>
+            <tbody id="reorder-body"></tbody></table>
+        <div class="dlg-actions">
+            <button class="btn sec" type="button" id="reorder-csv">Download CSV</button>
+            <button class="btn sec" type="button" data-close>Close</button>
+        </div>
+    </dialog>
 </body>
 
 </html>

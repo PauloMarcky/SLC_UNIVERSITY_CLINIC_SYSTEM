@@ -7,10 +7,13 @@
     <title>New Consultation / Checkup - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/prescription.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/today.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
+    <script src="../js/rx-api.js" defer></script>
+    <script src="../js/prescription-builder.js" defer></script>
     <script src="../js/consultation-form.js" defer></script>
 </head>
 
@@ -80,9 +83,14 @@
                     <div class="form">
                         <div class="f"><label for="x">Diagnosis category<span class="req" aria-hidden="true">*</span></label><select id="x" name="diagnosis" required aria-describedby="e-x"><option value="">Select diagnosis</option><option>URI / Flu</option><option>Wound</option><option>Neurological</option><option>Mental health (anxiety, depression, panic)</option><option>Metabolic</option><option>Normal / Well</option></select><p class="field-error" id="e-x" hidden></p></div>
                         <div></div>
-                        <div class="f full"><label for="n">Notes / prescription</label><textarea id="n" name="notes" rows="3" maxlength="5000"></textarea></div>
+                        <div class="f full"><label for="n">Notes / remarks</label><textarea id="n" name="notes" rows="3" maxlength="5000"></textarea></div>
                         <div class="f full"><label class="conf-toggle" for="conf"><input type="checkbox" id="conf" name="confidential"><span><b>Mark as confidential</b><small>Hidden from nurses. Mental health diagnoses are always saved as confidential.</small></span></label></div>
                     </div>
+                </section>
+                <section class="form-section" aria-labelledby="s4">
+                    <h3 id="s4">Prescription <small>(optional)</small></h3>
+                    <p class="hint">Saved with the visit. The nurse sees it in the Inventory page and dispenses it; stock is deducted then, earliest-expiring batch first.</p>
+                    <div id="rx-builder"></div>
                 </section>
                 <div class="form-actions">
                     <button class="btn" type="submit" id="save-visit">Save visit</button>

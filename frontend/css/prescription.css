@@ -1,0 +1,29 @@
+/* Extra styles for prescriptions and live inventory. Link AFTER style.css. */
+.rx-row { display: grid; grid-template-columns: 2fr 1.2fr 1.4fr .7fr .9fr; gap: 12px; align-items: end; }
+.rx-row .rx-instr { grid-column: span 3; }
+.rx-row .rx-add { grid-column: span 2; }
+.rx-dose { display: flex; align-items: center; gap: 6px; }
+.rx-dose input { flex: 1; min-width: 0; }
+.rx-unit { color: #5b6470; font-size: .9em; min-width: 3ch; }
+.rx-table { width: 100%; margin-top: 12px; }
+.rx-remove { padding: 2px 10px; font-size: .85em; }
+
+.rx-card { border: 1px solid #d5dae1; border-radius: 8px; padding: 12px 14px; margin: 10px 0; background: #fff; }
+.rx-card header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.rx-card ul { margin: 6px 0 10px 18px; padding: 0; }
+.rx-card .rx-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.rx-empty { color: #5b6470; font-style: italic; }
+
+dialog.inv-dialog { border: 1px solid #c3c9d1; border-radius: 10px; padding: 18px 20px; max-width: min(760px, 94vw); width: 100%; }
+dialog.inv-dialog::backdrop { background: rgba(0, 0, 0, .35); }
+dialog.inv-dialog .form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+dialog.inv-dialog .form .full { grid-column: 1 / -1; }
+.dlg-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+.inv-search { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.inv-sub { font-size: .85em; color: #5b6470; }
+
+@media (max-width: 800px) {
+  .rx-row { grid-template-columns: 1fr 1fr; }
+  .rx-row .rx-instr, .rx-row .rx-add { grid-column: span 2; }
+  dialog.inv-dialog .form { grid-template-columns: 1fr; }
+}
