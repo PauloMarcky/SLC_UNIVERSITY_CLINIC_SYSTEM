@@ -10,6 +10,10 @@ import {
   verifyPassword,
   passwordHash,
   createUser as storeCreateUser,
+  listUsers,
+  createManagedUser,
+  updateManagedUser,
+  deactivateUser,
   getCertificate,
   createCertificate,
   updateCertificate,
@@ -217,6 +221,26 @@ export function createClinicServer(options = {}) {
     }
 
     if (!['nurse', 'doctor'].includes(current.user.role)) throw new HttpError(403, 'Clinic staff access required.'); 
+    const usersMatch = path.match(/^\/api\/users(?:\/(\d+))?$/);
+    if (usersMatch) {
+      if (current.user.role !== 'doctor') throw new HttpError(403, 'Only a doctor can manage user accounts.');
+      if (!usersMatch[1] && method === 'GET') {
+        return json(response, 200, { users: await listUsers(current.user) });
+      }
+      if (!usersMatch[1] && method === 'POST') {
+        const user = await createManagedUser(await readJson(request), current.user);
+        return json(response, 201, { user });
+      }
+      if (usersMatch[1] && method === 'PUT') {
+        const user = await updateManagedUser(idFrom(usersMatch[1]), await readJson(request), current.user);
+        return json(response, 200, { user });
+      }
+      if (usersMatch[1] && method === 'DELETE') {
+        const user = await deactivateUser(idFrom(usersMatch[1]), current.user);
+        return json(response, 200, { user });
+      }
+    }
+
     if (path === '/api/patients' && method === 'GET') {
       const search = (url.searchParams.get('search') || '').trim().slice(0, 200);
       const [patients] = await pool.execute(
@@ -387,6 +411,7 @@ export function createClinicServer(options = {}) {
     if (!CONTENT_TYPES[extension]) throw new HttpError(404, 'File not found.');
     const restricted = { '/student/dashboard.html': 'student', '/employee/dashboard.html': 'employee',
       '/doctor/dashboard.html': 'doctor',
+      '/doctor/users.html': 'doctor',
       '/nurse/dashboard.html': 'nurse',
       '/shared/certificates.html': 'staff'
     };

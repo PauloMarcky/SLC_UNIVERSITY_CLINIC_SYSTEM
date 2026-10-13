@@ -118,13 +118,14 @@
             add: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
             inventory: '<path d="m12 3 9 5v9l-9 5-9-5V8zM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/>',
             chart: '<path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/>',
+            users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 8v6M23 11h-6"/>',
             logout: '<path d="M10 4H4v16h6M9 12h12M17 8l4 4-4 4"/>'
         };
         function decorateNav(aside) {
             aside.querySelectorAll('a').forEach(function (link) {
                 if (link.querySelector('.nav-icon')) return;
                 var href = link.getAttribute('href');
-                var name = /dashboard/.test(href) ? 'dashboard' : /consultation-form/.test(href) ? 'add' : /visits/.test(href) ? 'visits' : /inventory/.test(href) ? 'inventory' : /statistics|reports/.test(href) ? 'chart' : /index/.test(href) ? 'logout' : 'records';
+                var name = /dashboard/.test(href) ? 'dashboard' : /users\.html/.test(href) ? 'users' : /consultation-form/.test(href) ? 'add' : /visits/.test(href) ? 'visits' : /inventory/.test(href) ? 'inventory' : /statistics|reports/.test(href) ? 'chart' : /index/.test(href) ? 'logout' : 'records';
                 var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 icon.setAttribute('viewBox', '0 0 24 24');
                 icon.setAttribute('class', 'nav-icon');
