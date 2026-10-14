@@ -15,6 +15,7 @@
     "test": "node --env-file-if-exists=.env --test tests/*.test.js"
   },
   "dependencies": {
+    "express": "^4.19.2",
     "mysql2": "^3.24.5"
   }
 }

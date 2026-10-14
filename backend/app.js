@@ -23,6 +23,10 @@ import {
 } from './store.js';
 import { renderCertificate } from './certificate-template.js';
 import { listVisits, createVisit } from './visits-store.js';
+import {
+  registerPatient, getHistory, saveHistory,
+  triageVisit, queueVisits, completeVisit, screenVisit, screenedVisits
+} from './flow-store.js';
 import { listMedicines, listBatches, receiveStock, adjustStock, listMovements, reorderList } from './inventory-store.js';
 import { getPrescription, listPrescriptions, listForPatient, dispensePrescription, cancelPrescription } from './prescriptions-store.js';
 import { renderPrescription } from './prescription-template.js';
@@ -257,6 +261,38 @@ export function createClinicServer(options = {}) {
       const patientId = decodeURIComponent(patientRecordMatch[1]);
       const record = await getPatientRecord(patientId, current.user);
       return json(response, 200, { record });
+    }
+
+    if (path === '/api/patients' && method === 'POST') {
+      const created = await registerPatient(await readJson(request), current.user);
+      return json(response, 201, { patient: created });
+    }
+    const historyMatch = path.match(/^\/api\/patients\/([^/]+)\/history$/);
+    if (historyMatch && method === 'GET') {
+      return json(response, 200, { history: await getHistory(decodeURIComponent(historyMatch[1])) });
+    }
+    if (historyMatch && method === 'PUT') {
+      const history = await saveHistory(decodeURIComponent(historyMatch[1]), await readJson(request), current.user);
+      return json(response, 200, { history });
+    }
+    if (path === '/api/visits/triage' && method === 'POST') {
+      const visit = await triageVisit(await readJson(request), current.user);
+      return json(response, 201, { visit });
+    }
+    if (path === '/api/visits/queue' && method === 'GET') {
+      return json(response, 200, { visits: await queueVisits(current.user) });
+    }
+    if (path === '/api/visits/screened' && method === 'GET') {
+      return json(response, 200, { visits: await screenedVisits(current.user) });
+    }
+    const visitActionMatch = path.match(/^\/api\/visits\/(\d+)\/(complete|screen)$/);
+    if (visitActionMatch && method === 'POST') {
+      const visitId = idFrom(visitActionMatch[1]);
+      const actionBody = await readJson(request);
+      const visit = visitActionMatch[2] === 'complete'
+        ? await completeVisit(visitId, actionBody, current.user)
+        : await screenVisit(visitId, actionBody, current.user);
+      return json(response, 200, { visit });
     }
 
     if (path === '/api/visits') {
