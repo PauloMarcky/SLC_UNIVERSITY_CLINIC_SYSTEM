@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Add Student Record - ULS Clinic System</title>
+    <script src="../js/login-theme.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/student-record.css">
+    <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
+    <script src="../js/add-student.js" defer></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System <span>Prototype v5 (HTML/CSS)</span></h1>
+        <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Nurse</h4><a href="../nurse/dashboard.html">Dashboard</a><a href="../nurse/medical-records.html"
+                    class="on">Medical Records</a><a href="../nurse/inventory.html">Inventory</a><a
+                    href="../doctor/statistics.html">Statistics</a>
+            </nav>
+        </aside>
+        <main>
+            <div class="back-row">
+                <a class="back" href="../nurse/medical-records.html">&lsaquo; Back to Medical Records</a>
+                <span class="pill yellow">Sample data, nothing here is saved</span>
+            </div>
+            <div class="page-head">
+                <div>
+                    <h2>Add Student Record</h2>
+                    <p class="sub">Same order as the paper Physical / Medical Examination Form. Only ID and name are required.</p>
+                </div>
+            </div>
+            <p class="note save-result" id="form-message" role="alert" tabindex="-1" hidden></p>
+
+            <form class="box visit-form" id="student-form" novalidate>
+                <!-- Identification -->
+                <section class="form-section" aria-labelledby="s-ident">
+                    <h3 id="s-ident">Identification</h3>
+                    <div class="form cols-3">
+                        <div class="f"><label for="sid">Identification no.<span class="req" aria-hidden="true">*</span></label><input id="sid" maxlength="50" placeholder="e.g. 2026-00123" aria-describedby="e-sid"><p class="field-error" id="e-sid" hidden></p></div>
+                        <div class="f"><label for="last">Last name<span class="req" aria-hidden="true">*</span></label><input id="last" maxlength="100" placeholder="Dela Cruz" aria-describedby="e-last"><p class="field-error" id="e-last" hidden></p></div>
+                        <div class="f"><label for="first">First name<span class="req" aria-hidden="true">*</span></label><input id="first" maxlength="100" placeholder="Juan" aria-describedby="e-first"><p class="field-error" id="e-first" hidden></p></div>
+
+                        <div class="f"><label for="middle">Middle name</label><input id="middle" maxlength="100" placeholder="Santos"></div>
+                        <div class="f"><label for="dept">Department</label>
+                            <select id="dept">
+                                <option value="">Select department</option>
+                                <option>College of Information Technology</option>
+                                <option>College of Nursing</option>
+                                <option>College of Education</option>
+                                <option>College of Business</option>
+                                <option>College of Engineering</option>
+                                <option>College of Law</option>
+                            </select></div>
+                        <div class="f"><label for="contact">Contact number</label><input id="contact" maxlength="30" inputmode="tel" placeholder="09XX XXX XXXX"></div>
+
+                        <div class="f"><span class="label-text" id="gender-label">Gender</span>
+                            <div class="choice" role="radiogroup" aria-labelledby="gender-label">
+                                <label><input type="radio" name="gender" value="Male"> Male</label>
+                                <label><input type="radio" name="gender" value="Female"> Female</label>
+                            </div></div>
+                        <div class="f"><label for="dob">Date of birth</label><input id="dob" type="date" aria-describedby="e-dob"><p class="field-error" id="e-dob" hidden></p></div>
+                        <div class="f"><label for="age">Age (from date of birth)</label><input id="age" class="auto" readonly value="" placeholder="Filled in automatically"></div>
+
+                        <div class="f"><span class="label-text" id="status-label">Status</span>
+                            <div class="choice" role="radiogroup" aria-labelledby="status-label">
+                                <label><input type="radio" name="status" value="Single"> Single</label>
+                                <label><input type="radio" name="status" value="Married"> Married</label>
+                                <label><input type="radio" name="status" value="Other"> Other</label>
+                            </div></div>
+                        <div class="f"><label for="nation">Nationality</label><input id="nation" maxlength="60" placeholder="Filipino"></div>
+                        <div></div>
+
+                        <div class="f full"><label for="address">Address</label><input id="address" maxlength="300" placeholder="Street, Barangay, City, Province"></div>
+
+                        <div class="f"><label for="guardian">Name of guardian</label><input id="guardian" maxlength="200" placeholder="Full name"></div>
+                        <div class="f"><label for="emergency">Contact no. in case of emergency</label><input id="emergency" maxlength="30" inputmode="tel" placeholder="09XX XXX XXXX"></div>
+                    </div>
+                </section>
+
+                <!-- Past medical history -->
+                <section class="form-section" aria-labelledby="s-hx">
+                    <h3 id="s-hx">Past Medical History</h3>
+                    <p class="sub-note">Tick what applies. Extra boxes open only when ticked.</p>
+
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="asthma"> Asthma</label>
+                        <div class="hx-extra" id="asthma-extra" hidden>
+                            <div><label for="asthma-date">Date of last attack</label><input id="asthma-date" type="date" aria-describedby="e-asthma-date"><p class="field-error" id="e-asthma-date" hidden></p></div>
+                            <div><label for="asthma-med">Medicine taken</label><input id="asthma-med" maxlength="200"></div>
+                        </div>
+                    </div>
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="allergy"> Allergy</label>
+                        <div class="hx-extra" id="allergy-extra" hidden>
+                            <div><label for="allergy-food">Food, specify</label><input id="allergy-food" maxlength="200"></div>
+                            <div><label for="allergy-med">Medicine taken</label><input id="allergy-med" maxlength="200"></div>
+                        </div>
+                    </div>
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="febrile"> <span>Febrile convulsion <small>(Mataas na lagnat)</small></span></label>
+                        <div></div>
+                    </div>
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="fainting"> <span>Fainting spell / Dizzy spell <small>(Hinihimatay)</small></span></label>
+                        <div></div>
+                    </div>
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="epilepsy"> Epilepsy</label>
+                        <div></div>
+                    </div>
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="vaccines"> <span>Vaccines <small>(Bakuna)</small></span></label>
+                        <div class="hx-extra" id="vaccines-extra" hidden>
+                            <div class="hx-inline"><input type="checkbox" id="hepb"><label for="hepb" style="margin:0">Hepatitis-B</label></div>
+                            <div><label for="vaccine-other">Other vaccines</label><input id="vaccine-other" maxlength="200"></div>
+                        </div>
+                    </div>
+                    <div class="hx-row">
+                        <label class="hx-check"><input type="checkbox" id="other-cond"> Other condition</label>
+                        <div class="hx-extra" id="other-cond-extra" hidden>
+                            <div class="full"><label for="other-text">Specify</label><input id="other-text" maxlength="300" placeholder="Describe"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Vital signs -->
+                <section class="form-section" aria-labelledby="s-vit">
+                    <h3 id="s-vit">Vital Signs <small>&middot; filled up by the school nurse (optional now, can be added later)</small></h3>
+                    <div class="form form-vitals cols-4">
+                        <div class="f"><label for="v-date">Date</label><input id="v-date" type="date" aria-describedby="e-v-date"><p class="field-error" id="e-v-date" hidden></p></div>
+                        <div class="f"><label for="v-height">Height (cm)</label><input id="v-height" type="number" min="30" max="300" step="0.1" placeholder="170" aria-describedby="e-v-height"><p class="field-error" id="e-v-height" hidden></p></div>
+                        <div class="f"><label for="v-weight">Weight (kg)</label><input id="v-weight" type="number" min="1" max="500" step="0.1" placeholder="65" aria-describedby="e-v-weight"><p class="field-error" id="e-v-weight" hidden></p></div>
+                        <div class="f"><label for="v-sys">Blood pressure</label>
+                            <div class="bp-pair"><input id="v-sys" type="number" min="60" max="260" placeholder="120" aria-label="Systolic" aria-describedby="e-v-sys"><span aria-hidden="true">/</span><input id="v-dia" type="number" min="30" max="160" placeholder="80" aria-label="Diastolic" aria-describedby="e-v-sys"></div>
+                            <p class="field-error" id="e-v-sys" hidden></p></div>
+                    </div>
+                    <p class="field-hint" style="padding:0 24px 20px;margin:0">Each save adds a new dated row to the record. Older rows stay.</p>
+                </section>
+
+                <!-- Findings / notes -->
+                <section class="form-section" aria-labelledby="s-find">
+                    <h3 id="s-find">Physician's Findings / Nurse's Notes</h3>
+                    <div class="findings-grid">
+                        <div class="f"><label for="f-date">Date</label><input id="f-date" type="date" aria-describedby="e-f-date"><p class="field-error" id="e-f-date" hidden></p></div>
+                        <div class="f"><label for="f-notes">Findings / notes</label><textarea id="f-notes" rows="4" maxlength="5000" placeholder="Write the finding or note" aria-describedby="e-f-notes"></textarea><p class="field-error" id="e-f-notes" hidden></p></div>
+                        <div class="f"><label for="f-by">Examined by</label><input id="f-by" maxlength="200" value="Nurse"></div>
+                    </div>
+                </section>
+
+                <div class="form-actions">
+                    <button class="btn" type="submit" id="save-student">Save record</button>
+                    <a class="btn sec" href="../nurse/medical-records.html">Cancel</a>
+                    <span class="form-actions-note"><span class="req" aria-hidden="true">*</span> Required.</span>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+
+</html>

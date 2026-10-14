@@ -4,13 +4,16 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-
-    <title>Patient Record: Maria Dizon - ULS Clinic System</title>
+    <title>Student Record - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/student-record.css">
     <link rel="stylesheet" href="../css/prescription.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
+    <script src="../js/rx-api.js" defer></script>
+    <script src="../js/record-prescriptions.js" defer></script>
+    <script src="../js/record-detail.js" defer></script>
 </head>
 
 <body>
@@ -21,82 +24,82 @@
     <div class="layout">
         <aside>
             <nav aria-label="Menu">
-                <h4>Nurse</h4><a href="../nurse/dashboard.html">Dashboard</a><a
-                    href="../nurse/medical-records.html">Medical
-                    Records</a><a href="../nurse/inventory.html">Inventory</a><a
+                <h4>Nurse</h4><a href="../nurse/dashboard.html">Dashboard</a><a href="../nurse/medical-records.html"
+                    class="on">Medical Records</a><a href="../nurse/inventory.html">Inventory</a><a
                     href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
-            <h2 id="patient-name">Patient Record</h2>
-            <p class="sub" id="patient-info">Loading patient information...</p>
-            <p class="note" id="record-status">Static prototype: sample data only. Search, auto-calculation, saving and
-                alerts need a
-                backend.</p>
-            <section class="cards" id="patient-summary">
-                <article class="card"><small>Age / Sex (auto)</small><b>20 / F</b></article>
-                <article class="card ok"><small>BMI (auto)</small><b>21.5</b></article>
-                <article class="card ok"><small>BP status (auto)</small><b>Normal</b></article>
-                <article class="card"><small>Record opened</small><b>2026-10-07</b></article>
-            </section>
-            <div class="two" id="record-content">
-                <section class="box">
-                    <h3>Requirements</h3>
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td>Physical Exam</td>
-                                <td><span class="pill green">&#10003;</span></td>
-                            </tr>
-                            <tr>
-                                <td>Dental Examination</td>
-                                <td><span class="pill green">&#10003;</span></td>
-                            </tr>
-                            <tr>
-                                <td>Vaccination (Hep B, Tetanus, Influenza, COVID-19, MMR)</td>
-                                <td><span class="pill green">5/5</span></td>
-                            </tr>
-                            <tr>
-                                <td>Laboratory Results</td>
-                                <td><span class="pill green">&#10003;</span></td>
-                            </tr>
-                            <tr>
-                                <td>Medical Certificate</td>
-                                <td><span class="pill green">&#10003;</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-                <section class="box">
-                    <h3>Visit History</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Diagnosis</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>2026-10-07</td>
-                                <td>Consult</td>
-                                <td>Upper Respiratory Infection</td>
-                            </tr>
-                            <tr>
-                                <td>2026-08-02</td>
-                                <td>Checkup</td>
-                                <td>Normal / Well</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
+            <div class="back-row">
+                <a class="back" href="../nurse/medical-records.html">&lsaquo; Back to Medical Records</a>
+                <span>
+                    <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span>
+                    <span class="pill yellow" id="sample-tag">Sample data, nothing here is saved</span>
+                </span>
             </div>
-            <section class="box" id="rx-history"></section>
-            <a class="btn sec" href="../nurse/medical-records.html">Back to records</a>
-            <script src="../js/record-detail.js" defer></script>
-            <script src="../js/rx-api.js" defer></script>
-            <script src="../js/record-prescriptions.js" defer></script>
+            <p class="note save-result" id="record-message" role="status" aria-live="polite" hidden></p>
+
+            <div id="record-view" hidden>
+                <section class="box record-head">
+                    <div class="record-head-text">
+                        <small class="eyebrow">Student record</small>
+                        <h2 id="r-name"></h2>
+                        <p class="sub" id="r-line"></p>
+                    </div>
+                    <div class="record-head-actions" id="r-actions">
+                        <button type="button" class="btn sec" id="edit-record">Edit record</button>
+                        <button type="button" class="btn" id="add-entry">+ Add entry</button>
+                    </div>
+                </section>
+
+                <section class="box">
+                    <h3>Identification</h3>
+                    <div class="id-grid" id="r-ident"></div>
+                </section>
+
+                <section class="box">
+                    <h3>Past Medical History</h3>
+                    <table class="hx-table">
+                        <tbody id="r-history"></tbody>
+                    </table>
+                </section>
+
+                <section class="box">
+                    <h3 class="head-note">Vital Signs <span>Filled up by the school nurse &middot; newest first</span></h3>
+                    <div class="table-scroll">
+                        <table class="entry-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Height</th>
+                                    <th>Weight</th>
+                                    <th>Blood pressure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="r-vitals"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="box">
+                    <h3 class="head-note">Physician's Findings / Nurse's Notes <span>Newest first</span></h3>
+                    <div class="table-scroll">
+                        <table class="entry-table findings-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Findings / Notes</th>
+                                    <th>Examined by</th>
+                                </tr>
+                            </thead>
+                            <tbody id="r-findings"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="box" id="rx-history"></section>
+            </div>
         </main>
     </div>
 </body>
