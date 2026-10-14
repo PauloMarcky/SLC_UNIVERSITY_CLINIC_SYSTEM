@@ -12,7 +12,7 @@ const root = path.resolve(__dirname, '..');
 const pages = ['index.html', 'doctor/dashboard.html', 'doctor/visits.html',
     'doctor/consultation-form.html', 'doctor/statistics.html', 'nurse/dashboard.html',
     'nurse/medical-records.html', 'nurse/record-detail.html', 'nurse/inventory.html',
-    'student/dashboard.html', 'employee/dashboard.html', 'shared/certificates.html',
+    'shared/certificates.html',
     'archive/clinic-dashboard.html', 'archive/records.html', 'archive/reports.html'];
 const patient = { id: 'UI-TEST-001', name: 'UI Test Patient', college: 'IT', course: 'BSIT', year: '3', category: 'student' };
 const certificate = { id: 1, patientId: patient.id, patientName: patient.name, patient,
@@ -76,7 +76,7 @@ const server = http.createServer(async (req, res) => {
             for (const width of [1440, 820, 390, 320]) {
                 await page.setViewportSize({ width, height: 900 });
                 for (const file of pages) {
-                    role = file.startsWith('nurse/') ? 'nurse' : file.startsWith('student/') ? 'student' : file.startsWith('employee/') ? 'employee' : 'doctor';
+                    role = file.startsWith('nurse/') ? 'nurse' : 'doctor';
                     await page.goto(base + '/' + file);
                     await page.evaluate(theme => window.ClinicTheme.set(theme), theme);
                     await page.waitForTimeout(240);
@@ -111,13 +111,13 @@ const server = http.createServer(async (req, res) => {
                     }
                     layouts++;
                 }
-                console.log(`PASS ${theme} ${width}px: all 15 pages`);
+                console.log(`PASS ${theme} ${width}px: all 13 pages`);
             }
         }
         // Theme survives navigation and reload; old saved choices are still supported.
         await page.goto(base + '/index.html');
         await page.locator('[data-theme-choice="dark"]').click();
-        await page.goto(base + '/student/dashboard.html');
+        await page.goto(base + '/doctor/dashboard.html');
         assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
         await page.reload();
         assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
@@ -199,7 +199,7 @@ const server = http.createServer(async (req, res) => {
         await page.locator('#login-message:not([hidden])').waitFor();
         assert.match(await page.locator('#login-message').textContent(), /Invalid test credentials/);
         failLogin = false;
-        for (const nextRole of ['doctor', 'nurse', 'student', 'employee']) {
+        for (const nextRole of ['doctor', 'nurse']) {
             role = nextRole;
             await page.goto(base + '/index.html');
             await page.locator(`[data-role="${role}"]`).click();

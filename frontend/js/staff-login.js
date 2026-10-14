@@ -24,14 +24,6 @@
             name: 'Nurse',
             subtitle: 'Nurse portal — prepare and manage medical certificates.',
         },
-        student: {
-            name: 'Student',
-            subtitle: 'Student portal — view your clinic status and medical records.',
-        },
-        employee: {
-            name: 'Employee',
-            subtitle: 'Employee portal — view your clinic status and medical records.',
-        },
     };
 
     const VALID_ROLES = Object.keys(PORTALS);
@@ -84,8 +76,6 @@
             const destination = {
                 nurse: '/nurse/dashboard.html',
                 doctor: '/doctor/dashboard.html',
-                student: '/student/dashboard.html',
-                employee: '/employee/dashboard.html',
             }[data.user.role] || '/index.html';
             window.location.assign(destination);
         } catch (error) {
