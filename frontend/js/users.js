@@ -8,7 +8,7 @@
     const form = $('user-form');
     const userModal = $('user-modal');
     const deactivateModal = $('deactivate-modal');
-    const roleNames = { doctor: 'Doctor', nurse: 'Nurse', student: 'Student', employee: 'Employee (staff)' };
+    const roleNames = { doctor: 'Doctor', nurse: 'Nurse' };
     let currentUser = null;
     let users = [];
     let editingUser = null;
@@ -39,17 +39,6 @@
         if (focusTarget) focusTarget.focus();
     }
 
-    function patientRole(role) {
-        return role === 'student' || role === 'employee';
-    }
-
-    function updatePatientField() {
-        const required = patientRole($('user-role').value);
-        $('patient-field').hidden = !required;
-        $('user-patient-id').required = required;
-        if (!required) $('user-patient-id').value = '';
-    }
-
     function setFormMode(user) {
         editingUser = user || null;
         form.reset();
@@ -70,8 +59,6 @@
         $('user-active').checked = editing ? user.active : true;
         $('user-active').disabled = ownAccount;
         $('self-edit-note').hidden = !ownAccount;
-        $('user-patient-id').value = editing ? (user.patientId || '') : '';
-        updatePatientField();
         openModal(userModal, $('user-name'));
     }
 
@@ -155,7 +142,6 @@
     }
 
     $('create-user').addEventListener('click', () => setFormMode(null));
-    $('user-role').addEventListener('change', updatePatientField);
     document.querySelectorAll('[data-close-user]').forEach(button => button.addEventListener('click', () => closeModal(userModal)));
     document.querySelectorAll('[data-close-deactivate]').forEach(button => button.addEventListener('click', () => {
         pendingDeactivate = null;
@@ -170,8 +156,7 @@
         const body = {
             name: $('user-name').value.trim(),
             role: $('user-role').value,
-            active: $('user-active').checked,
-            patientId: $('user-patient-id').value.trim()
+            active: $('user-active').checked
         };
         const editing = Boolean(editingUser);
         if (editing) body.id = editingUser.id;

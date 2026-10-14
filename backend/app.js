@@ -110,7 +110,7 @@ export function createClinicServer(options = {}) {
   async function requireSession(request) {
     const current = await session(request);
     if (!current) throw new HttpError(401, 'Authentication required.');
-    if (!['nurse', 'doctor', 'student', 'employee'].includes(current.user.role)) {
+    if (!['nurse', 'doctor'].includes(current.user.role)) {
       throw new HttpError(403, 'Clinic staff access required.');
     }
     return current;
@@ -409,7 +409,7 @@ export function createClinicServer(options = {}) {
     if (!filePath.startsWith(publicRoot + sep)) throw new HttpError(404, 'File not found.');
     const extension = extname(filePath).toLowerCase();
     if (!CONTENT_TYPES[extension]) throw new HttpError(404, 'File not found.');
-    const restricted = { '/student/dashboard.html': 'student', '/employee/dashboard.html': 'employee',
+    const restricted = {
       '/doctor/dashboard.html': 'doctor',
       '/doctor/users.html': 'doctor',
       '/nurse/dashboard.html': 'nurse',

@@ -4,7 +4,7 @@ import { closePool } from './db.js';
 const [username, role, ...nameParts] = process.argv.slice(2);
 const name = nameParts.join(' ');
 if (!username || !role || !name) {
-  console.error('Usage: node create-user.js <username> <nurse|doctor|student|employee> <Full Name>'); console.error('For student/employee: set CLINIC_USER_PATIENT_ID to the patient record ID.');
+  console.error('Usage: node create-user.js <username> <nurse|doctor> <Full Name>');
   process.exit(1);
 }
 

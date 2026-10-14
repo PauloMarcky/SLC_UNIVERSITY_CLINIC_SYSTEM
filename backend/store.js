@@ -78,11 +78,8 @@ function rowToCertificate(row) {
 }
 
 async function createUser({ username, password, name, role, patientId = null }, connection = pool) {
-  if (!['nurse', 'doctor', 'student', 'employee'].includes(role)) {
-    throw new Error('Role must be nurse, doctor, student, or employee.');
-  }
-  if ((role === 'student' || role === 'employee') && !patientId) {
-    throw new Error('Student and employee accounts must be linked to a patient record.');
+  if (!['nurse', 'doctor'].includes(role)) {
+    throw new Error('Role must be nurse or doctor.');
   }
   if (typeof username !== 'string' || !/^[a-zA-Z0-9._@-]{3,100}$/.test(username)) {
     throw new Error('Username must be 3–100 letters, numbers, or . _ @ - characters.');
@@ -100,7 +97,7 @@ async function createUser({ username, password, name, role, patientId = null }, 
   return { id: result.insertId, username, name: name.trim(), role, patientId: patientId || null };
 }
 
-const USER_ROLES = ['nurse', 'doctor', 'student', 'employee'];
+const USER_ROLES = ['nurse', 'doctor'];
 
 function managedUserRole(value) {
   if (typeof value !== 'string' || !USER_ROLES.includes(value)) {

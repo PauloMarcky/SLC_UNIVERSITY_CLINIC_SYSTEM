@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
   id             INT PRIMARY KEY AUTO_INCREMENT,
   username       VARCHAR(100) NOT NULL UNIQUE,
   name           VARCHAR(200) NOT NULL,
-  role           ENUM('nurse','doctor','student','employee') NOT NULL,
+  role           ENUM('nurse','doctor') NOT NULL,
   patient_id     VARCHAR(50)  NULL,
   password_hash  VARCHAR(255) NOT NULL,
   active         TINYINT(1)   NOT NULL DEFAULT 1,
