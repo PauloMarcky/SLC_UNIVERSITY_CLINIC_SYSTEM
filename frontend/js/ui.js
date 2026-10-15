@@ -24,8 +24,12 @@
         var pageHeading = main.querySelector(':scope > h2, :scope > header > h2, :scope > .page-head h2, :scope > .certificate-heading h2');
         var headerTitle = topbar.querySelector('h1');
         if (pageHeading && headerTitle) {
-            headerTitle.textContent = pageHeading.textContent.trim();
+            var titleCopy = pageHeading.cloneNode(true);
+            titleCopy.querySelectorAll('.pill,.badge,[hidden]').forEach(function (item) { item.remove(); });
+            headerTitle.textContent = titleCopy.textContent.trim();
             if (pageHeading.id) headerTitle.id = pageHeading.id;
+            var statusLabels = Array.from(pageHeading.querySelectorAll(':scope > .pill,:scope > .badge'));
+            statusLabels.forEach(function (item) { pageHeading.parentElement.insertBefore(item, pageHeading.nextSibling); });
             pageHeading.remove();
         }
     }
@@ -50,7 +54,7 @@
         toggle.className = 'menu-toggle';
         toggle.innerHTML = icon('M4 7h16M4 12h16M4 17h16');
         toggle.setAttribute('aria-controls', sidebar.id);
-        var mobile = window.matchMedia('(max-width: 760px)');
+        var mobile = window.matchMedia('(max-width: 900px)');
         function setExpanded(expanded) {
             shell.classList.toggle('sidebar-collapsed', !expanded);
             document.body.classList.toggle('sidebar-is-collapsed', !expanded);

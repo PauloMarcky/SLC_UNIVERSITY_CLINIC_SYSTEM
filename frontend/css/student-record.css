@@ -16,7 +16,7 @@
 .hx-extra { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .hx-extra[hidden] { display:none; }
 .hx-extra .full { grid-column:1/-1; }
-.hx-extra label { display:block; margin-bottom:7px; font-size:.8125rem; font-weight:600; }
+.hx-extra label { display:block; margin-bottom:7px; font-size:.875rem; font-weight:600; }
 .hx-extra input { width:100%; }
 .hx-inline { display:flex; align-items:center; gap:10px; }
 .hx-inline input[type=checkbox] { width:20px; height:20px; margin:0; }
@@ -42,7 +42,7 @@
 /* ---- Student Record page (Part 4) ---- */
 .record-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding:22px 24px; }
 .record-head-text { min-width:0; }
-.record-head .eyebrow { display:block; font-size:.75rem; font-weight:650; letter-spacing:.5px; text-transform:uppercase; color:var(--m); }
+.record-head .eyebrow { display:block; font-size:.8125rem; font-weight:650; letter-spacing:.5px; text-transform:uppercase; color:var(--m); }
 .record-head h2 { margin:4px 0 6px; overflow-wrap:anywhere; }
 .record-head .sub { margin:0; }
 .record-head-actions { display:flex; flex-wrap:wrap; gap:12px; }
@@ -53,7 +53,7 @@
 .id-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px 24px; padding:24px; }
 .id-item { display:flex; flex-direction:column; gap:5px; min-width:0; }
 .id-item.span-2 { grid-column:span 2; }
-.id-label { font-size:.75rem; font-weight:650; letter-spacing:.3px; text-transform:uppercase; color:var(--m); }
+.id-label { font-size:.8125rem; font-weight:650; letter-spacing:.3px; text-transform:uppercase; color:var(--m); }
 .id-value { font-size:.9375rem; color:var(--t); overflow-wrap:anywhere; }
 .empty-dash { color:var(--m); }
 /* Past medical history: read-only table */

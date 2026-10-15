@@ -5,12 +5,12 @@
 .sheet-table th,
 .sheet-table td {
   white-space: nowrap;
-  padding: 10px 12px;
+  padding: 11px 14px;
   vertical-align: top;
   word-break: normal;
   overflow-wrap: normal;
 }
-.sheet-table th { font-size: 12px; }
+.sheet-table th { font-size: 13px; }
 .sheet-table td:nth-child(2) { white-space: normal; min-width: 150px; }
 .sheet-table td.log-placeholder { white-space: normal; text-align: center; }
 .cell-more { max-width: 230px; white-space: normal; }

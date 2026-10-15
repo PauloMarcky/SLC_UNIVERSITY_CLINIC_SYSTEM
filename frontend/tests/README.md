@@ -1,9 +1,10 @@
 # Frontend regression checks
 
-The redesign applies to all 15 existing HTML pages. Shared layout, controls, tables,
-forms, alerts and light/dark tokens live in `css/style.css`; the login, statistics
-and certificate styles extend that system. `js/login-theme.js` is loaded on every
-page and preserves the previous login-theme preference.
+The redesign applies to all 16 existing HTML pages. Shared shell, role navigation,
+controls, tables, forms, alerts and light/dark tokens live in `css/style.css` and
+`js/ui.js`; the login, statistics, prescription and student-record styles extend
+that system. `js/login-theme.js` is loaded on every page and preserves the previous
+login-theme preference.
 
 The login uses `css/docmema-transparent.png`, a background-removed version of the
 supplied `css/docmema.png`; the original is retained. Day/night campus artwork
@@ -12,19 +13,21 @@ complete campus panorama above the form. The original source image files are not
 edited. Small decorative flocks start every seven seconds and are disabled while
 the document is hidden or reduced motion is requested.
 
-All dashboard pages share one viewport-aligned day/night scene and the saved theme.
-The entire 16:9 image fits without cropping, with a matching color around it on
-other aspect ratios. The 260px desktop sidebar is translucent over that scene;
-the mobile drawer paints the same scene at the identical viewport size and offset
-so underlying dashboard cards cannot show through. Opening or scrolling navigation
-does not resize the scene. Navigation keeps the transparent `assets/uls-logo.png`.
+All authenticated and archive pages share a flat pale-blue canvas, white cards,
+280px desktop sidebar, 82px header, and dark blue navigation. At 900px and below,
+the sidebar opens as a drawer and the header is 72px. The original transparent
+`assets/uls-logo.png` is rendered in white across every sidebar without changing
+the source seal at `frontend/assets/uls-logo.png`. The login page retains its own
+campus artwork.
 
 ## Verified
 
-- 120 combinations: 15 pages, two themes, widths 1440, 820, 390 and 320 pixels.
+- 128 combinations: 16 pages, two themes, widths 1440, 820, 390 and 320 pixels;
+  the nurse Statistics view also has a 1672 x 941 reference-viewport check.
 - No document overflow, overlapping header controls, missing images/assets or
   uncaught browser JavaScript errors in those checks.
-- 260px desktop sidebar, mobile drawer and Escape behavior, desktop content
+- 280px shared desktop sidebar, consistent header sizing, white seal treatment,
+  tablet/mobile drawer and Escape behavior, Doctor submenu sizing, desktop content
   expansion, keyboard modal handling, persistent themes and scrollable tables.
 - Two-role (doctor, nurse) login routing/payload, password visibility and login errors.
 - Reduced-motion behavior and seven-second decorative animation scheduling.

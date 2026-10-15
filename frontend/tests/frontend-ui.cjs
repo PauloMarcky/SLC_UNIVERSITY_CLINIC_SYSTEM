@@ -37,6 +37,8 @@ async function mockApi(route) {
         }
         body = { visits: [] };
     }
+    else if (url.pathname === '/api/medicines') body = { medicines: [] };
+    else if (url.pathname === '/api/users') body = { users: [] };
     else if (url.pathname === '/api/config') body = { universityName: 'UI Test University', clinicName: 'UI Test Clinic' };
     else if (url.pathname !== '/api/logout') {
         unexpectedApiRequests.push(route.request().method() + ' ' + url.pathname);
@@ -82,6 +84,10 @@ const server = http.createServer(async (req, res) => {
                             theme: document.documentElement.dataset.theme,
                             switches: document.querySelectorAll('[data-theme-choice]').length,
                             sidebar: sidebar && Math.round(sidebar.getBoundingClientRect().width),
+                            sidebarHidden: sidebar && getComputedStyle(sidebar).visibility === 'hidden',
+                            logoFilter: sidebar && getComputedStyle(sidebar.querySelector('.clinic-sidebar-brand img')).filter,
+                            headerHeight: (() => { const topbar = document.querySelector('.topbar'); return topbar && Math.round(topbar.getBoundingClientRect().height); })(),
+                            formActionPosition: (() => { const actions = document.querySelector('.form-actions'); return actions && getComputedStyle(actions).position; })(),
                             images: Array.from(document.images).filter(i => !i.complete || i.naturalWidth === 0).map(i => i.src),
                             tables: document.querySelectorAll('table').length,
                             wrappedTables: document.querySelectorAll('.table-scroll table').length,
@@ -100,14 +106,53 @@ const server = http.createServer(async (req, res) => {
                     assert.equal(result.switches, 2, `${file}: theme controls missing`);
                     assert.equal(result.images.length, 0, `${file}: missing image ${result.images}`);
                     assert.equal(result.tables, result.wrappedTables, `${file}: table without scroll region`);
-                    if (file !== 'index.html' && width > 760) assert.equal(result.sidebar, 260, `${file}: sidebar width`);
-                    if (process.env.UI_SCREENSHOTS && ['index.html', 'doctor/queue.html', 'doctor/statistics.html'].includes(file) && [1440, 390].includes(width)) {
+                    if (file !== 'index.html') {
+                        assert.match(result.logoFilter, /invert\(1\)/, `${file}: sidebar seal is not white`);
+                        if (width > 900) {
+                            assert.equal(result.sidebar, 280, `${file}: shared desktop sidebar width`);
+                            assert.equal(result.headerHeight, 82, `${file}: shared desktop header height`);
+                        } else {
+                            assert.equal(result.sidebarHidden, true, `${file}, ${width}: navigation drawer should start closed`);
+                            assert.equal(result.headerHeight, 72, `${file}: shared tablet/mobile header height`);
+                        }
+                    }
+                    if (file === 'nurse/add-student.html') assert.equal(result.formActionPosition, 'static', 'form actions should not cover fields while scrolling');
+                    if (process.env.UI_SCREENSHOTS && theme === 'light' && [1440, 390].includes(width)) {
                         await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, `${file.replaceAll('/', '-')}-${theme}-${width}.png`), fullPage: true });
                     }
                     layouts++;
                 }
                 console.log(`PASS ${theme} ${width}px: all ${pages.length} pages`);
             }
+        }
+        role = 'doctor';
+        await page.setViewportSize({ width: 820, height: 900 });
+        await page.goto(base + '/doctor/queue.html');
+        await page.waitForFunction(() => document.querySelector('aside .nav-group summary'));
+        assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
+        assert.ok(await page.locator('aside .nav-group summary').first().evaluate(el => {
+            const height = Math.round(el.getBoundingClientRect().height);
+            return height >= 48 && height <= 68;
+        }), 'wrapped Doctor navigation labels should grow without clipping');
+        assert.equal(await page.locator('aside .nav-group .nav-children a').first().evaluate(el => parseFloat(getComputedStyle(el).fontSize)), 14);
+        role = 'nurse';
+        await page.setViewportSize({ width: 1672, height: 941 });
+        await page.goto(base + '/doctor/statistics.html');
+        await page.evaluate(() => window.ClinicTheme.set('light'));
+        await page.waitForFunction(() => document.querySelector('aside h4')?.textContent === 'Nurse');
+        await page.waitForTimeout(240);
+        assert.equal(await page.locator('aside').evaluate(el => Math.round(el.getBoundingClientRect().width)), 280);
+        assert.deepEqual(await page.locator('aside nav a').allTextContents(), ['Assess', 'Statistics', 'Log out']);
+        assert.equal(await page.locator('.topbar h1').textContent(), 'Statistics');
+        assert.match(await page.locator('.clinic-sidebar-brand img').evaluate(el => getComputedStyle(el).filter), /invert\(1\)/);
+        assert.equal(await page.locator('.alert-title').textContent(), 'Possible outbreak pattern (sample data)');
+        assert.deepEqual(await page.locator('.alert-message strong').allTextContents(), ['11 → 20', '3 → 6']);
+        await page.locator('#stat-period').selectOption('week');
+        assert.match(await page.locator('#stat-summary').textContent(), /This week/);
+        await page.locator('#stat-reset').click();
+        assert.match(await page.locator('#stat-summary').textContent(), /97 cases.*This month/);
+        if (process.env.UI_SCREENSHOTS) {
+            await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, 'nurse-statistics-reference-1672x941.png') });
         }
         // Theme survives navigation and reload; old saved choices are still supported.
         await page.goto(base + '/index.html');

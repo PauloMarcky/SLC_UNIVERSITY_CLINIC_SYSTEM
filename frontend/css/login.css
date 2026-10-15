@@ -2,7 +2,8 @@
 .login-page {
   --login-ink: #18364f;
   --login-muted: #485f74;
-  --login-blue: #24649c;
+  --login-blue: #1558b8;
+  --login-action: #1558b8;
   --login-line: rgba(72, 112, 149, .25);
   --login-control: rgba(255, 255, 255, .83);
   --login-card: rgba(248, 252, 255, .79);
@@ -50,6 +51,7 @@
   --login-ink: #f2f7fd;
   --login-muted: #c5d6e8;
   --login-blue: #a5d3ff;
+  --login-action: #326fb8;
   --login-line: rgba(174, 201, 231, .28);
   --login-control: rgba(18, 39, 63, .86);
   --login-card: rgba(12, 30, 51, .79);
@@ -116,7 +118,7 @@
 .login-page .theme-option:hover { color: var(--login-blue); background: var(--login-hover); }
 .login-page .theme-option[aria-pressed="true"] {
   color: #fff;
-  background: #24649c;
+  background: var(--login-action);
   box-shadow: 0 2px 6px rgba(20, 55, 90, .15);
 }
 
@@ -209,9 +211,9 @@
 .login-page .role-link svg { width: 19px; height: 19px; flex: none; }
 .login-page .role-link:hover { border-color: var(--login-blue); background: var(--login-hover); }
 .login-page .role-link[aria-pressed="true"] {
-  border-color: #24649c;
+  border-color: var(--login-action);
   color: #fff;
-  background: #24649c;
+  background: var(--login-action);
   box-shadow: 0 3px 9px rgba(24, 68, 109, .18);
 }
 
@@ -221,7 +223,7 @@
   display: block;
   margin: 0;
   color: var(--login-ink);
-  font-size: .8125rem;
+  font-size: .875rem;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -243,7 +245,7 @@
   margin: 0;
   padding: 0 13px 0 43px;
   border: 1px solid var(--login-line);
-  border-radius: 11px;
+  border-radius: 10px;
   outline: none;
   color: var(--login-ink);
   background: var(--login-control);
@@ -306,10 +308,10 @@
   width: 100%;
   min-height: 48px;
   margin-top: 3px;
-  border: 1px solid #24649c;
-  border-radius: 11px;
+  border: 1px solid var(--login-action);
+  border-radius: 10px;
   color: #fff;
-  background: #24649c;
+  background: var(--login-action);
   box-shadow: 0 4px 10px rgba(16, 63, 104, .18);
   font: inherit;
   font-size: .9375rem;
@@ -317,10 +319,10 @@
   cursor: pointer;
   transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
-.login-page .login .login-submit:hover:not(:disabled) { background: #1b527f; box-shadow: 0 5px 14px rgba(16, 63, 104, .25); transform: translateY(-1px); }
+.login-page .login .login-submit:hover:not(:disabled) { background: #104a9b; box-shadow: 0 5px 14px rgba(16, 63, 104, .25); transform: translateY(-1px); }
 .login-page .login .login-submit:active:not(:disabled) { transform: translateY(0); }
 .login-page .login-submit:disabled { cursor: wait; opacity: .72; }
-.login-footer { margin: 15px 0 0; color: var(--login-muted); font-size: .75rem; line-height: 1.4; text-align: center; }
+.login-footer { margin: 15px 0 0; color: var(--login-muted); font-size: .8125rem; line-height: 1.4; text-align: center; }
 
 /* Lightweight decorative SVGs never intercept pointer or keyboard interaction. */
 .login-birds { position: fixed; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; }

@@ -166,25 +166,37 @@
         });
     }
 
-    function joinNames(names) {
-        if (names.length <= 1) return names.join('');
-        return names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1];
-    }
-
     function drawAlert(result, scope) {
         var box = document.getElementById('stat-alert');
         var rising = result.conditions.filter(function (c) { return c.rising; });
         box.textContent = '';
         box.hidden = false;
+        var icon = el('span', 'alert-icon', rising.length ? '!' : '\u2713');
+        icon.setAttribute('aria-hidden', 'true');
+        var content = el('div', 'alert-content');
+        var heading = el('h3', 'alert-title', rising.length ? 'Possible outbreak pattern (sample data)' : 'No sharp increase detected');
+        var message = el('p', 'alert-message');
+        content.appendChild(heading);
         if (rising.length) {
             box.className = 'alert';
-            var parts = rising.map(function (c) { return c.name + ' (' + c.last + ' \u2192 ' + c.now + ')'; });
-            box.appendChild(document.createTextNode('Possible outbreak' + scope + ': ' + joinNames(parts) + ' rising this week compared with last week.'));
-            box.appendChild(el('span', 'alert-sub', 'Sample rule: at least ' + ALERT_MIN_THIS_WEEK + ' cases this week and at least ' + ALERT_RATIO + '\u00D7 last week. The real rule is for the doctor to set.'));
+            message.appendChild(document.createTextNode('Possible outbreak' + scope + ': '));
+            rising.forEach(function (condition, index) {
+                if (index > 0) message.appendChild(document.createTextNode(index === rising.length - 1 ? ' and ' : ', '));
+                message.appendChild(document.createTextNode(condition.name + ' ('));
+                message.appendChild(el('strong', '', condition.last + ' \u2192 ' + condition.now));
+                message.appendChild(document.createTextNode(')'));
+            });
+            message.appendChild(document.createTextNode(' rising this week compared with last week.'));
+            content.appendChild(message);
+            content.appendChild(el('span', 'alert-sub', 'Sample rule: at least ' + ALERT_MIN_THIS_WEEK + ' cases this week and at least ' + ALERT_RATIO + '\u00D7 last week. The real rule is for the doctor to set.'));
         } else {
             box.className = 'alert is-clear';
-            box.appendChild(document.createTextNode('No condition is rising sharply this week' + scope + '.'));
+            message.appendChild(document.createTextNode('No condition is rising sharply this week' + scope + '.'));
+            content.appendChild(message);
+            content.appendChild(el('span', 'alert-sub', 'Sample figures only; this check does not confirm a real outbreak.'));
         }
+        box.appendChild(icon);
+        box.appendChild(content);
     }
 
     function apply() {

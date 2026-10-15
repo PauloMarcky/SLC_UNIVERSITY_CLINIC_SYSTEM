@@ -47,7 +47,7 @@
     <div class="modal" id="user-modal" hidden>
         <div class="modal-backdrop" data-close-user></div>
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
-            <div class="modal-head"><h3 id="user-modal-title">Create User</h3><button class="modal-x" type="button" data-close-user aria-label="Close">&times;</button></div>
+            <div class="modal-head"><h3 id="user-modal-title">Create User</h3><button class="modal-x" type="button" data-close-user aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
             <form class="form" id="user-form" novalidate>
                 <div class="f"><label for="user-name">Name</label><input id="user-name" name="name" maxlength="200" autocomplete="name" required></div>
                 <div class="f" id="username-field"><label for="user-username">Username</label><input id="user-username" name="username" minlength="3" maxlength="100" pattern="[A-Za-z0-9._@-]{3,100}" autocomplete="username" required><p class="field-hint">3–100 letters, numbers, dots, underscores, @, or hyphens.</p></div>
@@ -63,7 +63,7 @@
     <div class="modal" id="deactivate-modal" hidden>
         <div class="modal-backdrop" data-close-deactivate></div>
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deactivate-title">
-            <div class="modal-head"><h3 id="deactivate-title">Deactivate account?</h3><button class="modal-x" type="button" data-close-deactivate aria-label="Close">&times;</button></div>
+            <div class="modal-head"><h3 id="deactivate-title">Deactivate account?</h3><button class="modal-x" type="button" data-close-deactivate aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
             <div class="user-confirm-body"><p id="deactivate-copy"></p><p class="field-hint">The account and its clinic records will remain in the system. The user will be signed out and unable to log in.</p></div>
             <div class="form-actions"><button class="btn" type="button" id="confirm-deactivate">Deactivate account</button><button class="btn sec" type="button" data-close-deactivate>Cancel</button></div>
         </div>
