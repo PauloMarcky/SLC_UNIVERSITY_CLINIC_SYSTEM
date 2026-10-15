@@ -30,7 +30,10 @@
                     <h2>Student Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span></h2>
                     <p class="sub">Search a student and open the record, or register a new student.</p>
                 </div>
-                <a class="btn" id="add-student" href="../nurse/add-student.html">+ Add student</a>
+                <div style="display:flex;flex-wrap:wrap;gap:12px">
+                    <a class="btn sec" id="import-students" href="../nurse/import-students.html">Import from Excel</a>
+                    <a class="btn" id="add-student" href="../nurse/add-student.html">+ Add student</a>
+                </div>
             </div>
             <div class="filters" role="search">
                 <div class="grow"><label for="mr-search">Search by name or ID</label><input id="mr-search" type="search"
