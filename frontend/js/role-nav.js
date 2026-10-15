@@ -9,6 +9,7 @@
                 ['Dashboard', '../nurse/dashboard.html'],
                 ['Medical Records', '../nurse/medical-records.html'],
                 ['Inventory', '../nurse/inventory.html'],
+                ['Triage', '../nurse/triage.html'],
                 ['Statistics', '../doctor/statistics.html'],
                 ['Certificates', '../shared/certificates.html']
             ]
@@ -20,14 +21,16 @@
                 ['New Visit', '../doctor/consultation-form.html'],
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Certificate Approval', '../shared/certificates.html'],
-                ['User Management', '../doctor/users.html']
+                ['User Management', '../doctor/users.html'],
+                ['Exam Queue', '../doctor/queue.html'],
+                ['Screened', '../doctor/screened.html']
             ],
-            order: [['link', 0], ['group', 0], ['link', 1], ['link', 2], ['link', 3], ['group', 1], ['link', 4]],
+            order: [['link', 0], ['group', 0], ['link', 5], ['link', 2], ['link', 3], ['group', 1], ['link', 4]],
             groups: [
                 {
                     title: 'Consultations & Checkups',
                     icon: '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/>',
-                    pages: ['/doctor/visits.html', '/doctor/screening.html', '/doctor/checkup.html', '/doctor/consultation.html'],
+                    pages: ['/doctor/screening.html', '/doctor/checkup.html', '/doctor/consultation.html'],
                     links: [
                         ['Screening', '../doctor/screening.html'],
                         ['Checkup', '../doctor/checkup.html'],
@@ -78,7 +81,7 @@
             const details = document.createElement('details');
             details.className = 'nav-group';
             const active = group.pages.includes(current);
-            details.open = true;
+            details.open = active;
             if (active) details.classList.add('has-active');
             const summary = document.createElement('summary');
             summary.innerHTML = '<svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + group.icon + '</svg><span>' + group.title + '</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"></path></svg>';
