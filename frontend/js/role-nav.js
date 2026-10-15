@@ -6,8 +6,7 @@
         nurse: {
             title: 'Nurse',
             links: [
-                ['Medical Records', '../nurse/medical-records.html'],
-                ['Triage', '../nurse/triage.html'],
+                ['Assess', '../nurse/assess.html'],
                 ['Statistics', '../doctor/statistics.html']
             ]
         },
@@ -42,8 +41,11 @@
             ]
         }
     };
-    // Pages that are not in the menu highlight the menu item they belong to.
-    const PARENT_PAGE = { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html' };
+    // Pages that are not in the menu highlight the menu item they belong to (per role).
+    const PARENT_PAGES = {
+        nurse: { '/nurse/record-detail.html': '/nurse/assess.html', '/nurse/add-student.html': '/nurse/assess.html' },
+        doctor: { '/nurse/record-detail.html': '/nurse/medical-records.html' }
+    };
 
     const nav = document.querySelector('aside nav');
     if (!nav || location.protocol === 'file:') return;
@@ -56,7 +58,7 @@
         nav.querySelectorAll('a:not([data-logout])').forEach(link => link.remove());
         nav.querySelectorAll('.nav-group').forEach(group => group.remove());
         if (heading) heading.textContent = menu.title;
-        const current = PARENT_PAGE[location.pathname] || location.pathname;
+        const current = (PARENT_PAGES[role] || {})[location.pathname] || location.pathname;
         const makeLink = function (item, currentPath) {
             const link = document.createElement('a');
             link.textContent = item[0];

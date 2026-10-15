@@ -22,7 +22,7 @@
         },
         nurse: {
             name: 'Nurse',
-            subtitle: 'Nurse portal — triage patients and keep medical records.',
+            subtitle: 'Nurse portal — assess patients and send them to the doctor.',
         },
     };
 
@@ -74,7 +74,7 @@
                 },
             });
             const destination = {
-                nurse: '/nurse/triage.html',
+                nurse: '/nurse/assess.html',
                 doctor: '/doctor/queue.html',
             }[data.user.role] || '/index.html';
             window.location.assign(destination);

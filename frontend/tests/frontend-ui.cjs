@@ -12,7 +12,7 @@ const root = path.resolve(__dirname, '..');
 const pages = ['index.html', 'doctor/queue.html', 'doctor/checkup.html', 'doctor/consultation.html',
     'doctor/screening.html', 'doctor/statistics.html', 'doctor/statistics-checkup.html',
     'doctor/statistics-consultation.html', 'doctor/users.html', 'nurse/medical-records.html',
-    'nurse/record-detail.html', 'nurse/add-student.html', 'nurse/triage.html',
+    'nurse/record-detail.html', 'nurse/add-student.html', 'nurse/assess.html',
     'archive/clinic-dashboard.html', 'archive/records.html', 'archive/reports.html'];
 const patient = { id: 'UI-TEST-001', name: 'UI Test Patient', college: 'IT', course: 'BSIT', year: '3', category: 'student' };
 const contentTypes = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.svg': 'image/svg+xml' };
@@ -144,7 +144,7 @@ const server = http.createServer(async (req, res) => {
             await page.goto(base + '/index.html');
             await page.locator(`[data-role="${role}"]`).click();
             await page.locator('#u').fill('ui-test'); await page.locator('#p').fill('ui-test-password');
-            await Promise.all([page.waitForURL(`**/${role === 'doctor' ? 'doctor/queue' : 'nurse/triage'}.html`), page.locator('.login-submit').click()]);
+            await Promise.all([page.waitForURL(`**/${role === 'doctor' ? 'doctor/queue' : 'nurse/assess'}.html`), page.locator('.login-submit').click()]);
             assert.deepEqual(loginPayload, { username: 'ui-test', password: 'ui-test-password', portal: role });
         }
         // Reduced-motion users see no flock; normal mode spawns after roughly seven seconds.
