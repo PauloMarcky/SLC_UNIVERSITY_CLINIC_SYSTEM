@@ -1,0 +1,12 @@
+/* Doctor exam queue: the Examine pop-up. */
+.exam-modal .modal-card { width: min(880px, 100%); }
+.exam-modal .visit-form { overflow: visible; }
+.exam-modal .exam-summary { margin: 0; padding: 18px 24px 0; font-size: .875rem; color: var(--m); }
+.exam-modal .note { margin: 16px 24px 0; }
+.exam-modal .form-section > .form { padding-top: 18px; }
+@media (max-width: 640px) {
+  .exam-modal .exam-summary { padding-inline: 20px; }
+  .exam-modal .note { margin-inline: 20px; }
+}
+.exam-modal #rx-builder { padding: 12px 24px 24px; }
+@media (max-width: 640px) { .exam-modal #rx-builder { padding-inline: 20px; } }

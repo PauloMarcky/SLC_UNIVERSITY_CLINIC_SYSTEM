@@ -31,7 +31,8 @@ export async function resetDatabase() {
   const connection = await pool.getConnection();
   try {
     await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    for (const table of ['notifications', 'certificate_history', 'certificates', 'sessions', 'users', 'patients']) {
+    for (const table of ['notifications', 'certificate_history', 'certificates', 'sessions', 'users', 'patients',
+                         'visits', 'patient_medical_history']) {
       await connection.query(`TRUNCATE TABLE ${table}`);
     }
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');

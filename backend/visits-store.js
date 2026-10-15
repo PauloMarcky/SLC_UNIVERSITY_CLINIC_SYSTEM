@@ -3,10 +3,6 @@ import { HttpError, patient } from './store.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions-store.js';
 
 const VISIT_TYPES = ['Consultation', 'Checkup'];
-const DIAGNOSES = [
-  'URI / Flu', 'Wound', 'Neurological',
-  'Mental health (anxiety, depression, panic)', 'Metabolic', 'Normal / Well'
-];
 
 function text(value, field, max, required = false) {
   if (value === undefined || value === null) value = '';
@@ -152,8 +148,7 @@ async function createVisit(body, actor) {
   }
   const visitType = text(body.visitType, 'Visit type', 20, true);
   if (!VISIT_TYPES.includes(visitType)) throw new HttpError(400, 'Select a valid visit type.');
-  const diagnosis = text(body.diagnosis, 'Diagnosis category', 100, true);
-  if (!DIAGNOSES.includes(diagnosis)) throw new HttpError(400, 'Select a valid diagnosis category.');
+  const diagnosis = text(body.diagnosis, 'Clinical diagnosis', 500, true);
   const { systolic, diastolic } = parseBp(body.bp);
   const weight = number(body.weight, 'Weight', 1, 500);
   const height = number(body.height, 'Height', 30, 300);
@@ -162,8 +157,7 @@ async function createVisit(body, actor) {
   const complaint = text(body.complaint, 'Complaint', 500, true);
   const notes = text(body.notes, 'Notes', 5000);
   const rxItems = parseItems(body.prescription);   // validated before anything is saved
-  const confidential = body.confidential === true || body.confidential === 'true' ||
-    diagnosis.startsWith('Mental health') ? 1 : 0;
+  const confidential = body.confidential === true || body.confidential === 'true' ? 1 : 0;
 
   // Patient details are only used when a new patient is being added.
   const newPatient = {
@@ -216,5 +210,5 @@ async function createVisit(body, actor) {
 export {
   listVisits, createVisit,
   text, number, validDate, parseBp, bmiOf, bpStatusOf,
-  rowToVisit, SELECT_VISIT, VISIT_TYPES, DIAGNOSES
+  rowToVisit, SELECT_VISIT, VISIT_TYPES
 };
