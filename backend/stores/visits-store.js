@@ -1,4 +1,4 @@
-import { pool, withTransaction } from './db.js';
+import { pool, withTransaction } from '../config/db.js';
 import { HttpError, patient } from './store.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions-store.js';
 
@@ -104,12 +104,13 @@ function rowToVisit(row, role) {
     yearLevel: row.year || '',
     visitNumber: Number(row.visit_number) || 1,
     bodyTemperature: row.body_temperature == null ? null : Number(row.body_temperature),
+    screenedCopyOf: row.screened_copy_of == null ? null : Number(row.screened_copy_of),
     createdAt: row.created_at
   };
 }
 
 const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college, p.course, p.year, p.gender, p.date_of_birth,
-                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.id <= v.id) AS visit_number
+                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.id <= v.id) AS visit_number
                       FROM visits v JOIN patients p ON p.id = v.patient_id`;
 
 async function listVisits({ search = '', type = '', college = '' }, actor) {

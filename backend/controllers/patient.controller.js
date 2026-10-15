@@ -1,5 +1,5 @@
-import { pool } from '../db.js';
-import { HttpError } from '../store.js';
+import { pool } from '../config/db.js';
+import { HttpError } from '../stores/store.js';
 
 export async function getPatients(req, res, next) {
   try {

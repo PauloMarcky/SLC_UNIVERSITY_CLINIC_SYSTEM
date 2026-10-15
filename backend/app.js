@@ -3,7 +3,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
 import { resolve, extname, sep, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pool, withTransaction } from './db.js';
+import { pool, withTransaction } from './config/db.js';
 import {
   HttpError,
   STATUSES,
@@ -20,16 +20,16 @@ import {
   transition,
   certificate as mapCertificate,
   getPatientRecord
-} from './store.js';
-import { renderCertificate } from './certificate-template.js';
-import { listVisits, createVisit } from './visits-store.js';
+} from './stores/store.js';
+import { renderCertificate } from './templates/certificate-template.js';
+import { listVisits, createVisit } from './stores/visits-store.js';
 import {
   registerPatient, getPatient, updatePatient, getHistory, saveHistory,
   triageVisit, queueVisits, completeVisit, screenVisit, screenedVisits
-} from './flow-store.js';
-import { listMedicines, listBatches, receiveStock, adjustStock, listMovements, reorderList } from './inventory-store.js';
-import { getPrescription, listPrescriptions, listForPatient, dispensePrescription, cancelPrescription } from './prescriptions-store.js';
-import { renderPrescription } from './prescription-template.js';
+} from './stores/flow-store.js';
+import { listMedicines, listBatches, receiveStock, adjustStock, listMovements, reorderList } from './stores/inventory-store.js';
+import { getPrescription, listPrescriptions, listForPatient, dispensePrescription, cancelPrescription } from './stores/prescriptions-store.js';
+import { renderPrescription } from './templates/prescription-template.js';
 
 const PROJECT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const FRONTEND_ROOT = resolve(PROJECT_ROOT, 'frontend');
@@ -247,16 +247,37 @@ export function createClinicServer(options = {}) {
 
     if (path === '/api/patients' && method === 'GET') {
       const search = (url.searchParams.get('search') || '').trim().slice(0, 200);
+      const college = (url.searchParams.get('college') || '').trim().slice(0, 100);
+      const paged = url.searchParams.has('limit');
+      const limit = paged ? Math.min(Math.max(parseInt(url.searchParams.get('limit'), 10) || 10, 1), 100) : 500;
+      const offset = paged ? Math.max(parseInt(url.searchParams.get('offset'), 10) || 0, 0) : 0;
       const [patients] = await pool.execute(
         `SELECT p.id, p.name, p.college, p.course, p.year, p.category,
                 DATE_FORMAT(p.date_of_birth, '%Y-%m-%d') AS dateOfBirth,
                 (SELECT MAX(v.visit_date) FROM visits v
                   WHERE v.patient_id = p.id AND (? = 'doctor' OR v.confidential = 0)) AS lastVisit
            FROM patients p
-          WHERE INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0
-          ORDER BY p.name LIMIT 500`,
-        [current.user.role, search, search]
+          WHERE (INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0)
+            AND (? = '' OR p.college = ?)
+          ORDER BY p.name, p.id LIMIT ${limit} OFFSET ${offset}`,
+        [current.user.role, search, search, college, college]
       );
+      if (paged) {
+        const [groups] = await pool.execute(
+          `SELECT college, COUNT(*) AS n FROM patients p
+            WHERE INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0
+            GROUP BY college ORDER BY college`,
+          [search, search]
+        );
+        const all = groups.reduce((sum, g) => sum + Number(g.n), 0);
+        const chosen = groups.find(g => String(g.college || '').toLowerCase() === college.toLowerCase());
+        return json(response, 200, {
+          patients,
+          total: college ? (chosen ? Number(chosen.n) : 0) : all,
+          all,
+          colleges: groups.filter(g => g.college).map(g => ({ name: g.college, count: Number(g.n) }))
+        });
+      }
       return json(response, 200, { patients });
     }
 

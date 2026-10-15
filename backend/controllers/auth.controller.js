@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
-import { pool } from '../db.js';
-import { HttpError, verifyPassword, passwordHash } from '../store.js';
+import { pool } from '../config/db.js';
+import { HttpError, verifyPassword, passwordHash } from '../stores/store.js';
 
 const dummyHash = passwordHash('dummy-password-hash');
 const SESSION_AGE = 8 * 60 * 60 * 1000;

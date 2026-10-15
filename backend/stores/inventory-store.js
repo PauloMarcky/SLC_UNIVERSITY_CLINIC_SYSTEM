@@ -1,4 +1,4 @@
-import { pool, withTransaction } from './db.js';
+import { pool, withTransaction } from '../config/db.js';
 import { HttpError } from './store.js';
 
 export const NEAR_EXPIRY_DAYS = 60;

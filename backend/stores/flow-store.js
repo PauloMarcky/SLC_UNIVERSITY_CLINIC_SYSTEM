@@ -1,4 +1,4 @@
-import { pool, withTransaction } from './db.js';
+import { pool, withTransaction } from '../config/db.js';
 import { HttpError } from './store.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions-store.js';
 import {
@@ -264,11 +264,12 @@ async function completeVisit(id, body, actor) {
         diagnosis, confidential,
         actor.id, actor.name, now,
         soapObjective, actionsTaken,
-        flag(body.sentToHospital), screen ? 1 : 0, screen ? actor.id : null,
-        screen ? now : null, screen ? screenedNote : '',
+        flag(body.sentToHospital), 0, null,
+        null, '',
         id
       ]
     );
+    if (screen) await copyToScreening(connection, id, actor, screenedNote, now);
     return createPrescriptionInTx(
       connection, { visitId: id, patientId: visit.patient_id, items: rxItems }, actor
     );
@@ -279,7 +280,46 @@ async function completeVisit(id, body, actor) {
 }
 
 // ---------- screening ----------
+// A screened checkup is saved twice: the original stays in Checkup, and this copy goes to Screening.
+async function copyToScreening(connection, visitId, actor, note, when) {
+  await connection.execute(
+    `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
+       weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
+       created_by, created_by_name, created_at, status, nurse_id, nurse_name, doctor_id, doctor_name,
+       pulse_rate, initial_diagnosis, external_labs_attached, body_temperature,
+       soap_subjective, soap_objective, soap_assessment, soap_plan, actions_taken,
+       sent_to_hospital, completed_at, is_screened, screened_by, screened_at, screened_note,
+       screened_copy_of)
+     SELECT patient_id, visit_type, visit_date, complaint, systolic, diastolic,
+       weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
+       created_by, created_by_name, created_at, status, nurse_id, nurse_name, doctor_id, doctor_name,
+       pulse_rate, initial_diagnosis, external_labs_attached, body_temperature,
+       soap_subjective, soap_objective, soap_assessment, soap_plan, actions_taken,
+       sent_to_hospital, completed_at, 1, ?, ?, ?, id
+       FROM visits WHERE id = ?`,
+    [actor.id, when, note, visitId]
+  );
+}
 async function screenVisit(id, body, actor) {
+  requireRole(actor, ['doctor'], 'Only a doctor can put a checkup to screening.');
+  const note = text(body.screenedNote, 'Screening note', 300);
+  await withTransaction(async connection => {
+    const [found] = await connection.execute(
+      `SELECT id FROM visits WHERE id = ? AND visit_type = 'Checkup' AND status = 'completed'
+         AND is_screened = 0 AND screened_copy_of IS NULL FOR UPDATE`,
+      [id]
+    );
+    if (!found[0]) {
+      throw new HttpError(409, 'Only a completed checkup that is not yet screened can be put to screening.');
+    }
+    const [already] = await connection.execute('SELECT id FROM visits WHERE screened_copy_of = ? LIMIT 1', [id]);
+    if (already[0]) throw new HttpError(409, 'This checkup is already in Screening.');
+    await copyToScreening(connection, id, actor, note, new Date().toISOString());
+  });
+  return fetchVisit(id, actor);
+}
+
+async function screenVisitInPlace(id, body, actor) {
   requireRole(actor, ['doctor'], 'Only a doctor can put a checkup to screening.');
   const note = text(body.screenedNote, 'Screening note', 300);
   const [result] = await pool.execute(

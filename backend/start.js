@@ -1,4 +1,4 @@
-import { closePool } from './db.js';
+import { closePool } from './config/db.js';
 import { createClinicServer } from './app.js';
 
 const host = process.env.HOST || '127.0.0.1';

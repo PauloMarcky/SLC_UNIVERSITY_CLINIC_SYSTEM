@@ -1,5 +1,5 @@
-import { createUser } from '../store.js';
-import { closePool } from '../db.js';
+import { createUser } from '../stores/store.js';
+import { closePool } from '../config/db.js';
 
 const DEFAULT_PASSWORD = 'clinic-dev-2026';
 

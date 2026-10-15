@@ -1,5 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { pool, withTransaction } from './db.js';
+import { pool, withTransaction } from '../config/db.js';
 
 const STATUSES = Object.freeze({
   DRAFT: 'Draft',
@@ -444,6 +444,7 @@ async function getPatientRecord(id, actor) {
      FROM visits v
      WHERE v.patient_id = ?
        AND (? = 'doctor' OR v.confidential = 0)
+        AND v.screened_copy_of IS NULL
      ORDER BY v.visit_date DESC, v.id DESC`,
     [patientId, actor.role]
   );

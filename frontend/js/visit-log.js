@@ -17,7 +17,7 @@
         },
         checkup: {
             url: '/api/visits',
-            keep: v => v.visitType === 'Checkup',
+            keep: v => v.visitType === 'Checkup' && !v.screenedCopyOf,
             cols: v => [v.visitDate, v.patientName, v.heightCm + ' cm', v.weightKg + ' kg',
                 v.bmi, v.age == null ? dash : v.age, v.course || dash, v.diagnosis],
             empty: 'No checkups yet.'

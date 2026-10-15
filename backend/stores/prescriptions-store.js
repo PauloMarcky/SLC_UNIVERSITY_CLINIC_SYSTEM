@@ -1,4 +1,4 @@
-import { pool, withTransaction } from './db.js';
+import { pool, withTransaction } from '../config/db.js';
 import { HttpError } from './store.js';
 import { wholeNumber } from './inventory-store.js';
 

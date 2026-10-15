@@ -1,10 +1,10 @@
-import { createUser } from './store.js';
-import { closePool } from './db.js';
+import { createUser } from '../stores/store.js';
+import { closePool } from '../config/db.js';
 
 const [username, role, ...nameParts] = process.argv.slice(2);
 const name = nameParts.join(' ');
 if (!username || !role || !name) {
-  console.error('Usage: node create-user.js <username> <nurse|doctor> <Full Name>');
+  console.error('Usage: node scripts/create-user.js <username> <nurse|doctor> <Full Name>');
   process.exit(1);
 }
 
