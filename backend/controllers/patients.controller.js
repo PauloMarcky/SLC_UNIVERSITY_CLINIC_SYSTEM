@@ -1,0 +1,33 @@
+import { readJson } from '../utils/http.js';
+import {
+  searchPatients, getPatient, updatePatient, getPatientRecord, registerPatient, getHistory, saveHistory
+} from '../services/patients.service.js';
+
+export async function search(req, res) {
+  res.status(200).json({ patients: await searchPatients(req.query.search, req.session.user) });
+}
+
+export async function record(req, res) {
+  res.status(200).json({ record: await getPatientRecord(req.params.id, req.session.user) });
+}
+
+export async function register(req, res) {
+  res.status(201).json({ patient: await registerPatient(await readJson(req), req.session.user) });
+}
+
+export async function history(req, res) {
+  res.status(200).json({ history: await getHistory(req.params.id) });
+}
+
+export async function updateHistory(req, res) {
+  const saved = await saveHistory(req.params.id, await readJson(req), req.session.user);
+  res.status(200).json({ history: saved });
+}
+
+export async function read(req, res) {
+  res.status(200).json({ patient: await getPatient(req.params.id) });
+}
+
+export async function update(req, res) {
+  res.status(200).json({ patient: await updatePatient(req.params.id, await readJson(req), req.session.user) });
+}
