@@ -4,11 +4,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Medical Records - ULS Clinic System</title>
+    <title>Student Records - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
+    <script src="../js/clinic-api.js" defer></script>
     <script src="../js/medical-records.js" defer></script>
 </head>
 
@@ -20,14 +21,14 @@
     <div class="layout">
         <aside>
             <nav aria-label="Menu">
-                <h4>Nurse</h4><a href="../nurse/assess.html">Assess</a><a href="../doctor/statistics.html">Statistics</a>
+                <h4>Nurse</h4><a href="../nurse/assess.html">Assess</a><a href="../nurse/medical-records.html" class="on">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
             <div class="page-head" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
                 <div>
-                    <h2>Medical Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span> <span class="pill yellow" id="sample-tag">Sample data, nothing here is saved</span></h2>
-                    <p class="sub">Search a student, open the record, then add an entry from there.</p>
+                    <h2>Student Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span></h2>
+                    <p class="sub">Search a student and open the record, or register a new student.</p>
                 </div>
                 <a class="btn" id="add-student" href="../nurse/add-student.html">+ Add student</a>
             </div>

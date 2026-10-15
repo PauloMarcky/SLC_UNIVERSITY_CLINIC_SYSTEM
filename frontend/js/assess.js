@@ -38,6 +38,8 @@
         $('triage-form').hidden = !patient;
         $('history-box').hidden = !patient;
         $('past-box').hidden = !patient;
+        $('open-record').hidden = !patient;
+        if (patient) $('open-record').setAttribute('href', '../nurse/record-detail.html?id=' + encodeURIComponent(patient.id));
         if (patient && changed) {
             $('patient-hint').textContent = 'Selected: ' + label(patient);
             try {

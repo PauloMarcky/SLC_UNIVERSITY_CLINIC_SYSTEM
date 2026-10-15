@@ -24,7 +24,7 @@ import {
 import { renderCertificate } from './certificate-template.js';
 import { listVisits, createVisit } from './visits-store.js';
 import {
-  registerPatient, getHistory, saveHistory,
+  registerPatient, getPatient, updatePatient, getHistory, saveHistory,
   triageVisit, queueVisits, completeVisit, screenVisit, screenedVisits
 } from './flow-store.js';
 import { listMedicines, listBatches, receiveStock, adjustStock, listMovements, reorderList } from './inventory-store.js';
@@ -248,12 +248,25 @@ export function createClinicServer(options = {}) {
     if (path === '/api/patients' && method === 'GET') {
       const search = (url.searchParams.get('search') || '').trim().slice(0, 200);
       const [patients] = await pool.execute(
-        `SELECT id, name, college, course, year, category FROM patients
-         WHERE INSTR(LOWER(name), LOWER(?)) > 0 OR INSTR(LOWER(id), LOWER(?)) > 0
-         ORDER BY name LIMIT 100`,
-        [search, search]
+        `SELECT p.id, p.name, p.college, p.course, p.year, p.category,
+                DATE_FORMAT(p.date_of_birth, '%Y-%m-%d') AS dateOfBirth,
+                (SELECT MAX(v.visit_date) FROM visits v
+                  WHERE v.patient_id = p.id AND (? = 'doctor' OR v.confidential = 0)) AS lastVisit
+           FROM patients p
+          WHERE INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0
+          ORDER BY p.name LIMIT 500`,
+        [current.user.role, search, search]
       );
       return json(response, 200, { patients });
+    }
+
+    const patientMatch = path.match(/^\/api\/patients\/([^/]+)$/);
+    if (patientMatch && method === 'GET') {
+      return json(response, 200, { patient: await getPatient(decodeURIComponent(patientMatch[1])) });
+    }
+    if (patientMatch && method === 'PUT') {
+      const patient = await updatePatient(decodeURIComponent(patientMatch[1]), await readJson(request), current.user);
+      return json(response, 200, { patient });
     }
 
     const patientRecordMatch = path.match(/^\/api\/patients\/([^/]+)\/record$/);
