@@ -18,11 +18,11 @@
     const PORTALS = {
         doctor: {
             name: 'Doctor',
-            subtitle: 'Doctor portal — review and approve medical certificates.',
+            subtitle: 'Doctor portal — examine triaged patients and keep clinic records.',
         },
         nurse: {
             name: 'Nurse',
-            subtitle: 'Nurse portal — prepare and manage medical certificates.',
+            subtitle: 'Nurse portal — triage patients and keep medical records.',
         },
     };
 
@@ -74,8 +74,8 @@
                 },
             });
             const destination = {
-                nurse: '/nurse/dashboard.html',
-                doctor: '/doctor/dashboard.html',
+                nurse: '/nurse/triage.html',
+                doctor: '/doctor/queue.html',
             }[data.user.role] || '/index.html';
             window.location.assign(destination);
         } catch (error) {

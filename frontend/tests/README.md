@@ -26,10 +26,7 @@ does not resize the scene. Navigation keeps the transparent `assets/uls-logo.png
   uncaught browser JavaScript errors in those checks.
 - 260px desktop sidebar, mobile drawer and Escape behavior, desktop content
   expansion, keyboard modal handling, persistent themes and scrollable tables.
-- Original four-role login routing/payload, password visibility and login errors.
-- Consultation BMI calculation, confidential diagnosis behavior, visit submission
-  payload/CSRF and search/reset controls.
-- Certificate doctor/nurse controls, review display, patient selection and editor.
+- Two-role (doctor, nurse) login routing/payload, password visibility and login errors.
 - Reduced-motion behavior and seven-second decorative animation scheduling.
 - All five existing, database-free certificate template tests pass.
 - All frontend JavaScript syntax checks and `git diff --check` pass.

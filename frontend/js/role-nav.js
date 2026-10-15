@@ -6,26 +6,19 @@
         nurse: {
             title: 'Nurse',
             links: [
-                ['Dashboard', '../nurse/dashboard.html'],
                 ['Medical Records', '../nurse/medical-records.html'],
-                ['Inventory', '../nurse/inventory.html'],
                 ['Triage', '../nurse/triage.html'],
-                ['Statistics', '../doctor/statistics.html'],
-                ['Certificates', '../shared/certificates.html']
+                ['Statistics', '../doctor/statistics.html']
             ]
         },
         doctor: {
             title: 'Doctor',
             links: [
-                ['Dashboard', '../doctor/dashboard.html'],
-                ['New Visit', '../doctor/consultation-form.html'],
-                ['Student Records', '../nurse/medical-records.html'],
-                ['Certificate Approval', '../shared/certificates.html'],
-                ['User Management', '../doctor/users.html'],
                 ['Exam Queue', '../doctor/queue.html'],
-                ['Screened', '../doctor/screened.html']
+                ['Student Records', '../nurse/medical-records.html'],
+                ['User Management', '../doctor/users.html']
             ],
-            order: [['link', 0], ['group', 0], ['link', 5], ['link', 2], ['link', 3], ['group', 1], ['link', 4]],
+            order: [['group', 0], ['link', 0], ['link', 1], ['group', 1], ['link', 2]],
             groups: [
                 {
                     title: 'Consultations & Checkups',
@@ -59,8 +52,6 @@
     function build(role) {
         const menu = MENUS[role];
         const heading = nav.querySelector('h4');
-        // certificates.js looks these two elements up by id, so keep the ids when they exist.
-        const keepDashboardId = !!document.getElementById('sidebar-dashboard');
         const logoutLink = nav.querySelector('a[data-logout]');
         nav.querySelectorAll('a:not([data-logout])').forEach(link => link.remove());
         nav.querySelectorAll('.nav-group').forEach(group => group.remove());
@@ -70,7 +61,6 @@
             const link = document.createElement('a');
             link.textContent = item[0];
             link.setAttribute('href', item[1]);
-            if (item[0] === 'Dashboard' && keepDashboardId) link.id = 'sidebar-dashboard';
             if (new URL(item[1], location.href).pathname === (currentPath || current)) {
                 link.classList.add('on');
                 link.setAttribute('aria-current', 'page');
