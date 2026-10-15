@@ -1,35 +1,10 @@
-import { pool, withTransaction } from './db.js';
-import { HttpError } from './store.js';
+import { pool, withTransaction } from '../db/pool.js';
+import { HttpError } from '../utils/http-error.js';
+import { text, wholeNumber, dateText } from '../utils/validators.js';
 
 export const NEAR_EXPIRY_DAYS = 60;
 export const ADJUST_REASONS = ['damaged', 'lost', 'expired_disposal', 'correction'];
 const REMOVE_ONLY = ['damaged', 'lost', 'expired_disposal'];
-
-function text(value, field, max, required = false) {
-  if (value === undefined || value === null) value = '';
-  if (typeof value !== 'string') throw new HttpError(400, `${field} must be text.`);
-  const result = value.trim();
-  if (required && !result) throw new HttpError(400, `${field} is required.`);
-  if (result.length > max) throw new HttpError(400, `${field} must be at most ${max} characters.`);
-  return result;
-}
-
-export function wholeNumber(value, field, min, max) {
-  const n = typeof value === 'string' && !value.trim() ? NaN : Number(value);
-  if (!Number.isInteger(n) || n < min || n > max) {
-    throw new HttpError(400, `${field} must be a whole number from ${min} to ${max}.`);
-  }
-  return n;
-}
-
-function dateText(value, field) {
-  const date = text(value, field, 10, true);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      new Date(`${date}T00:00:00.000Z`).toISOString().slice(0, 10) !== date) {
-    throw new HttpError(400, `Enter a valid ${field.toLowerCase()}.`);
-  }
-  return date;
-}
 
 async function today(connection = pool) {
   const [rows] = await connection.execute(`SELECT DATE_FORMAT(CURDATE(), '%Y-%m-%d') AS d`);

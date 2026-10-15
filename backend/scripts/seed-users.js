@@ -6,6 +6,8 @@ const DEFAULT_PASSWORD = 'clinic-dev-2026';
 const defaults = [
   { username: 'nurse1',    name: 'Default Nurse',  role: 'nurse'    },
   { username: 'doctor1',   name: 'Default Doctor', role: 'doctor'   },
+  { username: 'student1',  name: 'Maria Dizon',    role: 'student',  patientId: '2026-00123' },
+  { username: 'employee1', name: 'Jose Ramos',     role: 'employee', patientId: 'E-0098'     },
 ];
 
 for (const user of defaults) {
