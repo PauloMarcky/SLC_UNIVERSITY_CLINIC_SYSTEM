@@ -10,7 +10,9 @@ const path = require('node:path');
 const http = require('node:http');
 const root = path.resolve(__dirname, '..');
 const pages = ['index.html', 'doctor/dashboard.html', 'doctor/visits.html',
-    'doctor/consultation-form.html', 'doctor/statistics.html', 'nurse/dashboard.html',
+    'doctor/screening.html', 'doctor/checkup.html', 'doctor/consultation.html',
+    'doctor/consultation-form.html', 'doctor/statistics.html',
+    'doctor/statistics-checkup.html', 'doctor/statistics-consultation.html', 'doctor/users.html', 'nurse/dashboard.html',
     'nurse/medical-records.html', 'nurse/record-detail.html', 'nurse/inventory.html',
     'shared/certificates.html',
     'archive/clinic-dashboard.html', 'archive/records.html', 'archive/reports.html'];
@@ -34,6 +36,9 @@ async function mockApi(route) {
     else if (url.pathname.startsWith('/api/certificates/')) body = { certificate, history: [] };
     else if (url.pathname === '/api/notifications') body = { notifications: [] };
     else if (url.pathname === '/api/patients') body = { patients: [patient] };
+    else if (url.pathname === '/api/users') body = { users: [] };
+    else if (url.pathname === '/api/medicines') body = { medicines: [] };
+    else if (url.pathname === '/api/prescriptions') body = { prescriptions: [] };
     else if (url.pathname === '/api/visits') {
         lastVisitQuery = url.search;
         if (route.request().method() === 'POST') {
@@ -73,12 +78,13 @@ const server = http.createServer(async (req, res) => {
         if (process.env.UI_SCREENSHOTS) await fs.mkdir(process.env.UI_SCREENSHOTS, { recursive: true });
         let layouts = 0;
         for (const theme of ['light', 'dark']) {
+            await page.goto(base + '/index.html');
+            await page.locator(`[data-theme-choice="${theme}"]`).click();
             for (const width of [1440, 820, 390, 320]) {
                 await page.setViewportSize({ width, height: 900 });
                 for (const file of pages) {
                     role = file.startsWith('nurse/') ? 'nurse' : 'doctor';
                     await page.goto(base + '/' + file);
-                    await page.evaluate(theme => window.ClinicTheme.set(theme), theme);
                     await page.waitForTimeout(240);
                     const result = await page.evaluate(() => {
                         const sidebar = document.querySelector('aside');
@@ -90,6 +96,12 @@ const server = http.createServer(async (req, res) => {
                             images: Array.from(document.images).filter(i => !i.complete || i.naturalWidth === 0).map(i => i.src),
                             tables: document.querySelectorAll('table').length,
                             wrappedTables: document.querySelectorAll('.table-scroll table').length,
+                            glass: (() => {
+                                const card = document.querySelector('.login-page .login');
+                                if (!card) return null;
+                                const style = getComputedStyle(card);
+                                return { color: style.backgroundColor, blur: style.backdropFilter || style.webkitBackdropFilter };
+                            })(),
                             headerOverlap: (() => {
                                 const children = Array.from(document.querySelectorAll('.topbar > *'))
                                     .filter(el => el.getClientRects().length).map(el => el.getBoundingClientRect());
@@ -101,39 +113,115 @@ const server = http.createServer(async (req, res) => {
                     });
                     assert.equal(result.overflow, false, `${file}, ${width}, ${theme}: document overflows`);
                     assert.equal(result.headerOverlap, false, `${file}, ${width}, ${theme}: header controls overlap`);
-                    assert.equal(result.theme, theme);
-                    assert.equal(result.switches, 2, `${file}: theme controls missing`);
+                    const login = file === 'index.html';
+                    assert.equal(result.theme, login ? theme : 'light', `${file}: staff workspace must stay light`);
+                    assert.equal(result.switches, login ? 2 : 0, `${file}: theme controls must be login-only`);
+                    if (login) {
+                        assert.match(result.glass.color, /^rgba\(/, `${theme}: login card must be translucent`);
+                        assert.match(result.glass.blur, /blur\(/, `${theme}: login card must blur its background`);
+                    }
                     assert.equal(result.images.length, 0, `${file}: missing image ${result.images}`);
                     assert.equal(result.tables, result.wrappedTables, `${file}: table without scroll region`);
-                    if (file !== 'index.html' && width > 760) assert.equal(result.sidebar, 260, `${file}: sidebar width`);
-                    if (process.env.UI_SCREENSHOTS && ['index.html', 'doctor/dashboard.html', 'shared/certificates.html', 'doctor/statistics.html'].includes(file) && [1440, 390].includes(width)) {
+                    if (!login && width > 760) assert.equal(result.sidebar, 280, `${file}: sidebar width`);
+                    if (process.env.UI_SCREENSHOTS && ['index.html', 'doctor/dashboard.html', 'doctor/users.html', 'nurse/dashboard.html', 'shared/certificates.html', 'doctor/statistics.html'].includes(file) && [1440, 390].includes(width)) {
                         await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, `${file.replaceAll('/', '-')}-${theme}-${width}.png`), fullPage: true });
                     }
                     layouts++;
                 }
-                console.log(`PASS ${theme} ${width}px: all 13 pages`);
+                console.log(`PASS saved ${theme} theme, ${width}px: all ${pages.length} pages`);
             }
         }
-        // Theme survives navigation and reload; old saved choices are still supported.
+        // A saved login theme survives staff navigation, reload and staff theme API calls.
         await page.goto(base + '/index.html');
         await page.locator('[data-theme-choice="dark"]').click();
-        await page.goto(base + '/doctor/dashboard.html');
+        for (const staffRole of ['doctor', 'nurse']) {
+            role = staffRole;
+            await page.goto(base + `/${staffRole}/dashboard.html`);
+            assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+            assert.equal(await page.locator('[data-theme-choice]').count(), 0);
+            await page.evaluate(() => window.ClinicTheme.set('dark'));
+            assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+            await page.reload();
+            assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
+        }
+        await page.goto(base + '/index.html');
         assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+        await page.evaluate(() => {
+            localStorage.removeItem('clinic-theme');
+            localStorage.setItem('clinic-login-theme', 'dark');
+        });
         await page.reload();
-        assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
+        assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark', 'Legacy login preference is retained');
         // Mobile drawer is usable, modal to keyboard navigation, and closes on Escape.
+        role = 'doctor';
         await page.setViewportSize({ width: 390, height: 844 });
         await page.goto(base + '/doctor/dashboard.html');
+        assert.equal(await page.locator('aside').evaluate(el => el.inert), true);
         await page.locator('.menu-toggle').click();
         assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
         assert.equal(await page.locator('main').evaluate(el => el.inert), true);
         await page.keyboard.press('Escape');
         assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
         assert.equal(await page.locator('main').evaluate(el => el.inert), false);
+        // Desktop collapse keeps an accessible icon rail and persists across staff pages.
         await page.setViewportSize({ width: 1440, height: 900 });
+        await page.waitForTimeout(240);
+        const navigationSizes = await page.locator('aside a, aside summary').evaluateAll(items => items
+            .filter(el => el.getClientRects().length)
+            .map(el => ({ name: el.textContent.trim(), font: getComputedStyle(el).fontSize, height: Math.round(el.getBoundingClientRect().height) })));
+        for (const item of navigationSizes) {
+            assert.equal(item.font, '14px', `${item.name}: consistent sidebar text size`);
+            assert.equal(item.height, 48, `${item.name}: consistent sidebar control height`);
+        }
         await page.locator('.menu-toggle').click();
         await page.waitForTimeout(240);
-        assert.equal(await page.locator('main').evaluate(el => Math.round(el.getBoundingClientRect().left)), 0);
+        async function assertRail() {
+            assert.equal(await page.locator('aside').evaluate(el => Math.round(el.getBoundingClientRect().width)), 80);
+            assert.equal(await page.locator('aside').evaluate(el => Math.round(el.getBoundingClientRect().left)), 0);
+            assert.equal(await page.locator('aside').evaluate(el => el.inert), false);
+            assert.equal(await page.locator('main').evaluate(el => Math.round(el.getBoundingClientRect().left)), 80);
+            assert.equal(await page.locator('.topbar').evaluate(el => Math.round(el.getBoundingClientRect().left)), 80);
+            assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'false');
+            const controls = await page.locator('aside a, aside summary').evaluateAll(items => items
+                .filter(el => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden')
+                .map(el => ({ icon: !!el.querySelector('.nav-icon'), label: el.getAttribute('aria-label') || el.textContent.trim(), title: el.title })));
+            assert.ok(controls.length > 1, 'Collapsed rail has multiple usable destinations');
+            for (const control of controls) {
+                assert.ok(control.icon, `Rail icon missing: ${control.label}`);
+                assert.ok(control.label && control.title, 'Rail controls retain accessible names and tooltips');
+            }
+        }
+        await assertRail();
+        assert.equal(await page.evaluate(() => localStorage.getItem('clinic-sidebar-collapsed')), 'true');
+        if (process.env.UI_SCREENSHOTS) await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, 'doctor-collapsed-rail.png'), fullPage: true });
+        await page.reload();
+        await assertRail();
+        await page.locator('aside a[href$="users.html"]').click();
+        await page.waitForURL('**/doctor/users.html');
+        await assertRail();
+        // Opening a collapsed group reveals its destinations, including keyboard activation.
+        await page.locator('aside .nav-group summary').first().focus();
+        await page.keyboard.press('Enter');
+        await page.waitForTimeout(240);
+        assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
+        assert.equal(await page.locator('aside .nav-group').first().getAttribute('open'), '');
+        assert.equal(await page.locator('aside a[href$="screening.html"]').isVisible(), true);
+        assert.equal(await page.evaluate(() => localStorage.getItem('clinic-sidebar-collapsed')), 'false');
+        await page.locator('.menu-toggle').click();
+        role = 'nurse';
+        await page.goto(base + '/nurse/dashboard.html');
+        await assertRail();
+        if (process.env.UI_SCREENSHOTS) await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, 'nurse-collapsed-rail.png'), fullPage: true });
+        // Mobile drawer changes do not overwrite the saved desktop rail preference.
+        await page.setViewportSize({ width: 390, height: 844 });
+        await page.locator('.menu-toggle').click();
+        await page.keyboard.press('Escape');
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.waitForTimeout(240);
+        await assertRail();
+        await page.locator('.menu-toggle').click();
+        role = 'doctor';
+        await page.goto(base + '/doctor/dashboard.html');
         // Existing visit modal's focus and dismissal, no clinical record is submitted.
         await page.locator('[data-open-visit]').first().click();
         await page.locator('#visit-modal [data-close-modal]').last().focus();
@@ -184,7 +272,7 @@ const server = http.createServer(async (req, res) => {
         assert.equal(await page.locator('#certificate-type').inputValue(), 'Fitness to Return');
         if (process.env.UI_SCREENSHOTS) {
             await page.locator('#certificate-type').click();
-            await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, 'certificate-dropdown-dark.png') });
+            await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, 'certificate-dropdown-light.png') });
             await page.keyboard.press('Escape');
         }
         page.once('dialog', dialog => dialog.accept());
@@ -220,7 +308,7 @@ const server = http.createServer(async (req, res) => {
         assert.deepEqual(errors, [], 'Browser JavaScript errors');
         assert.deepEqual(failures, [], 'Missing assets');
         assert.deepEqual(unexpectedApiRequests, [], 'Unexpected API requests');
-        console.log(`PASS ${layouts} page/theme/viewport combinations; theme persistence, sidebar, modal keyboard, BMI, visit form/CSRF, filters, certificate roles/editor, four login routes, password control, login errors, and reduced motion.`);
+        console.log(`PASS ${layouts} page/saved-theme/viewport combinations; login glass and theme persistence, light staff workspaces, persistent accessible icon rail, mobile drawer, modal keyboard, BMI, visit form/CSRF, filters, certificate roles/editor, two login routes, password control, login errors, and reduced motion.`);
     } finally {
         await browser.close();
         await new Promise(resolve => server.close(resolve));

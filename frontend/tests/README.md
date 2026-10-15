@@ -1,45 +1,44 @@
 # Frontend regression checks
 
-The redesign applies to all 15 existing HTML pages. Shared layout, controls, tables,
-forms, alerts and light/dark tokens live in `css/style.css`; the login, statistics
-and certificate styles extend that system. `js/login-theme.js` is loaded on every
-page and preserves the previous login-theme preference.
+Shared layout, controls, tables, forms and alerts live in `css/style.css`; the
+login, statistics and certificate styles extend that system. `js/login-theme.js`
+keeps doctor and nurse workspaces light and preserves the user's separate login
+appearance preference. The light/dark buttons remain on `index.html` only.
 
-The login uses `css/docmema-transparent.png`, a background-removed version of the
-supplied `css/docmema.png`; the original is retained. Day/night campus artwork
-fills the viewport without stretching; portrait screens additionally show the
-complete campus panorama above the form. The original source image files are not
-edited. Small decorative flocks start every seven seconds and are disabled while
-the document is hidden or reduced motion is requested.
+The login keeps the existing university branding and day/night campus artwork,
+with a translucent, blurred card in both themes. Small decorative flocks start
+every seven seconds and are disabled while the document is hidden or reduced
+motion is requested.
 
-All dashboard pages share one viewport-aligned day/night scene and the saved theme.
-The entire 16:9 image fits without cropping, with a matching color around it on
-other aspect ratios. The 260px desktop sidebar is translucent over that scene;
-the mobile drawer paints the same scene at the identical viewport size and offset
-so underlying dashboard cards cannot show through. Opening or scrolling navigation
-does not resize the scene. Navigation keeps the transparent `assets/uls-logo.png`.
+Desktop navigation is 280px wide when expanded and stays visible as an 80px icon
+rail when collapsed. Main content and the header follow that width. The desktop
+choice is saved as `clinic-sidebar-collapsed`; mobile drawer actions do not change
+it. At 760px and below the sidebar remains an off-canvas drawer. Navigation uses
+14px labels and 48px controls, with tooltips and accessible names in the icon rail.
+Opening a group from the rail expands navigation and reveals its destinations.
 
-## Verified
+## Browser coverage
 
-- 120 combinations: 15 pages, two themes, widths 1440, 820, 390 and 320 pixels.
+- 152 combinations: 19 pages, two saved login themes, widths 1440, 820, 390 and
+  320 pixels. Staff pages remain light for both saved preferences.
 - No document overflow, overlapping header controls, missing images/assets or
   uncaught browser JavaScript errors in those checks.
-- 260px desktop sidebar, mobile drawer and Escape behavior, desktop content
-  expansion, keyboard modal handling, persistent themes and scrollable tables.
-- Original four-role login routing/payload, password visibility and login errors.
+- 280px expanded sidebar and 80px persistent icon rail, usable icons, consistent
+  sidebar control sizing, group expansion through keyboard activation, mobile
+  drawer and Escape behavior, keyboard modal handling and scrollable tables.
+- Login-only theme controls, translucent blur in both themes, stored preference
+  preservation across staff navigation and legacy login preference support.
+- Original doctor/nurse login routing/payload, password visibility and errors.
 - Consultation BMI calculation, confidential diagnosis behavior, visit submission
   payload/CSRF and search/reset controls.
 - Certificate doctor/nurse controls, review display, patient selection and editor.
 - Reduced-motion behavior and seven-second decorative animation scheduling.
-- All five existing, database-free certificate template tests pass.
-- All frontend JavaScript syntax checks and `git diff --check` pass.
 
 Browser checks use an ephemeral local static server, installed Microsoft Edge and
 synthetic API responses. They do not connect to MySQL or change real clinic data.
-The checkout had no backend `.env` or installed backend dependencies, so live
-database-backed login and CRUD were not verified. Authentication, routes,
-permissions, business scripts and backend files were left unchanged. Existing
-prototype screens/placeholder actions retain their original behavior.
+Live database-backed login and CRUD are outside this browser suite. Authentication,
+routes, permissions and business scripts keep their original behavior. Existing
+prototype screens and placeholder actions are not replaced by these UI checks.
 
 Native selects retain browser keyboard, validation and form semantics. Browsers
 supporting `appearance: base-select` also receive the rounded animated option
