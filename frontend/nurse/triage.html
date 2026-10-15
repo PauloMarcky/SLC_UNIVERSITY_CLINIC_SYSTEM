@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Triage - ULS Clinic System</title>
+    <script src="../js/login-theme.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
+    <script src="../js/today.js" defer></script>
+    <script src="../js/clinic-api.js" defer></script>
+    <script src="../js/triage.js" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System</h1>
+        <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Nurse</h4>
+                <a href="../nurse/dashboard.html">Dashboard</a>
+            </nav>
+        </aside>
+        <main>
+            <div class="page-head">
+                <div>
+                    <h2>Triage</h2>
+                    <p class="sub">Find or register the patient, record vitals, and send the visit to the doctor's queue.</p>
+                </div>
+            </div>
+            <p class="note" id="flow-message" role="alert" tabindex="-1" hidden></p>
+
+            <section class="box visit-form" aria-labelledby="t1">
+                <h3 id="t1">1. Patient</h3>
+                <div class="form">
+                    <div class="f full">
+                        <label for="psearch">Patient name or ID</label>
+                        <input id="psearch" list="patient-list" autocomplete="off" placeholder="Type the name or ID, then pick from the list">
+                        <datalist id="patient-list"></datalist>
+                        <p class="field-hint" id="patient-hint"></p>
+                    </div>
+                    <div class="f full"><button class="btn sec" type="button" id="toggle-register">Patient not found? Register a new patient</button></div>
+                </div>
+                <form class="form" id="register-form" hidden novalidate>
+                    <div class="f"><label for="r-id">Patient ID *</label><input id="r-id" maxlength="50"></div>
+                    <div class="f"><label for="r-cat">Patient type</label><select id="r-cat"><option value="student">Student</option><option value="employee">Employee</option></select></div>
+                    <div class="f"><label for="r-last">Last name *</label><input id="r-last" maxlength="100"></div>
+                    <div class="f"><label for="r-first">First name *</label><input id="r-first" maxlength="100"></div>
+                    <div class="f"><label for="r-middle">Middle name</label><input id="r-middle" maxlength="100"></div>
+                    <div class="f"><label for="r-gender">Gender</label><select id="r-gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+                    <div class="f"><label for="r-dob">Date of birth</label><input id="r-dob" type="date"></div>
+                    <div class="f"><label for="r-civil">Civil status</label><select id="r-civil"><option value="">Select</option><option>Single</option><option>Married</option><option>Other</option></select></div>
+                    <div class="f"><label for="r-college">College / Department</label><input id="r-college" maxlength="100"></div>
+                    <div class="f"><label for="r-course">Course</label><input id="r-course" maxlength="100"></div>
+                    <div class="f"><label for="r-year">Year level</label><input id="r-year" maxlength="20"></div>
+                    <div class="f"><label for="r-contact">Contact number</label><input id="r-contact" maxlength="30"></div>
+                    <div class="f full"><label for="r-address">Address</label><input id="r-address" maxlength="300"></div>
+                    <div class="f"><label for="r-gname">Guardian name</label><input id="r-gname" maxlength="200"></div>
+                    <div class="f"><label for="r-gcontact">Guardian contact</label><input id="r-gcontact" maxlength="30"></div>
+                    <div class="f full modal-actions"><button class="btn" type="submit" id="save-patient">Save patient</button></div>
+                </form>
+            </section>
+
+            <section class="box visit-form" id="history-box" aria-labelledby="t2" hidden>
+                <h3 id="t2">2. Past medical history</h3>
+                <form class="form" id="history-form" novalidate>
+                    <div class="f full choice">
+                        <label><input type="checkbox" id="h-asthma"> Asthma</label>
+                        <label><input type="checkbox" id="h-allergy"> Allergy</label>
+                        <label><input type="checkbox" id="h-febrile"> Febrile convulsion</label>
+                        <label><input type="checkbox" id="h-fainting"> Fainting spell</label>
+                        <label><input type="checkbox" id="h-epilepsy"> Epilepsy</label>
+                    </div>
+                    <div class="f"><label for="h-allergy-details">Allergy details</label><input id="h-allergy-details" maxlength="300"></div>
+                    <div class="f"><label for="h-vaccines">Vaccines</label><input id="h-vaccines" maxlength="300"></div>
+                    <div class="f full"><label for="h-other">Other condition</label><input id="h-other" maxlength="300"></div>
+                    <div class="f full modal-actions"><button class="btn sec" type="submit" id="save-history">Save medical history</button></div>
+                </form>
+            </section>
+
+            <form class="box visit-form" id="triage-form" aria-labelledby="t3" novalidate hidden>
+                <section class="form-section">
+                    <h3 id="t3">3. Triage</h3>
+                    <div class="form">
+                        <div class="f"><label for="t">Visit type</label><select id="t"><option value="Consultation">Consultation (sick)</option><option value="Checkup">Checkup (routine)</option></select></div>
+                        <div class="f"><label for="d">Date (auto)</label><input id="d" data-today="iso" readonly></div>
+                        <div class="f full"><label for="c">Chief complaint / purpose of visit *</label><input id="c" maxlength="500"></div>
+                        <div class="f"><label for="bp">Blood pressure *</label><input id="bp" placeholder="120/80" inputmode="numeric"></div>
+                        <div class="f"><label for="pulse">Pulse rate (bpm)</label><input id="pulse" type="number" min="20" max="250"></div>
+                        <div class="f"><label for="temp">Body temperature (&deg;C)</label><input id="temp" type="number" min="30" max="45" step="0.1"></div>
+                        <div class="f"><label for="w">Weight (kg) *</label><input id="w" type="number" min="1" max="500" step="0.1"></div>
+                        <div class="f"><label for="h">Height (cm) *</label><input id="h" type="number" min="30" max="300" step="0.1"></div>
+                        <div class="f"><label for="b">BMI (auto)</label><input id="b" value="Enter weight and height" readonly></div>
+                        <div class="f full"><label for="idx">Initial nurse diagnosis</label><input id="idx" maxlength="200"></div>
+                        <div class="f full"><label><input type="checkbox" id="labs"> External lab results or documents attached to the printed chart</label></div>
+                    </div>
+                </section>
+                <div class="form-actions">
+                    <button class="btn" type="submit" id="save-triage">Send to doctor</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

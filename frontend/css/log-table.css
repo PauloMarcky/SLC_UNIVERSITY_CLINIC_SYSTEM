@@ -1,0 +1,31 @@
+/* Doctor log tables (consultation / checkup): readable columns, scroll sideways, expandable long text. */
+.sheet-scroll { overflow-x: auto; max-width: 100%; }
+.sheet-table { table-layout: auto !important; width: 100%; min-width: 1500px; }
+.sheet-table col { width: auto !important; }
+.sheet-table th,
+.sheet-table td {
+  white-space: nowrap;
+  padding: 10px 12px;
+  vertical-align: top;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.sheet-table th { font-size: 12px; }
+.sheet-table td:nth-child(2) { white-space: normal; min-width: 150px; }
+.sheet-table td.log-placeholder { white-space: normal; text-align: center; }
+.cell-more { max-width: 230px; white-space: normal; }
+.cell-more summary {
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+  color: inherit;
+}
+.cell-more summary::-webkit-details-marker { display: none; }
+.cell-more summary::after { content: ' \25BE'; opacity: .6; }
+.cell-more[open] summary::after { content: ' \25B4'; }
+.cell-more .cell-full {
+  margin-top: 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
