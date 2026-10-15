@@ -39,45 +39,108 @@ async function fetchVisit(id, actor) {
 }
 
 // ---------- patients ----------
-async function registerPatient(body, actor) {
-  requireRole(actor, STAFF, 'Clinic staff access required.');
-  const id = text(body.id, 'Patient ID', 50, true);
-  if (!/^[A-Za-z0-9._-]+$/.test(id)) {
-    throw new HttpError(400, 'Patient ID may only contain letters, numbers, dots, dashes, and underscores.');
-  }
+// Validates the identification fields shared by registration and editing.
+function identityFields(body) {
   const lastName = text(body.lastName, 'Last name', 100, true);
   const firstName = text(body.firstName, 'First name', 100, true);
   const middleName = text(body.middleName, 'Middle name', 100);
   const gender = text(body.gender, 'Gender', 10);
   if (gender && !['Male', 'Female'].includes(gender)) throw new HttpError(400, 'Select a valid gender.');
   const dateOfBirth = optionalDate(body.dateOfBirth, 'Date of birth');
-  const category = body.category === 'employee' ? 'employee' : 'student';
   const name = [firstName, middleName, lastName].filter(Boolean).join(' ');
   if (name.length > 200) throw new HttpError(400, 'Patient name is too long.');
-  const college = text(body.college, 'College', 100);
-  const course = text(body.course, 'Course', 100);
-  const year = text(body.year, 'Year', 20);
+  return {
+    name, lastName, firstName, middleName, gender: gender || null, dateOfBirth,
+    college: text(body.college, 'College', 100),
+    course: text(body.course, 'Course', 100),
+    year: text(body.year, 'Year', 20),
+    civilStatus: text(body.civilStatus, 'Civil status', 20),
+    nationality: text(body.nationality, 'Nationality', 50) || 'Filipino',
+    contactNumber: text(body.contactNumber, 'Contact number', 30),
+    address: text(body.address, 'Address', 300),
+    guardianName: text(body.guardianName, 'Guardian name', 200),
+    guardianContact: text(body.guardianContact, 'Guardian contact', 30)
+  };
+}
+
+async function registerPatient(body, actor) {
+  requireRole(actor, STAFF, 'Clinic staff access required.');
+  const id = text(body.id, 'Patient ID', 50, true);
+  if (!/^[A-Za-z0-9._-]+$/.test(id)) {
+    throw new HttpError(400, 'Patient ID may only contain letters, numbers, dots, dashes, and underscores.');
+  }
+  const f = identityFields(body);
+  const category = body.category === 'employee' ? 'employee' : 'student';
   try {
     await pool.execute(
       `INSERT INTO patients(id, name, college, course, year, category, last_name, first_name,
-         middle_name, gender, date_of_birth, civil_status, contact_number, address,
+         middle_name, gender, date_of_birth, civil_status, nationality, contact_number, address,
          guardian_name, guardian_contact)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
-        id, name, college, course, year, category, lastName, firstName,
-        middleName, gender || null, dateOfBirth,
-        text(body.civilStatus, 'Civil status', 20),
-        text(body.contactNumber, 'Contact number', 30),
-        text(body.address, 'Address', 300),
-        text(body.guardianName, 'Guardian name', 200),
-        text(body.guardianContact, 'Guardian contact', 30)
+        id, f.name, f.college, f.course, f.year, category, f.lastName, f.firstName,
+        f.middleName, f.gender, f.dateOfBirth, f.civilStatus, f.nationality, f.contactNumber,
+        f.address, f.guardianName, f.guardianContact
       ]
     );
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') throw new HttpError(409, 'A patient with this ID already exists.');
     throw error;
   }
-  return { id, name, college, course, year, category };
+  return { id, name: f.name, college: f.college, course: f.course, year: f.year, category };
+}
+
+function profileOf(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    lastName: row.last_name || '',
+    firstName: row.first_name || '',
+    middleName: row.middle_name || '',
+    college: row.college || '',
+    course: row.course || '',
+    year: row.year || '',
+    category: row.category,
+    gender: row.gender || '',
+    dateOfBirth: row.date_of_birth || null,
+    civilStatus: row.civil_status || '',
+    nationality: row.nationality || '',
+    contactNumber: row.contact_number || '',
+    address: row.address || '',
+    guardianName: row.guardian_name || '',
+    guardianContact: row.guardian_contact || ''
+  };
+}
+
+async function getPatient(patientId) {
+  const [rows] = await pool.execute(
+    `SELECT id, name, last_name, first_name, middle_name, college, course, year, category, gender,
+            DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS date_of_birth, civil_status, nationality,
+            contact_number, address, guardian_name, guardian_contact
+       FROM patients WHERE id = ?`,
+    [patientId]
+  );
+  if (!rows[0]) throw new HttpError(404, 'Patient not found.');
+  return profileOf(rows[0]);
+}
+
+// Edits identification only. The ID and the category never change here.
+async function updatePatient(patientId, body, actor) {
+  requireRole(actor, ['nurse'], 'Only the nurse can edit a patient record.');
+  await assertPatient(patientId);
+  const f = identityFields(body);
+  await pool.execute(
+    `UPDATE patients SET name = ?, college = ?, course = ?, year = ?, last_name = ?, first_name = ?,
+       middle_name = ?, gender = ?, date_of_birth = ?, civil_status = ?, nationality = ?,
+       contact_number = ?, address = ?, guardian_name = ?, guardian_contact = ?
+     WHERE id = ?`,
+    [
+      f.name, f.college, f.course, f.year, f.lastName, f.firstName, f.middleName, f.gender,
+      f.dateOfBirth, f.civilStatus, f.nationality, f.contactNumber, f.address, f.guardianName,
+      f.guardianContact, patientId
+    ]
+  );
+  return getPatient(patientId);
 }
 
 function historyOf(row) {
@@ -244,6 +307,6 @@ async function screenedVisits(actor) {
 }
 
 export {
-  registerPatient, getHistory, saveHistory,
+  registerPatient, getPatient, updatePatient, getHistory, saveHistory,
   triageVisit, queueVisits, completeVisit, screenVisit, screenedVisits
 };

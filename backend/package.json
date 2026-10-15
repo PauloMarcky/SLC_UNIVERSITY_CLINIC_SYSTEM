@@ -12,7 +12,7 @@
     "create-user": "node --env-file-if-exists=.env create-user.js",
     "seed-users": "node --env-file-if-exists=.env scripts/seed-users.js",
     "migrate": "node --env-file-if-exists=.env database/migrate.js",
-    "test": "node --env-file-if-exists=.env --test tests/*.test.js"
+    "test": "node --env-file-if-exists=.env --test --test-concurrency=1 tests/*.test.js"
   },
   "dependencies": {
     "express": "^4.19.2",

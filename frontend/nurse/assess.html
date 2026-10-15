@@ -20,7 +20,7 @@
     <div class="layout">
         <aside>
             <nav aria-label="Menu">
-                <h4>Nurse</h4><a href="../nurse/assess.html" class="on">Assess</a><a href="../doctor/statistics.html">Statistics</a>
+                <h4>Nurse</h4><a href="../nurse/assess.html" class="on">Assess</a><a href="../nurse/medical-records.html">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
@@ -40,6 +40,7 @@
                         <input id="psearch" list="patient-list" autocomplete="off" placeholder="Type the name or ID, then pick from the list">
                         <datalist id="patient-list"></datalist>
                         <p class="field-hint" id="patient-hint"></p>
+                        <p class="field-hint"><a id="open-record" href="../nurse/medical-records.html" hidden>Open full record &rsaquo;</a></p>
                     </div>
                     <div class="f full"><button class="btn sec" type="button" id="toggle-register">Patient not found? Register a new patient</button></div>
                 </div>

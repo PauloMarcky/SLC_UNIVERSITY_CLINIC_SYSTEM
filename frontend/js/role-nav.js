@@ -7,6 +7,7 @@
             title: 'Nurse',
             links: [
                 ['Assess', '../nurse/assess.html'],
+                ['Student Records', '../nurse/medical-records.html'],
                 ['Statistics', '../doctor/statistics.html']
             ]
         },
@@ -43,7 +44,7 @@
     };
     // Pages that are not in the menu highlight the menu item they belong to (per role).
     const PARENT_PAGES = {
-        nurse: { '/nurse/record-detail.html': '/nurse/assess.html', '/nurse/add-student.html': '/nurse/assess.html' },
+        nurse: { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html' },
         doctor: { '/nurse/record-detail.html': '/nurse/medical-records.html' }
     };
 

@@ -1,6 +1,6 @@
-/* Medical Records list (Part 2 of the student record rebuild).
-   SAMPLE DATA for now: nothing here is saved. Part 6 replaces SAMPLE_STUDENTS with GET /api/patients.
-   Row shape follows the backend handoff: id, name, college (shown as Department), dateOfBirth -> age, lastVisit. */
+/* Student Records list: loads every patient from GET /api/patients.
+   Columns: ID, Name, Department (the college value), Age (from date of birth), Last visit.
+   Doctors see the page read-only (no Add student button). */
 (function () {
     'use strict';
     const body = document.getElementById('mr-body');
@@ -8,19 +8,13 @@
     const clear = document.getElementById('mr-clear');
     const count = document.getElementById('mr-count');
     const tabsBox = document.getElementById('mr-tabs');
-    if (!body || !search || !tabsBox) return;
-
-    const SAMPLE_STUDENTS = [
-        { id: '2026-00123', name: 'Dela Cruz, Juan Santos', college: 'College of Information Technology', dateOfBirth: '2007-03-08', lastVisit: '2026-10-12' },
-        { id: '2026-00145', name: 'Reyes, Ana Lopez', college: 'College of Nursing', dateOfBirth: '2008-05-20', lastVisit: '2026-10-09' },
-        { id: '2026-00167', name: 'Garcia, Mark Villanueva', college: 'College of Information Technology', dateOfBirth: '2006-02-11', lastVisit: null },
-        { id: '2026-00188', name: 'Santos, Carla Mendoza', college: 'College of Education', dateOfBirth: '2007-07-30', lastVisit: '2026-09-21' },
-        { id: '2026-00201', name: 'Bautista, Paolo Ramos', college: 'College of Nursing', dateOfBirth: '2005-01-15', lastVisit: '2026-08-30' }
-    ];
+    const api = window.ClinicAPI;
+    if (!body || !search || !tabsBox || !api) return;
 
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    let students = SAMPLE_STUDENTS.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+    let students = [];
     let department = '';
+    let timer;
 
     function escapeHtml(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
@@ -34,12 +28,11 @@
         return m ? MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1] : '';
     }
 
-    // Age from date of birth, same idea as the server will use.
     function ageFrom(iso) {
         const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
         if (!m) return '';
         const now = new Date();
-        let age = now.getFullYear() - Number(m[1]);
+        const age = now.getFullYear() - Number(m[1]);
         const before = now.getMonth() + 1 < Number(m[2]) || (now.getMonth() + 1 === Number(m[2]) && now.getDate() < Number(m[3]));
         return before ? age - 1 : age;
     }
@@ -65,33 +58,45 @@
         tabsBox.innerHTML = html;
     }
 
+    // The server already filtered by the search box; the department tab narrows the loaded list.
     function render() {
-        const text = search.value.trim().toLowerCase();
         const list = students.filter(function (s) {
-            const matchText = !text || (s.id + ' ' + s.name).toLowerCase().indexOf(text) !== -1;
-            const matchDept = !department || String(s.college || '').trim() === department;
-            return matchText && matchDept;
+            return !department || String(s.college || '').trim() === department;
         });
-
         if (!list.length) {
-            body.innerHTML = messageRow('No students match your filters.');
+            body.innerHTML = messageRow(search.value.trim() || department ? 'No students match your filters.' : 'No students yet. Use + Add student to register one.');
         } else {
             body.innerHTML = list.map(function (s) {
                 const link = '../nurse/record-detail.html?id=' + encodeURIComponent(s.id);
                 return '<tr>' +
                     '<td>' + escapeHtml(s.id) + '</td>' +
                     '<td><a href="' + link + '"><strong>' + escapeHtml(s.name) + '</strong></a></td>' +
-                    '<td>' + escapeHtml(s.college) + '</td>' +
+                    '<td>' + (s.college ? escapeHtml(s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
                     '<td>' + escapeHtml(ageFrom(s.dateOfBirth)) + '</td>' +
                     '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">No visits yet</span>') + '</td>' +
                     '<td><a href="' + link + '">Open &rsaquo;</a></td>' +
                     '</tr>';
             }).join('');
         }
-
-        count.textContent = (text || department)
-            ? 'Showing ' + list.length + ' of ' + students.length + ' students'
+        count.textContent = (search.value.trim() || department)
+            ? 'Showing ' + list.length + ' students'
             : students.length + ' students';
+    }
+
+    function fail(error) {
+        if (error.status === 401) { window.location.assign('/index.html'); return; }
+        body.innerHTML = messageRow(error.message);
+        count.textContent = '';
+    }
+
+    async function load() {
+        try {
+            const result = await api.request('/api/patients?search=' + encodeURIComponent(search.value.trim()));
+            students = result.patients;
+            if (department && !students.some(function (s) { return String(s.college || '').trim() === department; })) department = '';
+            buildTabs();
+            render();
+        } catch (error) { fail(error); }
     }
 
     tabsBox.addEventListener('click', function (event) {
@@ -102,30 +107,26 @@
         buildTabs();
         render();
     });
-    search.addEventListener('input', render);
+    search.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(load, 250);
+    });
     clear.addEventListener('click', function () {
         search.value = '';
         department = '';
-        buildTabs();
-        render();
+        load();
         search.focus();
     });
 
-    buildTabs();
-    render();
-
     // Doctors see this page read-only: show the tag and hide Add student. Nurses see the button.
-    if (location.protocol !== 'file:') {
-        fetch('/api/session', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
-            .then(function (r) { return r.ok ? r.json() : null; })
-            .then(function (s) {
-                if (s && s.user && s.user.role === 'doctor') {
-                    const tag = document.getElementById('readonly-tag');
-                    const add = document.getElementById('add-student');
-                    if (tag) tag.hidden = false;
-                    if (add) add.hidden = true;
-                }
-            })
-            .catch(function () { /* leave the page as is */ });
-    }
+    api.getSession().then(function (session) {
+        if (session.user.role === 'doctor') {
+            const tag = document.getElementById('readonly-tag');
+            const add = document.getElementById('add-student');
+            if (tag) tag.hidden = false;
+            if (add) add.hidden = true;
+        }
+    }).catch(fail);
+
+    load();
 })();

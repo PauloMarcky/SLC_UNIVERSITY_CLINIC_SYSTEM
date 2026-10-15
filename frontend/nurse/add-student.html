@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../css/student-record.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
+    <script src="../js/clinic-api.js" defer></script>
     <script src="../js/add-student.js" defer></script>
 </head>
 
@@ -21,18 +22,17 @@
     <div class="layout">
         <aside>
             <nav aria-label="Menu">
-                <h4>Nurse</h4><a href="../nurse/assess.html" class="on">Assess</a><a href="../doctor/statistics.html">Statistics</a>
+                <h4>Nurse</h4><a href="../nurse/assess.html">Assess</a><a href="../nurse/medical-records.html" class="on">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
             <div class="back-row">
-                <a class="back" href="../nurse/medical-records.html">&lsaquo; Back to Medical Records</a>
-                <span class="pill yellow">Sample data, nothing here is saved</span>
+                <a class="back" id="back-link" href="../nurse/medical-records.html">&lsaquo; Back to Student Records</a>
             </div>
             <div class="page-head">
                 <div>
-                    <h2>Add Student Record</h2>
-                    <p class="sub">Same order as the paper Physical / Medical Examination Form. Only ID and name are required.</p>
+                    <h2 id="page-title">Add Student Record</h2>
+                    <p class="sub" id="page-sub">Same order as the paper Physical / Medical Examination Form. Only ID and name are required. Vital signs are recorded on the Assess page.</p>
                 </div>
             </div>
             <p class="note save-result" id="form-message" role="alert" tabindex="-1" hidden></p>
@@ -73,13 +73,14 @@
                                 <label><input type="radio" name="status" value="Married"> Married</label>
                                 <label><input type="radio" name="status" value="Other"> Other</label>
                             </div></div>
-                        <div class="f"><label for="nation">Nationality</label><input id="nation" maxlength="60" placeholder="Filipino"></div>
-                        <div></div>
+                        <div class="f"><label for="nation">Nationality</label><input id="nation" maxlength="50" placeholder="Filipino"></div>
+                        <div class="f"><label for="course">Course</label><input id="course" maxlength="100" placeholder="e.g. BSIT"></div>
 
-                        <div class="f full"><label for="address">Address</label><input id="address" maxlength="300" placeholder="Street, Barangay, City, Province"></div>
-
+                        <div class="f"><label for="year">Year level</label><input id="year" maxlength="20" placeholder="e.g. 3"></div>
                         <div class="f"><label for="guardian">Name of guardian</label><input id="guardian" maxlength="200" placeholder="Full name"></div>
                         <div class="f"><label for="emergency">Contact no. in case of emergency</label><input id="emergency" maxlength="30" inputmode="tel" placeholder="09XX XXX XXXX"></div>
+
+                        <div class="f full"><label for="address">Address</label><input id="address" maxlength="300" placeholder="Street, Barangay, City, Province"></div>
                     </div>
                 </section>
 
@@ -90,16 +91,12 @@
 
                     <div class="hx-row">
                         <label class="hx-check"><input type="checkbox" id="asthma"> Asthma</label>
-                        <div class="hx-extra" id="asthma-extra" hidden>
-                            <div><label for="asthma-date">Date of last attack</label><input id="asthma-date" type="date" aria-describedby="e-asthma-date"><p class="field-error" id="e-asthma-date" hidden></p></div>
-                            <div><label for="asthma-med">Medicine taken</label><input id="asthma-med" maxlength="200"></div>
-                        </div>
+                        <div></div>
                     </div>
                     <div class="hx-row">
                         <label class="hx-check"><input type="checkbox" id="allergy"> Allergy</label>
                         <div class="hx-extra" id="allergy-extra" hidden>
-                            <div><label for="allergy-food">Food, specify</label><input id="allergy-food" maxlength="200"></div>
-                            <div><label for="allergy-med">Medicine taken</label><input id="allergy-med" maxlength="200"></div>
+                            <div class="full"><label for="allergy-text">Details (food, medicine)</label><input id="allergy-text" maxlength="300"></div>
                         </div>
                     </div>
                     <div class="hx-row">
@@ -117,8 +114,7 @@
                     <div class="hx-row">
                         <label class="hx-check"><input type="checkbox" id="vaccines"> <span>Vaccines <small>(Bakuna)</small></span></label>
                         <div class="hx-extra" id="vaccines-extra" hidden>
-                            <div class="hx-inline"><input type="checkbox" id="hepb"><label for="hepb" style="margin:0">Hepatitis-B</label></div>
-                            <div><label for="vaccine-other">Other vaccines</label><input id="vaccine-other" maxlength="200"></div>
+                            <div class="full"><label for="vaccine-text">Vaccines received</label><input id="vaccine-text" maxlength="300" placeholder="e.g. Hepatitis-B, Tetanus"></div>
                         </div>
                     </div>
                     <div class="hx-row">
@@ -129,33 +125,9 @@
                     </div>
                 </section>
 
-                <!-- Vital signs -->
-                <section class="form-section" aria-labelledby="s-vit">
-                    <h3 id="s-vit">Vital Signs <small>&middot; filled up by the school nurse (optional now, can be added later)</small></h3>
-                    <div class="form form-vitals cols-4">
-                        <div class="f"><label for="v-date">Date</label><input id="v-date" type="date" aria-describedby="e-v-date"><p class="field-error" id="e-v-date" hidden></p></div>
-                        <div class="f"><label for="v-height">Height (cm)</label><input id="v-height" type="number" min="30" max="300" step="0.1" placeholder="170" aria-describedby="e-v-height"><p class="field-error" id="e-v-height" hidden></p></div>
-                        <div class="f"><label for="v-weight">Weight (kg)</label><input id="v-weight" type="number" min="1" max="500" step="0.1" placeholder="65" aria-describedby="e-v-weight"><p class="field-error" id="e-v-weight" hidden></p></div>
-                        <div class="f"><label for="v-sys">Blood pressure</label>
-                            <div class="bp-pair"><input id="v-sys" type="number" min="60" max="260" placeholder="120" aria-label="Systolic" aria-describedby="e-v-sys"><span aria-hidden="true">/</span><input id="v-dia" type="number" min="30" max="160" placeholder="80" aria-label="Diastolic" aria-describedby="e-v-sys"></div>
-                            <p class="field-error" id="e-v-sys" hidden></p></div>
-                    </div>
-                    <p class="field-hint" style="padding:0 24px 20px;margin:0">Each save adds a new dated row to the record. Older rows stay.</p>
-                </section>
-
-                <!-- Findings / notes -->
-                <section class="form-section" aria-labelledby="s-find">
-                    <h3 id="s-find">Physician's Findings / Nurse's Notes</h3>
-                    <div class="findings-grid">
-                        <div class="f"><label for="f-date">Date</label><input id="f-date" type="date" aria-describedby="e-f-date"><p class="field-error" id="e-f-date" hidden></p></div>
-                        <div class="f"><label for="f-notes">Findings / notes</label><textarea id="f-notes" rows="4" maxlength="5000" placeholder="Write the finding or note" aria-describedby="e-f-notes"></textarea><p class="field-error" id="e-f-notes" hidden></p></div>
-                        <div class="f"><label for="f-by">Examined by</label><input id="f-by" maxlength="200" value="Nurse"></div>
-                    </div>
-                </section>
-
                 <div class="form-actions">
                     <button class="btn" type="submit" id="save-student">Save record</button>
-                    <a class="btn sec" href="../nurse/medical-records.html">Cancel</a>
+                    <a class="btn sec" id="cancel-link" href="../nurse/medical-records.html">Cancel</a>
                     <span class="form-actions-note"><span class="req" aria-hidden="true">*</span> Required.</span>
                 </div>
             </form>
