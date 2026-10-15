@@ -7,6 +7,7 @@
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/prescription.css">
+    <link rel="stylesheet" href="../css/exam-modal.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
@@ -39,6 +40,7 @@
                 <div class="toolbar"><button class="btn sec" type="button" id="refresh">Refresh</button></div>
             </div>
             <p class="note" id="flow-message" role="alert" tabindex="-1" hidden></p>
+            <nav class="tabs" id="type-tabs" aria-label="Visit type"></nav>
             <section class="box">
                 <h3>Waiting <span class="pill yellow" id="queue-count">0</span></h3>
                 <table>
@@ -47,22 +49,24 @@
                 </table>
             </section>
 
-            <form class="box visit-form" id="exam-form" novalidate hidden>
+        </main>
+    </div>
+    <div class="modal exam-modal" id="exam-modal" hidden>
+        <div class="modal-backdrop" data-close-exam></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exam-title">
+            <div class="modal-head"><h3 id="exam-title">Examination</h3><button class="modal-x" type="button" data-close-exam aria-label="Close">&times;</button></div>
+            <form class="visit-form" id="exam-form" novalidate>
+                <p class="exam-summary" id="exam-summary"></p>
+                <p class="note user-message-error" id="exam-message" role="alert" tabindex="-1" hidden></p>
                 <section class="form-section">
-                    <h3 id="exam-title">Examination</h3>
-                    <p class="hint" id="exam-summary"></p>
                     <div class="form">
-                        <div class="f full"><label for="x">Final diagnosis category *</label>
-                            <select id="x"><option value="">Select diagnosis</option><option>URI / Flu</option><option>Wound</option><option>Neurological</option><option>Mental health (anxiety, depression, panic)</option><option>Metabolic</option><option>Normal / Well</option></select></div>
-                        <div class="f full"><label for="s">Subjective</label><textarea id="s" rows="3" maxlength="5000"></textarea></div>
-                        <div class="f full"><label for="o">Objective</label><textarea id="o" rows="3" maxlength="5000"></textarea></div>
-                        <div class="f full"><label for="a">Assessment</label><textarea id="a" rows="3" maxlength="5000"></textarea></div>
-                        <div class="f full"><label for="p">Plan</label><textarea id="p" rows="3" maxlength="5000"></textarea></div>
-                        <div class="f full"><label for="act">Actions taken</label><textarea id="act" rows="4" maxlength="5000"></textarea></div>
-                        <div class="f full"><label for="n">Notes</label><textarea id="n" rows="3" maxlength="5000"></textarea></div>
+                        <div class="f full"><label for="purpose">Purpose of visit</label><input id="purpose" readonly></div>
+                        <div class="f full"><label for="o">Pertinent P.E. &amp; laboratory findings</label><textarea id="o" rows="4" maxlength="5000"></textarea></div>
+                        <div class="f full"><label for="x">Clinical diagnosis *</label><textarea id="x" rows="3" maxlength="500" required></textarea></div>
+                        <div class="f full"><label for="act">Action taken</label><textarea id="act" rows="3" maxlength="5000"></textarea></div>
                         <div class="f full choice">
                             <label><input type="checkbox" id="hosp"> Sent to hospital</label>
-                            <label><input type="checkbox" id="conf"> Mark as confidential (mental health is always confidential)</label>
+                            <label><input type="checkbox" id="conf"> Confidential (hidden from the nurse)</label>
                         </div>
                     </div>
                 </section>
@@ -70,7 +74,7 @@
                     <h3>Screening</h3>
                     <div class="form">
                         <div class="f full"><label><input type="checkbox" id="screen"> Put record to Screening (the checkup revealed an illness)</label></div>
-                        <div class="f full"><label for="screen-note">Screening note</label><input id="screen-note" maxlength="300" placeholder="e.g. UTI found in submitted lab results"></div>
+                        <div class="f full" id="screen-note-wrap" hidden><label for="screen-note">Screening note</label><input id="screen-note" maxlength="300" placeholder="e.g. UTI found in submitted lab results"></div>
                     </div>
                 </section>
                 <section class="form-section">
@@ -79,10 +83,10 @@
                 </section>
                 <div class="form-actions">
                     <button class="btn" type="submit" id="complete">Complete visit</button>
-                    <button class="btn sec" type="button" id="cancel">Cancel</button>
+                    <button class="btn sec" type="button" data-close-exam>Cancel</button>
                 </div>
             </form>
-        </main>
+        </div>
     </div>
 </body>
 </html>

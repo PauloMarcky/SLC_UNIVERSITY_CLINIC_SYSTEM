@@ -3,7 +3,7 @@ import { HttpError } from './store.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions-store.js';
 import {
   text, number, validDate, parseBp, bmiOf, bpStatusOf,
-  rowToVisit, SELECT_VISIT, VISIT_TYPES, DIAGNOSES
+  rowToVisit, SELECT_VISIT, VISIT_TYPES
 } from './visits-store.js';
 
 const STAFF = ['nurse', 'doctor'];
@@ -236,15 +236,11 @@ async function queueVisits(actor) {
 
 async function completeVisit(id, body, actor) {
   requireRole(actor, ['doctor'], 'Only a doctor can complete a visit.');
-  const diagnosis = text(body.diagnosis, 'Diagnosis category', 100, true);
-  if (!DIAGNOSES.includes(diagnosis)) throw new HttpError(400, 'Select a valid diagnosis category.');
-  const soapSubjective = text(body.soapSubjective, 'Subjective', 5000);
-  const soapObjective = text(body.soapObjective, 'Objective', 5000);
-  const soapAssessment = text(body.soapAssessment, 'Assessment', 5000);
-  const soapPlan = text(body.soapPlan, 'Plan', 5000);
-  const actionsTaken = text(body.actionsTaken, 'Actions taken', 5000);
-  const notes = text(body.notes, 'Notes', 5000);
-  const confidential = flag(body.confidential) || diagnosis.startsWith('Mental health') ? 1 : 0;
+  // Free text, as in the clinic's Excel record. The doctor decides what is confidential.
+  const diagnosis = text(body.diagnosis, 'Clinical diagnosis', 500, true);
+  const soapObjective = text(body.soapObjective, 'Pertinent P.E. and laboratory findings', 5000);
+  const actionsTaken = text(body.actionsTaken, 'Action taken', 5000);
+  const confidential = flag(body.confidential) ? 1 : 0;
   const rxItems = parseItems(body.prescription);   // validated before anything is saved
   const screenedNote = text(body.screenedNote, 'Screening note', 300);
   const wantsScreening = body.putToScreening === true;
@@ -259,15 +255,15 @@ async function completeVisit(id, body, actor) {
     const screen = wantsScreening && visit.visit_type === 'Checkup';
     const now = new Date().toISOString();
     await connection.execute(
-      `UPDATE visits SET diagnosis = ?, notes = ?, confidential = ?, status = 'completed',
+      `UPDATE visits SET diagnosis = ?, confidential = ?, status = 'completed',
          doctor_id = ?, doctor_name = ?, completed_at = ?,
-         soap_subjective = ?, soap_objective = ?, soap_assessment = ?, soap_plan = ?, actions_taken = ?,
+         soap_objective = ?, actions_taken = ?,
          sent_to_hospital = ?, is_screened = ?, screened_by = ?, screened_at = ?, screened_note = ?
        WHERE id = ?`,
       [
-        diagnosis, notes, confidential,
+        diagnosis, confidential,
         actor.id, actor.name, now,
-        soapSubjective, soapObjective, soapAssessment, soapPlan, actionsTaken,
+        soapObjective, actionsTaken,
         flag(body.sentToHospital), screen ? 1 : 0, screen ? actor.id : null,
         screen ? now : null, screen ? screenedNote : '',
         id
