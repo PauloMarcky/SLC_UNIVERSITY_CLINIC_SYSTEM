@@ -47,7 +47,7 @@
         }
     };
     // Pages that are not in the menu highlight the menu item they belong to.
-    const PARENT_PAGE = { '/nurse/record-detail.html': '/nurse/medical-records.html' };
+    const PARENT_PAGE = { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html' };
 
     const nav = document.querySelector('aside nav');
     if (!nav || location.protocol === 'file:') return;

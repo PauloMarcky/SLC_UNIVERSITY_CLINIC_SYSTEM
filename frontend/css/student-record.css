@@ -1,0 +1,95 @@
+/* Student record pages (Add Student, later Student Record). Loaded after style.css. */
+.sample-tag { margin-left:8px; vertical-align:middle; }
+.back-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:16px; }
+.back-row a.back { font-size:.875rem; font-weight:600; }
+.form.cols-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.form.cols-3 .span-2 { grid-column:span 2; }
+.f .choice label { padding:10px 14px; }
+.f input[readonly].auto { background:var(--surface-soft); color:var(--m); }
+.sub-note { padding:16px 24px 0; font-size:.875rem; color:var(--m); }
+/* Past medical history rows: tick box on the left, extra boxes open only when ticked */
+.hx-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:16px 20px; align-items:start; padding:16px 24px; border-top:1px solid var(--bd); }
+.hx-row:first-of-type { border-top:0; }
+.hx-check { display:flex; align-items:center; gap:12px; margin:0; font-weight:650; font-size:.9375rem; cursor:pointer; }
+.hx-check input { width:20px; height:20px; margin:0; flex:none; }
+.hx-check small { font-weight:400; color:var(--m); }
+.hx-extra { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.hx-extra[hidden] { display:none; }
+.hx-extra .full { grid-column:1/-1; }
+.hx-extra label { display:block; margin-bottom:7px; font-size:.8125rem; font-weight:600; }
+.hx-extra input { width:100%; }
+.hx-inline { display:flex; align-items:center; gap:10px; }
+.hx-inline input[type=checkbox] { width:20px; height:20px; margin:0; }
+.bp-pair { display:flex; align-items:center; gap:8px; }
+.bp-pair input { min-width:0; }
+.bp-pair span { font-size:1.25rem; color:var(--m); }
+.form-vitals.cols-4 { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.findings-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2.4fr) minmax(0,1.2fr); gap:20px; padding:24px; }
+.findings-grid textarea { width:100%; }
+.save-result { margin-bottom:16px; }
+@media(max-width:900px) {
+  .form.cols-3 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .form-vitals.cols-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .findings-grid { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:640px) {
+  .form.cols-3 { grid-template-columns:minmax(0,1fr); }
+  .form.cols-3 .span-2 { grid-column:auto; }
+  .hx-row { grid-template-columns:minmax(0,1fr); padding:16px 20px; }
+  .hx-extra { grid-template-columns:minmax(0,1fr); }
+  .form-vitals.cols-4 { grid-template-columns:minmax(0,1fr); }
+}
+/* ---- Student Record page (Part 4) ---- */
+.record-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; padding:22px 24px; }
+.record-head-text { min-width:0; }
+.record-head .eyebrow { display:block; font-size:.75rem; font-weight:650; letter-spacing:.5px; text-transform:uppercase; color:var(--m); }
+.record-head h2 { margin:4px 0 6px; overflow-wrap:anywhere; }
+.record-head .sub { margin:0; }
+.record-head-actions { display:flex; flex-wrap:wrap; gap:12px; }
+.record-head-actions[hidden] { display:none; }
+.head-note { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.head-note span { font-size:.8125rem; font-weight:400; color:var(--m); }
+/* Identification: 3 columns, label above value */
+.id-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px 24px; padding:24px; }
+.id-item { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.id-item.span-2 { grid-column:span 2; }
+.id-label { font-size:.75rem; font-weight:650; letter-spacing:.3px; text-transform:uppercase; color:var(--m); }
+.id-value { font-size:.9375rem; color:var(--t); overflow-wrap:anywhere; }
+.empty-dash { color:var(--m); }
+/* Past medical history: read-only table */
+.hx-table th[scope=row] { width:34%; padding:16px 24px; text-align:left; font-size:.9375rem; font-weight:650; letter-spacing:0; color:var(--t); background:none; white-space:normal; }
+.hx-table th small { font-weight:400; color:var(--m); }
+.hx-table td { white-space:normal; padding:16px 18px; }
+.hx-table .hx-answer { width:14%; white-space:nowrap; }
+.yn { font-weight:650; }
+.yn.no { font-weight:400; color:var(--m); }
+.yn.yes-warn { color:var(--warning); }
+.yn.yes-ok { color:var(--success); }
+/* Vital signs and findings tables */
+.entry-table { min-width:560px; }
+.findings-table { min-width:760px; }
+.findings-table td { white-space:normal; vertical-align:top; }
+.findings-table td:nth-child(1), .findings-table td:nth-child(2) { white-space:nowrap; }
+.findings-table td:nth-child(3) { min-width:260px; }
+.type-wellness { font-weight:650; color:var(--success); }
+.type-consult { font-weight:650; color:var(--g); }
+@media(max-width:900px) {
+  .id-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .id-gap { display:none; }
+}
+@media(max-width:640px) {
+  .id-grid { grid-template-columns:minmax(0,1fr); padding:20px; }
+  .id-item.span-2 { grid-column:auto; }
+  .hx-table th[scope=row] { padding:14px 12px 14px 20px; }
+}
+/* ---- Add entry / Edit record panel (Part 5) ---- */
+.entry-panel { margin-bottom:24px; border-top:3px solid var(--g); }
+.entry-panel .panel-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding:20px 24px 0; }
+.entry-panel .panel-head h3 { margin:0; font-size:1.125rem; }
+.entry-panel .sub-note { padding-bottom:4px; }
+.entry-panel .panel-message { margin:12px 24px 0; }
+.entry-panel .form-section { margin-top:12px; }
+.entry-panel .form-actions { position:static; box-shadow:none; }
+.entry-panel .bp-pair input { width:100%; }
+.entry-panel .f .choice label { padding:10px 14px; }
+.entry-panel .hx-extra .full { grid-column:1/-1; }

@@ -26,80 +26,39 @@
             </nav>
         </aside>
         <main>
-            <div class="page-head">
+            <div class="page-head" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
                 <div>
-                    <h2>Medical Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span></h2>
-                    <p class="sub">Requirements per student. Doctor visits auto-fill Physical, Dental and Vaccine entries. Doctor view is read-only.</p>
+                    <h2>Medical Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span> <span class="pill yellow" id="sample-tag">Sample data, nothing here is saved</span></h2>
+                    <p class="sub">Search a student, open the record, then add an entry from there.</p>
                 </div>
+                <a class="btn" id="add-student" href="../nurse/add-student.html">+ Add student</a>
             </div>
-            <nav class="tabs" id="mr-tabs" aria-label="College"><a class="on" aria-current="true" href="#" data-college="">All</a><a href="#emp">Employees</a></nav>
             <div class="filters" role="search">
-                <div class="grow"><label for="mr-search">Search</label><input id="mr-search" type="search"
-                        placeholder="Student name or ID" autocomplete="off"></div>
+                <div class="grow"><label for="mr-search">Search by name or ID</label><input id="mr-search" type="search"
+                        placeholder="Type a name or ID number" autocomplete="off"></div>
                 <div class="filters-clear"><button type="button" class="btn sec" id="mr-clear">Clear</button></div>
             </div>
+            <nav class="tabs" id="mr-tabs" aria-label="Department"></nav>
             <p class="filter-count" id="mr-count" role="status" aria-live="polite"></p>
             <section class="box">
-                <h3>Student requirements</h3>
-                <p class="legend">Students come from the database. Physical, Dental, Vaccines, Lab, Medical certificate and Cleared show &mdash; until the backend stores them.</p>
                 <table class="record-table">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>College</th>
-                            <th>Course</th>
-                            <th>Year</th>
-                            <th>Physical</th>
-                            <th>Dental</th>
-                            <th>Vaccines</th>
-                            <th>Lab</th>
-                            <th>Medical certificate</th>
-                            <th>Cleared</th>
+                            <th>Department</th>
+                            <th>Age</th>
+                            <th>Last visit</th>
+                            <th aria-label="Open"></th>
                         </tr>
                     </thead>
                     <tbody id="mr-body">
                         <tr>
-                            <td colspan="11">Loading students...</td>
+                            <td colspan="6">Loading students...</td>
                         </tr>
                     </tbody>
                 </table>
             </section>
-            <section class="box" id="emp">
-                <h3>Employees by category <span class="pill yellow">Sample data</span></h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Headcount (sample)</th>
-                            <th>Note</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Deans</td>
-                            <td>12</td>
-                            <td>Office-based</td>
-                        </tr>
-                        <tr>
-                            <td>Full-Time Faculty</td>
-                            <td>180</td>
-                            <td>Classroom exposure</td>
-                        </tr>
-                        <tr>
-                            <td>Part-Time / City Faculty</td>
-                            <td>95</td>
-                            <td>Limited campus hours</td>
-                        </tr>
-                        <tr>
-                            <td>Maintenance</td>
-                            <td>40</td>
-                            <td>Higher injury exposure</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
-            <p class="note">Search and college tabs narrow the students loaded from the database. Saving requirements and alerts need a backend.</p>
         </main>
     </div>
 </body>

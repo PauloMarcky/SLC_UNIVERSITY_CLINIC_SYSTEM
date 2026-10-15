@@ -80,15 +80,44 @@ function rowToVisit(row, role) {
     bmiStatus: row.bmi_status,
     confidential: Number(row.confidential) === 1,
     createdByName: row.created_by_name,
+    status: row.status,
+    isScreened: Number(row.is_screened) === 1,
+    screenedNote: hidden ? '' : row.screened_note || '',
+    screenedAt: row.screened_at || null,
+    doctorName: row.doctor_name || null,
+    nurseName: row.nurse_name || null,
+    pulseRate: row.pulse_rate == null ? null : Number(row.pulse_rate),
+    initialDiagnosis: row.initial_diagnosis || '',
+    externalLabsAttached: Number(row.external_labs_attached) === 1,
+    sentToHospital: Number(row.sent_to_hospital) === 1,
+    status: row.status,
+    isScreened: Number(row.is_screened) === 1,
+    screenedNote: hidden ? '' : row.screened_note || '',
+    screenedAt: row.screened_at || null,
+    doctorName: row.doctor_name || null,
+    nurseName: row.nurse_name || null,
+    pulseRate: row.pulse_rate == null ? null : Number(row.pulse_rate),
+    initialDiagnosis: row.initial_diagnosis || '',
+    externalLabsAttached: Number(row.external_labs_attached) === 1,
+    sentToHospital: Number(row.sent_to_hospital) === 1,
+    course: row.course || '',
+    age: row.date_of_birth ? Math.floor((Date.now() - new Date(row.date_of_birth).getTime()) / 31557600000) : null,
+    actionsTaken: hidden ? '' : row.actions_taken || '',
+    soapObjective: hidden ? '' : row.soap_objective || '',
+    sex: row.gender || '',
+    yearLevel: row.year || '',
+    visitNumber: Number(row.visit_number) || 1,
+    bodyTemperature: row.body_temperature == null ? null : Number(row.body_temperature),
     createdAt: row.created_at
   };
 }
 
-const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college
+const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college, p.course, p.year, p.gender, p.date_of_birth,
+                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.id <= v.id) AS visit_number
                       FROM visits v JOIN patients p ON p.id = v.patient_id`;
 
 async function listVisits({ search = '', type = '', college = '' }, actor) {
-  const where = [];
+  const where = ["v.status = 'completed'"];
   const params = [];
   const term = search.trim().slice(0, 200);
   if (term) {
@@ -163,11 +192,12 @@ async function createVisit(body, actor) {
     const [result] = await connection.execute(
       `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
          weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
-         created_by, created_by_name, created_at)
-       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+         created_by, created_by_name, created_at, doctor_id, doctor_name, completed_at)
+       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         patientId, visitType, visitDate, complaint, systolic, diastolic, weight, height,
         bmi, status, bpStatusOf(systolic, diastolic), diagnosis, notes, confidential,
+        actor.id, actor.name, new Date().toISOString(),
         actor.id, actor.name, new Date().toISOString()
       ]
     );
@@ -183,4 +213,8 @@ async function createVisit(body, actor) {
   return visit;
 }
 
-export { listVisits, createVisit };
+export {
+  listVisits, createVisit,
+  text, number, validDate, parseBp, bmiOf, bpStatusOf,
+  rowToVisit, SELECT_VISIT, VISIT_TYPES, DIAGNOSES
+};
