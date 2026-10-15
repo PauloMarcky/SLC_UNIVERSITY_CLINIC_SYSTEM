@@ -44,7 +44,7 @@
     };
     // Pages that are not in the menu highlight the menu item they belong to (per role).
     const PARENT_PAGES = {
-        nurse: { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html' },
+        nurse: { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html', '/nurse/import-students.html': '/nurse/medical-records.html' },
         doctor: { '/nurse/record-detail.html': '/nurse/medical-records.html' }
     };
 

@@ -123,8 +123,10 @@
         if (session.user.role === 'doctor') {
             const tag = document.getElementById('readonly-tag');
             const add = document.getElementById('add-student');
+            const imp = document.getElementById('import-students');
             if (tag) tag.hidden = false;
             if (add) add.hidden = true;
+            if (imp) imp.hidden = true;
         }
     }).catch(fail);
 
