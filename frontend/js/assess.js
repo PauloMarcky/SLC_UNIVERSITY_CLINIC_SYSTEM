@@ -1,4 +1,4 @@
-/* Nurse triage: find or register a patient, record history, vitals and send the visit to the doctor's queue. */
+/* Nurse assessment: find or register a patient, record history, review past visits, record vitals and send the patient to the doctor's queue. */
 (function () {
     'use strict';
     const api = window.ClinicAPI;
@@ -37,11 +37,13 @@
         selected = patient;
         $('triage-form').hidden = !patient;
         $('history-box').hidden = !patient;
+        $('past-box').hidden = !patient;
         if (patient && changed) {
             $('patient-hint').textContent = 'Selected: ' + label(patient);
             try {
                 const result = await api.request('/api/patients/' + encodeURIComponent(patient.id) + '/history');
                 fillHistory(result.history);
+                loadPastVisits(patient);
             } catch (error) { fail(error); }
         }
     }
@@ -95,6 +97,35 @@
         finally { button.disabled = false; }
     });
 
+    // ---------- past visits (completed visits only; the server hides confidential ones from the nurse) ----------
+    function pastCell(text) {
+        const td = document.createElement('td');
+        td.textContent = text == null || text === '' ? '\u2014' : String(text);
+        return td;
+    }
+    async function loadPastVisits(patient) {
+        const rows = $('past-rows');
+        const empty = text => {
+            const tr = document.createElement('tr'), td = pastCell(text);
+            td.colSpan = 5;
+            tr.append(td);
+            rows.replaceChildren(tr);
+        };
+        empty('Loading\u2026');
+        try {
+            const result = await api.request('/api/visits?search=' + encodeURIComponent(patient.id));
+            if (!selected || selected.id !== patient.id) return; // another patient was picked meanwhile
+            const own = result.visits.filter(v => v.patientId === patient.id);
+            if (!own.length) return empty('No past visits.');
+            rows.replaceChildren(...own.map(v => {
+                const tr = document.createElement('tr');
+                tr.append(pastCell(v.visitDate), pastCell(v.visitType), pastCell(v.complaint),
+                    pastCell(v.diagnosis), pastCell(v.actionsTaken));
+                return tr;
+            }));
+        } catch (error) { fail(error); }
+    }
+
     // ---------- medical history ----------
     function fillHistory(h) {
         $('h-asthma').checked = h.asthma;
@@ -123,7 +154,7 @@
         } catch (error) { fail(error); }
     });
 
-    // ---------- triage ----------
+    // ---------- assessment ----------
     function updateBmi() {
         const kg = parseFloat($('w').value), cm = parseFloat($('h').value);
         $('b').value = kg > 0 && cm > 0 ? (kg / Math.pow(cm / 100, 2)).toFixed(1) : 'Enter weight and height';
@@ -151,7 +182,7 @@
                     externalLabsAttached: $('labs').checked
                 }
             });
-            say('Triage saved. Visit #' + result.visit.id + ' for ' + selected.name + ' is in the doctor\u2019s queue.');
+            say('Assessment saved. Visit #' + result.visit.id + ' for ' + selected.name + ' is in the doctor\u2019s queue.');
             ['c', 'bp', 'pulse', 'temp', 'w', 'h', 'idx'].forEach(id => { $(id).value = ''; });
             $('labs').checked = false;
             updateBmi();
@@ -160,6 +191,6 @@
     });
 
     api.getSession().then(session => {
-        if (session.user.role !== 'nurse') say('Only a nurse can record triage.', true);
+        if (session.user.role !== 'nurse') say('Only a nurse can record an assessment.', true);
     }).catch(fail);
 })();
