@@ -1,0 +1,10 @@
+-- SLC University Clinic System: schema note.
+--
+-- This file intentionally contains no tables.
+-- The database schema lives in database/migrations/*.sql, applied in
+-- filename order by:
+--
+--     npm run migrate        (run from backend/)
+--
+-- Never edit a migration that has already been applied. Add a new numbered
+-- migration instead. See database/migrations/README.md.
