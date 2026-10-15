@@ -1,20 +1,12 @@
 import mysql from 'mysql2/promise';
-
-const required = ['DB_HOST', 'DB_USER', 'DB_NAME'];
-const missing = required.filter(key => !process.env[key]);
-if (missing.length) {
-  throw new Error(
-    `Missing MySQL environment variable(s): ${missing.join(', ')}. ` +
-    `Copy backend/.env.example to backend/.env and fill in your local MySQL credentials.`
-  );
-}
+import { env } from '../config/env.js';
 
 export const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME,
+  host: env.db.host,
+  port: env.db.port,
+  user: env.db.user,
+  password: env.db.password,
+  database: env.db.database,
   waitForConnections: true,
   connectionLimit: 10,
   maxIdle: 5,
@@ -27,12 +19,17 @@ export async function closePool() {
   await pool.end();
 }
 
+// Test helper: empties the tables the tests touch and re-seeds four sample patients.
+// The inventory/prescription tables are listed first because they point at visits and patients.
 export async function resetDatabase() {
   const connection = await pool.getConnection();
   try {
     await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    for (const table of ['notifications', 'certificate_history', 'certificates', 'sessions', 'users', 'patients',
-                         'visits', 'patient_medical_history']) {
+    for (const table of [
+      'dispense_lines', 'prescription_items', 'prescriptions', 'stock_movements',
+      'medicine_batches', 'medicines',
+      'notifications', 'certificate_history', 'certificates', 'sessions', 'users', 'patients'
+    ]) {
       await connection.query(`TRUNCATE TABLE ${table}`);
     }
     await connection.query('SET FOREIGN_KEY_CHECKS = 1');
@@ -48,6 +45,7 @@ export async function resetDatabase() {
   }
 }
 
+/** Runs `work(connection)` in one transaction. Commits on success, rolls back if it throws. */
 export async function withTransaction(work) {
   const connection = await pool.getConnection();
   try {
