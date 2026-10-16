@@ -32,6 +32,9 @@ Opening a group from the rail expands navigation and reveals its destinations.
 - Consultation BMI calculation, confidential diagnosis behavior, visit submission
   payload/CSRF and search/reset controls.
 - Certificate doctor/nurse controls, review display, patient selection and editor.
+- 260px desktop sidebar, mobile drawer and Escape behavior, desktop content
+  expansion, keyboard modal handling, persistent themes and scrollable tables.
+- Two-role (doctor, nurse) login routing/payload, password visibility and login errors.
 - Reduced-motion behavior and seven-second decorative animation scheduling.
 
 Browser checks use an ephemeral local static server, installed Microsoft Edge and

@@ -4,17 +4,18 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=22.9.0"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env start.js",
-    "dev": "node --watch --env-file-if-exists=.env start.js",
-    "create-user": "node --env-file-if-exists=.env create-user.js",
+    "start": "node --env-file-if-exists=.env server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js",
+    "create-user": "node --env-file-if-exists=.env scripts/create-user.js",
     "seed-users": "node --env-file-if-exists=.env scripts/seed-users.js",
-    "migrate": "node --env-file-if-exists=.env database/migrate.js",
-    "test": "node --env-file-if-exists=.env --test tests/*.test.js"
+    "migrate": "node --env-file-if-exists=.env db/migrate.js",
+    "test": "node --env-file-if-exists=.env --test --test-concurrency=1 tests/*.test.js"
   },
   "dependencies": {
+    "express": "^5.3.0",
     "mysql2": "^3.24.5"
   }
 }

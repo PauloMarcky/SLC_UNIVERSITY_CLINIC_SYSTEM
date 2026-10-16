@@ -6,28 +6,24 @@
         nurse: {
             title: 'Nurse',
             links: [
-                ['Dashboard', '../nurse/dashboard.html'],
-                ['Medical Records', '../nurse/medical-records.html'],
-                ['Inventory', '../nurse/inventory.html'],
-                ['Statistics', '../doctor/statistics.html'],
-                ['Certificates', '../shared/certificates.html']
+                ['Assess', '../nurse/assess.html'],
+                ['Student Records', '../nurse/medical-records.html'],
+                ['Statistics', '../doctor/statistics.html']
             ]
         },
         doctor: {
             title: 'Doctor',
             links: [
-                ['Dashboard', '../doctor/dashboard.html'],
-                ['New Visit', '../doctor/consultation-form.html'],
+                ['Exam Queue', '../doctor/queue.html'],
                 ['Student Records', '../nurse/medical-records.html'],
-                ['Certificate Approval', '../shared/certificates.html'],
                 ['User Management', '../doctor/users.html']
             ],
-            order: [['link', 0], ['group', 0], ['link', 1], ['link', 2], ['link', 3], ['group', 1], ['link', 4]],
+            order: [['group', 0], ['link', 0], ['link', 1], ['group', 1], ['link', 2]],
             groups: [
                 {
                     title: 'Consultations & Checkups',
                     icon: '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/>',
-                    pages: ['/doctor/visits.html', '/doctor/screening.html', '/doctor/checkup.html', '/doctor/consultation.html'],
+                    pages: ['/doctor/screening.html', '/doctor/checkup.html', '/doctor/consultation.html'],
                     links: [
                         ['Screening', '../doctor/screening.html'],
                         ['Checkup', '../doctor/checkup.html'],
@@ -46,8 +42,11 @@
             ]
         }
     };
-    // Pages that are not in the menu highlight the menu item they belong to.
-    const PARENT_PAGE = { '/nurse/record-detail.html': '/nurse/medical-records.html' };
+    // Pages that are not in the menu highlight the menu item they belong to (per role).
+    const PARENT_PAGES = {
+        nurse: { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html', '/nurse/import-students.html': '/nurse/medical-records.html' },
+        doctor: { '/nurse/record-detail.html': '/nurse/medical-records.html' }
+    };
 
     const nav = document.querySelector('aside nav');
     if (!nav || location.protocol === 'file:') return;
@@ -56,18 +55,15 @@
     function build(role) {
         const menu = MENUS[role];
         const heading = nav.querySelector('h4');
-        // certificates.js looks these two elements up by id, so keep the ids when they exist.
-        const keepDashboardId = !!document.getElementById('sidebar-dashboard');
         const logoutLink = nav.querySelector('a[data-logout]');
         nav.querySelectorAll('a:not([data-logout])').forEach(link => link.remove());
         nav.querySelectorAll('.nav-group').forEach(group => group.remove());
         if (heading) heading.textContent = menu.title;
-        const current = PARENT_PAGE[location.pathname] || location.pathname;
+        const current = (PARENT_PAGES[role] || {})[location.pathname] || location.pathname;
         const makeLink = function (item, currentPath) {
             const link = document.createElement('a');
             link.textContent = item[0];
             link.setAttribute('href', item[1]);
-            if (item[0] === 'Dashboard' && keepDashboardId) link.id = 'sidebar-dashboard';
             if (new URL(item[1], location.href).pathname === (currentPath || current)) {
                 link.classList.add('on');
                 link.setAttribute('aria-current', 'page');
@@ -78,7 +74,7 @@
             const details = document.createElement('details');
             details.className = 'nav-group';
             const active = group.pages.includes(current);
-            details.open = true;
+            details.open = active;
             if (active) details.classList.add('has-active');
             const summary = document.createElement('summary');
             summary.innerHTML = '<svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + group.icon + '</svg><span>' + group.title + '</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"></path></svg>';

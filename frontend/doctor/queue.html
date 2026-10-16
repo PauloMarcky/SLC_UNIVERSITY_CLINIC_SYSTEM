@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Exam Queue - ULS Clinic System</title>
+    <script src="../js/login-theme.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/prescription.css">
+    <link rel="stylesheet" href="../css/exam-modal.css">
+    <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
+    <script src="../js/clinic-api.js" defer></script>
+    <script src="../js/rx-api.js" defer></script>
+    <script src="../js/prescription-builder.js" defer></script>
+    <script src="../js/queue.js" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System</h1>
+        <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Doctor</h4>
+                <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/></svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a href="consultation.html">Consultation</a></div></details>
+                <a class="on" href="queue.html">Exam Queue</a>
+                <a href="../nurse/medical-records.html">Student Records</a>
+                <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/></svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a href="statistics-consultation.html">Statistics for Consultation</a></div></details>
+                <a href="users.html">User Management</a>
+            </nav>
+        </aside>
+        <main>
+            <div class="page-head">
+                <div>
+                    <h2>Exam Queue</h2>
+                    <p class="sub">Patients triaged by the nurse and waiting for your examination.</p>
+                </div>
+                <div class="toolbar"><button class="btn sec" type="button" id="refresh">Refresh</button></div>
+            </div>
+            <p class="note" id="flow-message" role="alert" tabindex="-1" hidden></p>
+            <nav class="tabs" id="type-tabs" aria-label="Visit type"></nav>
+            <section class="box">
+                <h3>Waiting <span class="pill yellow" id="queue-count">0</span></h3>
+                <table>
+                    <thead><tr><th>Date</th><th>Patient</th><th>Type</th><th>Complaint</th><th>BP</th><th>BMI</th><th>Nurse</th><th></th></tr></thead>
+                    <tbody id="queue-rows"><tr><td colspan="8">Loading…</td></tr></tbody>
+                </table>
+            </section>
+
+        </main>
+    </div>
+    <div class="modal exam-modal" id="exam-modal" hidden>
+        <div class="modal-backdrop" data-close-exam></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exam-title">
+            <div class="modal-head"><h3 id="exam-title">Examination</h3><button class="modal-x" type="button" data-close-exam aria-label="Close">&times;</button></div>
+            <form class="visit-form" id="exam-form" novalidate>
+                <p class="exam-summary" id="exam-summary"></p>
+                <p class="note user-message-error" id="exam-message" role="alert" tabindex="-1" hidden></p>
+                <section class="form-section">
+                    <div class="form">
+                        <div class="f full"><label for="purpose">Purpose of visit</label><input id="purpose" readonly></div>
+                        <div class="f full"><label for="o">Pertinent P.E. &amp; laboratory findings</label><textarea id="o" rows="4" maxlength="5000"></textarea></div>
+                        <div class="f full"><label for="x">Clinical diagnosis *</label><textarea id="x" rows="3" maxlength="500" required></textarea></div>
+                        <div class="f full"><label for="act">Action taken</label><textarea id="act" rows="3" maxlength="5000"></textarea></div>
+                        <div class="f full choice">
+                            <label><input type="checkbox" id="hosp"> Sent to hospital</label>
+                            <label><input type="checkbox" id="conf"> Confidential (hidden from the nurse)</label>
+                        </div>
+                    </div>
+                </section>
+                <section class="form-section" id="screen-box" hidden>
+                    <h3>Screening</h3>
+                    <div class="form">
+                        <div class="f full"><label><input type="checkbox" id="screen"> Put record to Screening (the checkup revealed an illness)</label></div>
+                        <div class="f full" id="screen-note-wrap" hidden><label for="screen-note">Screening note</label><input id="screen-note" maxlength="300" placeholder="e.g. UTI found in submitted lab results"></div>
+                    </div>
+                </section>
+                <section class="form-section">
+                    <h3>Prescription <small>(optional)</small></h3>
+                    <div id="rx-builder"></div>
+                </section>
+                <div class="form-actions">
+                    <button class="btn" type="submit" id="complete">Complete visit</button>
+                    <button class="btn sec" type="button" data-close-exam>Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

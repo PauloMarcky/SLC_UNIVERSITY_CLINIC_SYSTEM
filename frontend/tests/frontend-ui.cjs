@@ -15,12 +15,12 @@ const pages = ['index.html', 'doctor/dashboard.html', 'doctor/visits.html',
     'doctor/statistics-checkup.html', 'doctor/statistics-consultation.html', 'doctor/users.html', 'nurse/dashboard.html',
     'nurse/medical-records.html', 'nurse/record-detail.html', 'nurse/inventory.html',
     'shared/certificates.html',
+const pages = ['index.html', 'doctor/queue.html', 'doctor/checkup.html', 'doctor/consultation.html',
+    'doctor/screening.html', 'doctor/statistics.html', 'doctor/statistics-checkup.html',
+    'doctor/statistics-consultation.html', 'doctor/users.html', 'nurse/medical-records.html',
+    'nurse/record-detail.html', 'nurse/add-student.html', 'nurse/assess.html',
     'archive/clinic-dashboard.html', 'archive/records.html', 'archive/reports.html'];
 const patient = { id: 'UI-TEST-001', name: 'UI Test Patient', college: 'IT', course: 'BSIT', year: '3', category: 'student' };
-const certificate = { id: 1, patientId: patient.id, patientName: patient.name, patient,
-    type: 'Medical Certificate', status: 'Pending Approval', certificateDate: '2026-10-11',
-    createdAt: '2026-10-11T08:00:00Z', submittedAt: '2026-10-11T08:00:00Z', version: 1,
-    purpose: 'UI testing', findings: 'Synthetic test content', recommendations: 'Synthetic test content' };
 const contentTypes = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png', '.svg': 'image/svg+xml' };
 let role = 'doctor', failLogin = false, loginPayload, lastVisitQuery, visitPayload, visitCsrf;
 const unexpectedApiRequests = [];
@@ -32,9 +32,8 @@ async function mockApi(route) {
         if (failLogin) return route.fulfill({ status: 401, json: { error: 'Invalid test credentials.' } });
         body = { user: { role, name: 'UI Test User' } };
     } else if (url.pathname === '/api/session') body = { user: { role, name: 'UI Test User' }, csrfToken: 'ui-test-only' };
-    else if (url.pathname === '/api/certificates') body = { certificates: [certificate] };
-    else if (url.pathname.startsWith('/api/certificates/')) body = { certificate, history: [] };
     else if (url.pathname === '/api/notifications') body = { notifications: [] };
+    else if (url.pathname === '/api/visits/queue' || url.pathname === '/api/visits/screened') body = { visits: [] };
     else if (url.pathname === '/api/patients') body = { patients: [patient] };
     else if (url.pathname === '/api/users') body = { users: [] };
     else if (url.pathname === '/api/medicines') body = { medicines: [] };
@@ -124,11 +123,14 @@ const server = http.createServer(async (req, res) => {
                     assert.equal(result.tables, result.wrappedTables, `${file}: table without scroll region`);
                     if (!login && width > 760) assert.equal(result.sidebar, 280, `${file}: sidebar width`);
                     if (process.env.UI_SCREENSHOTS && ['index.html', 'doctor/dashboard.html', 'doctor/users.html', 'nurse/dashboard.html', 'shared/certificates.html', 'doctor/statistics.html'].includes(file) && [1440, 390].includes(width)) {
+                    if (file !== 'index.html' && width > 760) assert.equal(result.sidebar, 260, `${file}: sidebar width`);
+                    if (process.env.UI_SCREENSHOTS && ['index.html', 'doctor/queue.html', 'doctor/statistics.html'].includes(file) && [1440, 390].includes(width)) {
                         await page.screenshot({ path: path.join(process.env.UI_SCREENSHOTS, `${file.replaceAll('/', '-')}-${theme}-${width}.png`), fullPage: true });
                     }
                     layouts++;
                 }
                 console.log(`PASS saved ${theme} theme, ${width}px: all ${pages.length} pages`);
+                console.log(`PASS ${theme} ${width}px: all ${pages.length} pages`);
             }
         }
         // A saved login theme survives staff navigation, reload and staff theme API calls.
@@ -145,6 +147,7 @@ const server = http.createServer(async (req, res) => {
             assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
         }
         await page.goto(base + '/index.html');
+        await page.goto(base + '/doctor/queue.html');
         assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
         await page.evaluate(() => {
             localStorage.removeItem('clinic-theme');
@@ -157,6 +160,7 @@ const server = http.createServer(async (req, res) => {
         await page.setViewportSize({ width: 390, height: 844 });
         await page.goto(base + '/doctor/dashboard.html');
         assert.equal(await page.locator('aside').evaluate(el => el.inert), true);
+        await page.goto(base + '/doctor/queue.html');
         await page.locator('.menu-toggle').click();
         assert.equal(await page.locator('.menu-toggle').getAttribute('aria-expanded'), 'true');
         assert.equal(await page.locator('main').evaluate(el => el.inert), true);
@@ -277,6 +281,7 @@ const server = http.createServer(async (req, res) => {
         }
         page.once('dialog', dialog => dialog.accept());
         await page.locator('#cancel-edit').click();
+        assert.equal(await page.locator('main').evaluate(el => Math.round(el.getBoundingClientRect().left)), 0);
         // Browser mocks validate the original login payload, error message and all role routes.
         failLogin = true;
         await page.goto(base + '/index.html');
@@ -292,7 +297,7 @@ const server = http.createServer(async (req, res) => {
             await page.goto(base + '/index.html');
             await page.locator(`[data-role="${role}"]`).click();
             await page.locator('#u').fill('ui-test'); await page.locator('#p').fill('ui-test-password');
-            await Promise.all([page.waitForURL(`**/${role}/dashboard.html`), page.locator('.login-submit').click()]);
+            await Promise.all([page.waitForURL(`**/${role === 'doctor' ? 'doctor/queue' : 'nurse/assess'}.html`), page.locator('.login-submit').click()]);
             assert.deepEqual(loginPayload, { username: 'ui-test', password: 'ui-test-password', portal: role });
         }
         // Reduced-motion users see no flock; normal mode spawns after roughly seven seconds.
@@ -309,6 +314,7 @@ const server = http.createServer(async (req, res) => {
         assert.deepEqual(failures, [], 'Missing assets');
         assert.deepEqual(unexpectedApiRequests, [], 'Unexpected API requests');
         console.log(`PASS ${layouts} page/saved-theme/viewport combinations; login glass and theme persistence, light staff workspaces, persistent accessible icon rail, mobile drawer, modal keyboard, BMI, visit form/CSRF, filters, certificate roles/editor, two login routes, password control, login errors, and reduced motion.`);
+        console.log(`PASS ${layouts} page/theme/viewport combinations; theme persistence, sidebar, mobile drawer, two login routes, password control, login errors, and reduced motion.`);
     } finally {
         await browser.close();
         await new Promise(resolve => server.close(resolve));
