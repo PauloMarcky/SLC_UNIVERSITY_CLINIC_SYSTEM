@@ -30,7 +30,7 @@ Open `backend/.env` and set `DB_HOST`, `DB_USER`, `DB_PASSWORD` and `DB_NAME` to
 
     npm run migrate
 
-This creates the database if it is missing and applies every file in `backend/database/migrations/` in order. It is safe to run again at any time: it only applies migrations that are new. The schema lives only in the migration files. Do not run `schema.sql`.
+This creates the database if it is missing and applies every file in `backend/db/migrations/` in order. It is safe to run again at any time: it only applies migrations that are new. The schema lives only in the migration files. Do not run `schema.sql`.
 
 Verify in the MySQL command line:
 

@@ -1,7 +1,7 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClinicServer } from '../app.js';
-import { resetDatabase, closePool } from '../config/db.js';
+import { resetDatabase, closePool } from '../db/pool.js';
 
 after(async () => {
   await closePool();

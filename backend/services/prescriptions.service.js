@@ -1,21 +1,12 @@
-import { pool, withTransaction } from '../config/db.js';
-import { HttpError } from './store.js';
-import { wholeNumber } from './inventory-store.js';
+import { pool, withTransaction } from '../db/pool.js';
+import { HttpError } from '../utils/http-error.js';
+import { text, wholeNumber } from '../utils/validators.js';
 
 // Keep in sync with RX_FREQUENCIES in frontend/js/rx-api.js
 export const FREQUENCIES = [
   'Once daily', 'Twice daily (BID)', 'Three times daily (TID)', 'Four times daily (QID)',
   'Every 4 hours', 'Every 6 hours', 'Every 8 hours', 'At bedtime', 'As needed (PRN)', 'Single dose'
 ];
-
-function text(value, field, max, required = false) {
-  if (value === undefined || value === null) value = '';
-  if (typeof value !== 'string') throw new HttpError(400, `${field} must be text.`);
-  const result = value.trim();
-  if (required && !result) throw new HttpError(400, `${field} is required.`);
-  if (result.length > max) throw new HttpError(400, `${field} must be at most ${max} characters.`);
-  return result;
-}
 
 /** Validate the prescription part of a visit request. Returns [] when there is none. */
 export function parseItems(raw) {

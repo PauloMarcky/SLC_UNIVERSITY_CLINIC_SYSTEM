@@ -25,7 +25,7 @@ STEP 4 - CREATE THE DATABASE
   npm run migrate
 
   Creates the database if missing and applies every file in
-  backend/database/migrations/ in order. Safe to re-run. The schema lives
+  backend/db/migrations/ in order. Safe to re-run. The schema lives
   only in the migration files. Do NOT run schema.sql.
 
 STEP 5 - OPTIONAL SAMPLE PATIENTS

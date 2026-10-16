@@ -1,11 +1,11 @@
-import { createUser } from '../stores/store.js';
-import { closePool } from '../config/db.js';
+import { createUser } from '../services/users.service.js';
+import { closePool } from '../db/pool.js';
 
 const DEFAULT_PASSWORD = 'clinic-dev-2026';
 
 const defaults = [
-  { username: 'nurse1',    name: 'Default Nurse',  role: 'nurse'    },
-  { username: 'doctor1',   name: 'Default Doctor', role: 'doctor'   },
+  { username: 'nurse1', name: 'Default Nurse', role: 'nurse' },
+  { username: 'doctor1', name: 'Default Doctor', role: 'doctor' },
 ];
 
 for (const user of defaults) {

@@ -1,5 +1,6 @@
-import { createUser } from '../stores/store.js';
-import { closePool } from '../config/db.js';
+// Usage: node scripts/create-user.js <username> <nurse|doctor> <Full Name>
+import { createUser } from '../services/users.service.js';
+import { closePool } from '../db/pool.js';
 
 const [username, role, ...nameParts] = process.argv.slice(2);
 const name = nameParts.join(' ');

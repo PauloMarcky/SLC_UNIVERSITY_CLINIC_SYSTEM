@@ -1,10 +1,7 @@
-import { Router } from 'express';
-import { login, getSession, logout } from '../controllers/auth.controller.js';
+import { Router } from '../utils/framework.js';
+import * as auth from '../controllers/auth.controller.js';
 
-const router = Router();
-
-router.post('/login', login);
-router.get('/session', getSession);
-router.post('/logout', logout);
-
-export default router;
+/** Session routes. Login is wired separately in routes/index.js because it runs before the login gate. */
+export const authRoutes = Router()
+  .get('/session', auth.session)
+  .post('/logout', auth.logout);
