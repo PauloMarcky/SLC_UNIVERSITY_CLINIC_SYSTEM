@@ -43,31 +43,84 @@
         if (!sidebar) return;
         sidebar.id = 'clinic-navigation';
         var icon = function (d) {
-            return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+            return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18' + d + '"/></svg>';
         };
         var toggle = document.createElement('button');
         toggle.type = 'button';
         toggle.className = 'menu-toggle';
-        toggle.innerHTML = icon('M4 7h16M4 12h16M4 17h16');
         toggle.setAttribute('aria-controls', sidebar.id);
         var mobile = window.matchMedia('(max-width: 760px)');
-        function setExpanded(expanded) {
+        var desktopCollapsed = false;
+        try { desktopCollapsed = localStorage.getItem('clinic-sidebar-collapsed') === 'true'; }
+        catch (error) { /* Navigation also works without browser storage. */ }
+        var tooltip = document.createElement('div');
+        tooltip.id = 'clinic-nav-tooltip';
+        tooltip.className = 'nav-tooltip';
+        tooltip.setAttribute('role', 'tooltip');
+        tooltip.hidden = true;
+        document.body.append(tooltip);
+        var tooltipTarget;
+        function hideTooltip() {
+            tooltip.hidden = true;
+            if (tooltipTarget) tooltipTarget.removeAttribute('aria-describedby');
+            tooltipTarget = null;
+        }
+        function showTooltip(target) {
+            hideTooltip();
+            if (mobile.matches || !shell.classList.contains('sidebar-collapsed') || !target) return;
+            tooltipTarget = target;
+            tooltip.textContent = target.dataset.navLabel;
+            tooltip.hidden = false;
+            target.setAttribute('aria-describedby', tooltip.id);
+            var bounds = target.getBoundingClientRect();
+            tooltip.style.left = (sidebar.getBoundingClientRect().right + 12) + 'px';
+            tooltip.style.top = Math.max(8, Math.min(innerHeight - tooltip.offsetHeight - 8,
+                bounds.top + (bounds.height - tooltip.offsetHeight) / 2)) + 'px';
+        }
+        function setExpanded(expanded, persist) {
+            hideTooltip();
             shell.classList.toggle('sidebar-collapsed', !expanded);
             document.body.classList.toggle('sidebar-is-collapsed', !expanded);
             toggle.setAttribute('aria-expanded', String(expanded));
-            toggle.setAttribute('aria-label', expanded ? 'Hide navigation' : 'Show navigation');
-            toggle.title = expanded ? 'Hide navigation' : 'Show navigation';
+            var action = mobile.matches ? (expanded ? 'Close navigation' : 'Open navigation') :
+                (expanded ? 'Collapse navigation' : 'Expand navigation');
+            toggle.setAttribute('aria-label', action);
+            toggle.title = action;
+            toggle.innerHTML = icon(expanded ? 'M16 9l-3 3 3 3' : 'M14 9l3 3-3 3');
             document.body.classList.toggle('drawer-open', expanded && mobile.matches);
-            sidebar.inert = !expanded;
+            sidebar.inert = mobile.matches && !expanded;
             main.inert = expanded && mobile.matches;
+            if (persist && !mobile.matches) {
+                desktopCollapsed = !expanded;
+                try { localStorage.setItem('clinic-sidebar-collapsed', String(desktopCollapsed)); }
+                catch (error) { /* Saving a layout preference is optional. */ }
+            }
         }
-        setExpanded(!mobile.matches);
+        setExpanded(!mobile.matches && !desktopCollapsed);
         toggle.addEventListener('click', function () {
             var expanded = toggle.getAttribute('aria-expanded') !== 'true';
-            setExpanded(expanded);
-            if (expanded && mobile.matches) sidebar.querySelector('a, button')?.focus();
+            setExpanded(expanded, true);
+            if (expanded && mobile.matches) sidebar.querySelector('a, button, summary')?.focus();
         });
-        mobile.addEventListener('change', function () { setExpanded(!mobile.matches); });
+        mobile.addEventListener('change', function () { setExpanded(!mobile.matches && !desktopCollapsed); });
+        // A grouped rail icon opens its full menu, keeping every destination reachable.
+        sidebar.addEventListener('click', function (event) {
+            var summary = event.target.closest('.nav-group > summary');
+            if (summary && !mobile.matches && shell.classList.contains('sidebar-collapsed')) {
+                event.preventDefault();
+                setExpanded(true, true);
+                summary.parentElement.open = true;
+            }
+        });
+        sidebar.addEventListener('pointerover', function (event) {
+            var target = event.target.closest('[data-nav-label]');
+            if (target !== tooltipTarget) showTooltip(target);
+        });
+        sidebar.addEventListener('pointerleave', hideTooltip);
+        sidebar.addEventListener('focusin', function (event) { showTooltip(event.target.closest('[data-nav-label]')); });
+        sidebar.addEventListener('focusout', hideTooltip);
+        sidebar.addEventListener('scroll', hideTooltip, true);
+        window.addEventListener('resize', hideTooltip);
         // Phones: tap the dimmed workspace or press Escape to close the navigation drawer.
         shell.addEventListener('click', function (e) {
             if (mobile.matches && e.target === shell && !shell.classList.contains('sidebar-collapsed')) {
@@ -76,13 +129,14 @@
             }
         });
         document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hideTooltip();
             if (e.key === 'Escape' && mobile.matches && !shell.classList.contains('sidebar-collapsed')) {
                 setExpanded(false);
                 toggle.focus();
             }
             if (e.key === 'Tab' && mobile.matches && toggle.getAttribute('aria-expanded') === 'true') {
                 var controls = Array.from(topbar.querySelectorAll('a[href], button:not(:disabled)'))
-                    .concat(Array.from(sidebar.querySelectorAll('a[href], button:not(:disabled)')))
+                    .concat(Array.from(sidebar.querySelectorAll('a[href], button:not(:disabled), summary')))
                     .filter(function (item) { return item.getClientRects().length && !item.closest('[hidden]'); });
                 var first = controls[0], last = controls[controls.length - 1];
                 var outside = !controls.includes(document.activeElement);
@@ -109,11 +163,23 @@
             }
             if (topbarAccountNav && !topbarAccountNav.querySelector('a')) topbarAccountNav.remove();
         }
+        var logout = sidebar.querySelector('a[data-logout]');
+        if (logout && !logout.closest('.sidebar-logout')) {
+            var logoutNav = document.createElement('nav');
+            logoutNav.className = 'sidebar-logout';
+            logoutNav.setAttribute('aria-label', 'Session');
+            logoutNav.append(logout);
+            sidebar.append(logoutNav);
+        }
         if (topbar) topbar.prepend(toggle);
         else main.prepend(toggle);
         var paths = {
             dashboard: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
             records: '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5"/>',
+            certificates: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 11h6m-6 5 2 2 4-4"/>',
+            screening: '<path d="M8 4H6a2 2 0 0 0-2 2v14h16V6a2 2 0 0 0-2-2h-2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M7 13h3l2-4 2 8 2-4h2"/>',
+            checkup: '<path d="M6 3v5a5 5 0 0 0 10 0V3M4 3h4m6 0h4M11 13v3a5 5 0 0 0 10 0v-2"/><circle cx="21" cy="11" r="2"/>',
+            consultation: '<path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5A8.5 8.5 0 0 1 10.5 3h2a8.5 8.5 0 0 1 8.5 8.5Z"/><path d="M8 11h8m-4-4v8"/>',
             visits: '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/>',
             add: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
             inventory: '<path d="m12 3 9 5v9l-9 5-9-5V8zM3 8l9 5 9-5M12 13v9M7.5 5.5l9 5"/>',
@@ -123,16 +189,37 @@
         };
         function decorateNav(aside) {
             aside.querySelectorAll('a').forEach(function (link) {
-                if (link.querySelector('.nav-icon')) return;
                 var href = link.getAttribute('href');
-                var name = /dashboard/.test(href) ? 'dashboard' : /users\.html/.test(href) ? 'users' : /consultation-form/.test(href) ? 'add' : /visits/.test(href) ? 'visits' : /inventory/.test(href) ? 'inventory' : /statistics|reports/.test(href) ? 'chart' : /index/.test(href) ? 'logout' : 'records';
-                var icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                icon.setAttribute('viewBox', '0 0 24 24');
-                icon.setAttribute('class', 'nav-icon');
-                icon.setAttribute('aria-hidden', 'true');
-                icon.innerHTML = paths[name];
-                link.prepend(icon);
+                var name = link.hasAttribute('data-logout') ? 'logout' : /dashboard/i.test(link.textContent) ? 'dashboard' : /users\.html/.test(href) ? 'users' : /consultation-form/.test(href) ? 'add' : /statistics|reports/.test(href) ? 'chart' : /screening/.test(href) ? 'screening' : /checkup/.test(href) ? 'checkup' : /consultation/.test(href) ? 'consultation' : /certificates/.test(href) ? 'certificates' : /visits/.test(href) ? 'visits' : /inventory/.test(href) ? 'inventory' : 'records';
+                if (!link.querySelector('.nav-icon')) {
+                    var navIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    navIcon.setAttribute('viewBox', '0 0 24 24');
+                    navIcon.setAttribute('class', 'nav-icon');
+                    navIcon.setAttribute('aria-hidden', 'true');
+                    navIcon.innerHTML = paths[name];
+                    link.prepend(navIcon);
+                }
+                if (!link.querySelector('.nav-label')) {
+                    var label = document.createElement('span');
+                    label.className = 'nav-label';
+                    Array.from(link.childNodes).forEach(function (node) {
+                        if (node.nodeType !== 1 || !node.classList.contains('nav-icon')) label.append(node);
+                    });
+                    link.append(label);
+                }
                 if (link.classList.contains('on')) link.setAttribute('aria-current', 'page');
+            });
+            aside.querySelectorAll('.nav-group').forEach(function (group) {
+                var label = group.querySelector('summary > span');
+                if (label) label.classList.add('nav-label');
+                if (group.querySelector('a.on, a[aria-current="page"]')) group.classList.add('has-active');
+            });
+            aside.querySelectorAll('a, .nav-group > summary').forEach(function (control) {
+                var label = control.querySelector('.nav-label');
+                var name = (label ? label.textContent : control.textContent).trim();
+                control.dataset.navLabel = name;
+                control.setAttribute('aria-label', name);
+                control.title = name;
             });
         }
         decorateNav(sidebar);
