@@ -5,7 +5,7 @@
 'use strict';
 importScripts('../vendor/xlsx.full.min.js');
 
-const MAX_ROWS = 10000;
+const MAX_ROWS = Infinity; // no row limit
 const HEADERS = {
     id: ['code', 'id', 'id no', 'id number', 'student id', 'student no', 'student number', 'identification no'],
     lastName: ['last name', 'lastname', 'surname', 'family name'],

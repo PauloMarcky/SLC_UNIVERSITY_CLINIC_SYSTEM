@@ -9,7 +9,7 @@
     if (!api || !document.getElementById('imp-file')) return;
     const $ = id => document.getElementById(id);
 
-    const MAX_BYTES = 10 * 1024 * 1024;
+    const MAX_BYTES = Infinity; // no file size limit
     const AT_ONCE = 4;          // requests in flight while saving
     const SHOW_LIMIT = 200;     // table rows drawn at once (a 10,000-row table would freeze the page)
     const LIST_LIMIT = 500;     // GET /api/patients returns at most this many

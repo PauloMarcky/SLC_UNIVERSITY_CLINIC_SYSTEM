@@ -1,7 +1,7 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClinicServer } from '../app.js';
-import { resetDatabase, closePool } from '../db.js';
+import { resetDatabase, closePool } from '../db/pool.js';
 
 after(async () => {
   await closePool();
@@ -83,7 +83,20 @@ test('exam flow: free-text diagnosis, confidential checkbox and screening rules'
   assert.equal(doneA.data.visit.soapObjective, 'BP normal');
   assert.equal(doneA.data.visit.actionsTaken, 'Rest and fluids');
   assert.equal(doneA.data.visit.confidential, false);   // nothing is confidential unless the doctor ticks it
-  assert.equal(doneA.data.visit.isScreened, true);      // Checkup can be put to Screening
+  assert.equal(doneA.data.visit.isScreened, false);     // the original stays a plain Checkup...
+
+  // ...and Screening gets its own copy, which points back at the original.
+  const screened = await f.request('/api/visits/screened', { actor: doctor });
+  assert.equal(screened.status, 200);
+  assert.equal(screened.data.visits.length, 1);
+  const copy = screened.data.visits[0];
+  assert.equal(copy.screenedCopyOf, idA);
+  assert.equal(copy.visitType, 'Checkup');
+  assert.equal(copy.diagnosis, longDiagnosis);
+  assert.equal(copy.screenedNote, 'UTI in lab results');
+  assert.equal(copy.isScreened, true);
+  // The same checkup cannot be put to Screening a second time.
+  assert.equal((await f.request(`/api/visits/${idA}/screen`, { actor: doctor, method: 'POST', body: {} })).status, 409);
 
   // Completing twice is refused.
   assert.equal((await f.request(`/api/visits/${idA}/complete`, { actor: doctor, method: 'POST', body: full })).status, 409);
@@ -95,9 +108,9 @@ test('exam flow: free-text diagnosis, confidential checkbox and screening rules'
   assert.equal(doneB.data.visit.isScreened, false);
   assert.equal(doneB.data.visit.confidential, true);
   const nurseList = await f.request('/api/visits?search=2026-00123', { actor: nurse });
-  assert.deepEqual(nurseList.data.visits.map(v => v.id), [idA]);
+  assert.deepEqual(nurseList.data.visits.map(v => v.id).sort(), [idA, copy.id].sort());   // idB is hidden
   const doctorList = await f.request('/api/visits?search=2026-00123', { actor: doctor });
-  assert.deepEqual(doctorList.data.visits.map(v => v.id).sort(), [idA, idB].sort());
+  assert.deepEqual(doctorList.data.visits.map(v => v.id).sort(), [idA, idB, copy.id].sort());
 
   // The direct doctor entry accepts free text too.
   const direct = await f.request('/api/visits', { actor: doctor, method: 'POST', body: {

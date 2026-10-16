@@ -107,7 +107,7 @@ async function run() {
       .sort();
 
     if (files.length === 0) {
-      console.log('No migration files found in database/migrations/.');
+      console.log('No migration files found in db/migrations/.');
       return;
     }
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renderCertificate } from '../certificate-template.js';
+import { renderCertificate } from '../templates/certificate.template.js';
 
 const certificate = {
     id: 12, patientId: 'TEST-001', patientName: 'Test Patient',
