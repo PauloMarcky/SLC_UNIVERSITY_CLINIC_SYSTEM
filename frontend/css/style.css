@@ -266,6 +266,7 @@ tbody tr:has(a[href]:not([data-logout])) td,tbody tr:has(.certificate-actions bu
 .user-actions .btn:disabled { opacity:.5; }
 .status-switch { display:inline-flex; align-items:center; gap:10px; min-height:46px; padding:10px 13px; border:1px solid var(--field-border); border-radius:10px; background:var(--field-bg); cursor:pointer; font-weight:600; }
 .status-switch input { flex:none; margin:0; }
+.f .status-switch { display:flex; margin-bottom:0; }
 .user-confirm-body { padding:20px 24px; }
 .user-confirm-body .field-hint { margin-top:8px; }
 .user-self-label { margin-left:8px; }

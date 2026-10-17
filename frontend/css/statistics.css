@@ -79,3 +79,9 @@
     .stat-row:not(.no-trend) .stat-trend { text-align:right; }
 }
 @media (prefers-reduced-motion:reduce) { .stat-row { transition:none; } }
+
+/* Number cards on the Checkup and Consultation statistics pages. */
+.metric { min-height:130px; }
+.metric strong { display:block; margin-top:10px; font-size:1.5rem; color:var(--t); overflow-wrap:anywhere; font-variant-numeric:tabular-nums; }
+.metric strong.is-text { font-size:1.125rem; line-height:1.35; }
+.metric span { display:block; margin-top:4px; font-size:.8125rem; color:var(--m); }
