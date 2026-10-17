@@ -23,22 +23,46 @@
         <aside>
             <nav aria-label="Menu">
                 <h4>Doctor</h4>
-                <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/></svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a href="consultation.html">Consultation</a></div></details>
-                <a href="queue.html">Exam Queue</a><a href="../nurse/medical-records.html">Student Records</a>
-                <details class="nav-group has-active" open><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/></svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a href="statistics-consultation.html">Statistics for Consultation</a></div></details>
+                <details class="nav-group">
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="4" y="5" width="16" height="16" rx="2" />
+                            <path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6" />
+                        </svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a
+                            href="consultation.html">Consultation</a></div>
+                </details>
+                <a href="queue.html">Queue</a><a href="../nurse/medical-records.html">Student Records</a>
+                <details class="nav-group has-active" open>
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5" />
+                        </svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a
+                            href="statistics-consultation.html">Statistics for Consultation</a></div>
+                </details>
                 <a href="users.html">User Management</a>
             </nav>
         </aside>
         <main>
             <div class="page-head">
                 <div>
-                    <h2>Statistics</h2>
+                    <h2 id="stat-title">Statistics</h2>
                     <p class="sub">Raw visit data converted to graphs to spot outbreaks.</p>
                 </div>
             </div>
             <!-- sample-data note removed
                 -->
             <div class="filters" role="group" aria-label="Statistics filters">
+                <div><label for="stat-view">View</label><select id="stat-view" autocomplete="off">
+                        <option value="" selected>All combined</option>
+                        <option value="screened">Screened</option>
+                        <option value="checkup">Checkup</option>
+                        <option value="consultation">Consultation</option>
+                    </select></div>
                 <div><label for="stat-period">Period</label><select id="stat-period" autocomplete="off">
                         <option value="all">All time</option>
                         <option value="month" selected>This month</option>
@@ -51,7 +75,8 @@
                         <!-- -->
                         <!-- -->
                     </select></div>
-                <div hidden aria-hidden="true"><label for="stat-group">Group</label><select id="stat-group" autocomplete="off" disabled>
+                <div hidden aria-hidden="true"><label for="stat-group">Group</label><select id="stat-group"
+                        autocomplete="off" disabled>
                         <option selected>Students</option>
                         <option>Deans</option>
                         <option>Full-Time Faculty</option>
@@ -60,24 +85,35 @@
                     </select></div>
                 <div class="filters-clear">
                     <button type="button" class="btn sec" id="stat-reset">Reset</button>
-                    <a href="/api/statistics/export" class="btn sec" id="stat-export" download style="margin-left: 0.5rem; text-decoration: none; display: inline-flex; align-items: center;">Export CSV</a>
+                    <a href="/api/statistics/export" class="btn sec" id="stat-export" download
+                        style="margin-left: 0.5rem; text-decoration: none; display: inline-flex; align-items: center;">Export
+                        CSV</a>
                 </div>
             </div>
             <p class="filter-count" id="stat-summary" role="status" aria-live="polite"></p>
             <div class="alert" id="stat-alert" role="status" aria-live="polite" hidden></div>
             <section class="box">
-                <h3 class="stat-head">Cases by Condition Category <span class="stat-total" id="stat-conditions-total"></span></h3>
-                <div class="pad"><div class="stat-list" id="stat-conditions" role="list"></div></div>
+                <h3 class="stat-head">Cases by Condition Category <span class="stat-total"
+                        id="stat-conditions-total"></span></h3>
+                <div class="pad">
+                    <div class="stat-list" id="stat-conditions" role="list"></div>
+                </div>
             </section>
             <div class="two">
                 <section class="box">
-                    <h3 class="stat-head">Cases per Department <span class="stat-total" id="stat-colleges-total"></span></h3>
-                    <div class="pad"><div class="stat-list" id="stat-colleges" role="list"></div></div>
+                    <h3 class="stat-head">Cases per Department <span class="stat-total" id="stat-colleges-total"></span>
+                    </h3>
+                    <div class="pad">
+                        <div class="stat-list" id="stat-colleges" role="list"></div>
+                    </div>
                 </section>
                 <section class="box">
                     <h3 class="stat-head">BMI Distribution <span class="stat-total" id="stat-bmi-total"></span></h3>
-                    <div class="pad"><div class="stat-list" id="stat-bmi" role="list"></div></div>
-                    <p class="stat-foot">Weight and height checkups, not visits. Category cut-offs are to be confirmed by the clinic doctor.</p>
+                    <div class="pad">
+                        <div class="stat-list" id="stat-bmi" role="list"></div>
+                    </div>
+                    <p class="stat-foot">Weight and height checkups, not visits. Category cut-offs are to be confirmed
+                        by the clinic doctor.</p>
                 </section>
             </div>
         </main>

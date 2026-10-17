@@ -109,6 +109,7 @@ export function rowToVisit(row, role) {
     nurseNotes: hidden ? '' : row.nurse_notes || '',
     labSourceName: hidden ? '' : row.lab_source_name || '',
     labReceivedAt: hidden ? null : row.lab_received_at || null,
+    labSourceLocation: hidden ? '' : row.lab_source_location || '',
     checkupResult: row.checkup_result || null,
     isScreeningCopy: row.screened_copy_of != null,
     createdAt: row.created_at
@@ -237,6 +238,12 @@ function parseLabDate(value, labSourceName) {
   return date;
 }
 
+// Where the outside lab clinic is. Only kept when a clinic name was entered.
+function labLocationOf(body) {
+  if (!text(body.labSourceName, 'Laboratory / medical center name', 200)) return '';
+  return text(body.labSourceLocation, 'Laboratory location', 200);
+}
+
 // Everything the nurse types at triage. Used by both "record" and "edit".
 function parseTriage(body) {
   const visitType = text(body.visitType, 'Visit type', 20, true);
@@ -255,12 +262,23 @@ function parseTriage(body) {
     // Only the name of the outside clinic is typed. The results stay on paper, and the date is set by the system.
     labSourceName: text(body.labSourceName, 'Laboratory / medical center name', 200),
     labReceivedAt: parseLabDate(body.labReceivedAt, text(body.labSourceName, 'Laboratory / medical center name', 200)),
+    labSourceLocation: labLocationOf(body),
     urgent: flag(body.urgent),
     externalLabsAttached: flag(body.externalLabsAttached)
   };
 }
 
 export async function triageVisit(body, actor) {
+  const labLocation = labLocationOf(body);   // checked before anything is saved
+  const visit = await recordTriage(body, actor);
+  if (labLocation) {
+    await pool.execute('UPDATE visits SET lab_source_location = ? WHERE id = ?', [labLocation, visit.id]);
+    visit.labSourceLocation = labLocation;
+  }
+  return visit;
+}
+
+async function recordTriage(body, actor) {
   requireAnyRole(actor, ['nurse'], 'Only a nurse can record triage.');
   const patientId = text(body.patientId, 'Patient ID', 50, true);
   await assertPatient(patientId);
@@ -300,13 +318,13 @@ export async function updateTriage(id, body, actor) {
       `UPDATE visits SET visit_type = ?, visit_date = ?, complaint = ?, systolic = ?, diastolic = ?,
          weight_kg = ?, height_cm = ?, bmi = ?, bmi_status = ?, bp_status = ?, pulse_rate = ?,
          initial_diagnosis = ?, external_labs_attached = ?, body_temperature = ?, nurse_notes = ?,
-         lab_source_name = ?, lab_received_at = ?, urgent = ?
+         lab_source_name = ?, lab_source_location = ?, lab_received_at = ?, urgent = ?
        WHERE id = ?`,
       [
         t.visitType, t.visitDate, t.complaint, v.systolic, v.diastolic, v.weight, v.height,
         v.bmi, v.bmiStatus, v.bpStatus, t.pulse, t.initialDiagnosis,
         t.labSourceName ? 1 : t.externalLabsAttached, t.temperature, t.nurseNotes,
-        t.labSourceName, labDate, t.urgent, id
+        t.labSourceName, t.labSourceLocation, labDate, t.urgent, id
       ]
     );
   });
@@ -444,6 +462,11 @@ async function copyToScreening(connection, visitId, actor, note, when) {
        nurse_notes, lab_source_name, lab_received_at, urgent, id
        FROM visits WHERE id = ?`,
     [actor.id, when, note, visitId]
+  );
+  // The Screening copy keeps the outside lab location of the original visit.
+  await connection.execute(
+    'UPDATE visits c JOIN visits o ON o.id = c.screened_copy_of SET c.lab_source_location = o.lab_source_location WHERE o.id = ?',
+    [visitId]
   );
 }
 

@@ -1,4 +1,4 @@
-/* Add / Edit Student Record (nurse only).
+/* Add / Edit Student Record (nurses add and edit; doctors can only add).
    No ?id= in the address: register a new student (POST /api/patients).
    With ?id=<patient id>: edit that student (PUT /api/patients/:id). The ID cannot change.
    Past medical history is saved with PUT /api/patients/:id/history.
@@ -53,7 +53,7 @@
         form.querySelectorAll('input[name="' + name + '"]').forEach(function (r) { r.checked = r.value === value; });
     }
 
-    if (window.SLCDepartments) window.SLCDepartments.fillSelect($('dept'));
+    if (window.SLCDepartments) window.SLCDepartments.fillSelect($('dept'), { short: true });
 
     $('dob').max = TODAY;
     $('dob').addEventListener('input', function () {
@@ -73,7 +73,7 @@
         else message(error.message, true);
     }
     api.getSession().then(function (session) {
-        if (session.user.role !== 'nurse') window.location.replace('../nurse/medical-records.html'); // doctors are read-only
+        if (session.user.role !== 'nurse' && !(session.user.role === 'doctor' && !editingId)) window.location.replace('../nurse/medical-records.html'); // doctors may add a student but not edit one
     }).catch(fail);
 
     /* ---------- edit mode: fill the form ---------- */

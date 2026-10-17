@@ -74,7 +74,7 @@
             return;
         }
         list.innerHTML = results.map(function (p, i) {
-            const meta = [p.id, p.college, courseYear(p)].filter(Boolean).map(function (part) { return highlight(part, q); }).join(' &middot; ');
+            const meta = [p.id, window.SLCDepartments ? window.SLCDepartments.short(p.college) : p.college, courseYear(p)].filter(Boolean).map(function (part) { return highlight(part, q); }).join(' &middot; ');
             return '<li role="option" id="pt-opt-' + i + '" data-index="' + i + '" aria-selected="' + (i === active ? 'true' : 'false') + '"' +
                 (i === active ? ' class="is-active"' : '') + '>' +
                 '<span class="pt-main"><strong>' + highlight(p.name, q) + '</strong><small>' + meta + '</small></span>' +
@@ -182,7 +182,7 @@
         closeList();
         $('pc-name').textContent = patient.name;
         const age = ageFrom(patient.dateOfBirth);
-        $('pc-meta').textContent = [patient.id, patient.college, courseYear(patient), age !== '' ? age + ' yrs' : '',
+        $('pc-meta').textContent = [patient.id, window.SLCDepartments ? window.SLCDepartments.short(patient.college) : patient.college, courseYear(patient), age !== '' ? age + ' yrs' : '',
             patient.lastVisit ? 'Last visit ' + formatDate(patient.lastVisit) : 'No visits yet'].filter(Boolean).join(' \u00B7 ');
         $('open-record').setAttribute('href', '../nurse/record-detail.html?id=' + encodeURIComponent(patient.id));
         showPanels(true);
@@ -259,6 +259,22 @@
     $('w').addEventListener('input', updateBmi);
     $('h').addEventListener('input', updateBmi);
 
+    // The outside lab fields only appear while "External lab results" is ticked.
+    // Unticking hides and clears them, so nothing is saved or shown to the doctor.
+    function syncLabFields() {
+        const on = $('labs').checked;
+        document.querySelectorAll('.lab-field').forEach(field => { field.hidden = !on; });
+        if (!on) ['lab-name', 'lab-location', 'lab-date'].forEach(id => { $(id).value = ''; });
+        else {
+            // Scroll the nearest scrolling box (the page or a popup) all the way down.
+            let box = $('lab-date').parentElement;
+            while (box && !(/(auto|scroll)/.test(getComputedStyle(box).overflowY) && box.scrollHeight > box.clientHeight)) box = box.parentElement;
+            const scroller = box || document.scrollingElement;
+            scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
+        }
+    }
+    $('labs').addEventListener('change', syncLabFields);
+
     function todayIso() {
         const n = new Date(), pad = v => String(v).padStart(2, '0');
         return n.getFullYear() + '-' + pad(n.getMonth() + 1) + '-' + pad(n.getDate());
@@ -277,11 +293,14 @@
                     patientId: selected.id, visitType: $('t').value, visitDate: $('d').value || todayIso(),
                     complaint: $('c').value, bp: $('bp').value, weight: $('w').value, height: $('h').value,
                     pulseRate: $('pulse').value, temperature: $('temp').value, initialDiagnosis: $('idx').value,
-                    externalLabsAttached: $('labs').checked
+                    externalLabsAttached: $('labs').checked,
+                    labSourceName: $('lab-name').value, labSourceLocation: $('lab-location').value,
+                    labReceivedAt: $('lab-date').value
                 }
             });
-            ['c', 'bp', 'pulse', 'temp', 'w', 'h', 'idx'].forEach(id => { $(id).value = ''; });
+            ['c', 'bp', 'pulse', 'temp', 'w', 'h', 'idx', 'lab-name', 'lab-location', 'lab-date'].forEach(id => { $(id).value = ''; });
             $('labs').checked = false;
+            syncLabFields();
             updateBmi();
             resetSearch();                                   // ready for the next patient
             say('Assessment saved. Visit #' + result.visit.id + ' for ' + name + ' is in the doctor\u2019s queue.');

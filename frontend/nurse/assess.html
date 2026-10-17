@@ -13,6 +13,7 @@
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/today.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
+    <script src="../js/departments.js" defer></script>
     <script src="../js/assess.js" defer></script>
 </head>
 
@@ -137,6 +138,13 @@
                                 maxlength="200"></div>
                         <div class="f full"><label><input type="checkbox" id="labs"> External lab results or documents
                                 attached to the printed chart</label></div>
+                        <div class="f full lab-field" hidden><label for="lab-name">Outside laboratory / clinic name</label><input
+                                id="lab-name" maxlength="200" placeholder="Where the lab result came from"
+                                autocomplete="off"></div>
+                        <div class="f lab-field" hidden><label for="lab-location">Clinic location</label><input id="lab-location"
+                                maxlength="200" placeholder="Address or city" autocomplete="off"></div>
+                        <div class="f lab-field" hidden><label for="lab-date">Date handed in (blank = today)</label><input id="lab-date"
+                                type="date"></div>
                     </div>
                 </section>
                 <div class="form-actions">

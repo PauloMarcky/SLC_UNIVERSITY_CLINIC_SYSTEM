@@ -16,19 +16,52 @@
         ['College of Nursing, Public Health and Midwifery', ['Bachelor of Science in Nursing', 'Bachelor of Science in Midwifery', 'Bachelor of Science in Public Health']]
     ];
     const OPTIONS = [];
+    // Capital letters only: "College of Information Technology" -> "CIT".
+    const abbr = function (text) { return text.replace(/[^A-Z]/g, ''); };
+    // How many programs would get each short label. Civil and Computer Engineering are both "BSCE".
+    const SHORT_USES = {};
+    LIST.forEach(function (c) {
+        c[1].forEach(function (p) {
+            const key = abbr(c[0]) + ' - ' + abbr(p);
+            SHORT_USES[key] = (SHORT_USES[key] || 0) + 1;
+        });
+    });
+    // Short label for one program. If two programs share a label, the word before the last word is added: "CEA - BSCE (Civil)".
+    const shortLabel = function (college, program) {
+        const key = abbr(college) + ' - ' + abbr(program);
+        if (SHORT_USES[key] > 1) {
+            const words = program.split(' ');
+            return key + ' (' + words[words.length - 2] + ')';
+        }
+        return key;
+    };
     LIST.forEach(function (c) { c[1].forEach(function (p) { OPTIONS.push(c[0] + ' - ' + p); }); });
+
+    // Saved value ("College" or "College - Program") -> short label.
+    const SHORT_BY_VALUE = {};
+    LIST.forEach(function (c) {
+        SHORT_BY_VALUE[c[0]] = abbr(c[0]);
+        c[1].forEach(function (p) { SHORT_BY_VALUE[c[0] + ' - ' + p] = shortLabel(c[0], p); });
+    });
 
     window.SLCDepartments = {
         list: LIST,
         options: OPTIONS,
+        // Short label for a saved department. Anything not in the list (old or custom values) is returned unchanged.
+        short: function (value) {
+            return Object.prototype.hasOwnProperty.call(SHORT_BY_VALUE, value) ? SHORT_BY_VALUE[value] : value;
+        },
         // Fills a <select>, grouped by college, keeping the first (placeholder) option.
-        fillSelect: function (select) {
+        fillSelect: function (select, opts) {
+            const short = !!(opts && opts.short);   // short labels only change the text; the saved value stays the full name
             LIST.forEach(function (c) {
                 const group = document.createElement('optgroup');
-                group.label = c[0];
+                group.label = short ? abbr(c[0]) : c[0];
                 c[1].forEach(function (p) {
                     const o = document.createElement('option');
-                    o.value = o.textContent = c[0] + ' - ' + p;
+                    o.value = c[0] + ' - ' + p;
+                    o.textContent = short ? shortLabel(c[0], p) : o.value;
+                    if (short) o.title = o.value;
                     group.appendChild(o);
                 });
                 select.appendChild(group);

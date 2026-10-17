@@ -5,15 +5,32 @@ import { HttpError } from '../utils/http-error.js';
 const isBlank = v => v === undefined || v === null || String(v).trim() === '';
 
 /**
+ * View filter for the statistics page: '' (all combined), 'checkup', 'consultation' or 'screened'.
+ * Returns a fixed SQL fragment (never user text), or '' for "all combined".
+ * 'screened' = checkups elevated to screening (checkup_result = 'Needs screening').
+ */
+export function scopeCondition(scope) {
+  if (isBlank(scope)) return '';
+  switch (String(scope).trim().toLowerCase()) {
+    case 'checkup': return "v.visit_type = 'Checkup'";
+    case 'consultation': return "v.visit_type = 'Consultation'";
+    case 'screened': return "v.visit_type = 'Checkup' AND v.checkup_result = 'Needs screening'";
+    default: throw new HttpError(400, 'Invalid statistics view.');
+  }
+}
+
+/**
  * Returns top-level summary metrics:
  * Total visits, consultations, total checkups, healthy checkups (Cleared),
  * checkups elevated to screening (Needs screening), and unique patients seen.
  * Excludes cancelled visits and duplicate screening copies by default.
  */
-export async function getStatisticsSummary({ startDate, endDate, college } = {}, actor) {
+export async function getStatisticsSummary({ startDate, endDate, college, scope } = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required for statistics.');
 
   const conditions = ["v.status = 'completed'", "v.screened_copy_of IS NULL"];
+  const scopeSql = scopeCondition(scope);
+  if (scopeSql) conditions.push(scopeSql);
   const params = [];
 
   if (!isBlank(startDate)) {
@@ -77,10 +94,12 @@ export async function getStatisticsSummary({ startDate, endDate, college } = {},
  * Groups all completed visits by diagnosis / illness name.
  * Ranks them by frequency and calculates morbidity percentage.
  */
-export async function getMorbidityReport({ startDate, endDate, college, type } = {}, actor) {
+export async function getMorbidityReport({ startDate, endDate, college, type, scope } = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
 
   const conditions = ["v.status = 'completed'", "v.screened_copy_of IS NULL", "v.diagnosis <> ''", "v.diagnosis IS NOT NULL"];
+  const scopeSql = scopeCondition(scope);
+  if (scopeSql) conditions.push(scopeSql);
   const params = [];
 
   if (!isBlank(startDate)) {
@@ -144,10 +163,12 @@ export async function getMorbidityReport({ startDate, endDate, college, type } =
  * The "Dstrbtn" (Distribution) report:
  * Cross-tabulates clinical cases across Colleges, Courses, and Gender.
  */
-export async function getDemographicDistribution({ startDate, endDate } = {}, actor) {
+export async function getDemographicDistribution({ startDate, endDate, scope } = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
 
   const conditions = ["v.status = 'completed'", "v.screened_copy_of IS NULL"];
+  const scopeSql = scopeCondition(scope);
+  if (scopeSql) conditions.push(scopeSql);
   const params = [];
 
   if (!isBlank(startDate)) {

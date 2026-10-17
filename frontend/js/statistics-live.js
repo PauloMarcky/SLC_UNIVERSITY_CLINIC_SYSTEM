@@ -7,13 +7,21 @@
 
     var period = document.getElementById('stat-period');
     var college = document.getElementById('stat-college');
+    var view = document.getElementById('stat-view');
+    if (view) {
+        var wanted = new URLSearchParams(location.search).get('view');
+        if (wanted && Array.prototype.some.call(view.options, function (o) { return o.value === wanted; })) view.value = wanted;
+    }
     var reset = document.getElementById('stat-reset');
     if (!period || !college) return;
 
     while (college.options.length > 1) college.remove(1);
-    if (window.SLCDepartments) window.SLCDepartments.fillSelect(college);
+    if (window.SLCDepartments) window.SLCDepartments.fillSelect(college, { short: true });
 
     var PERIOD_LABEL = { all: 'All time', month: 'This month', week: 'This week' };
+    function deptShort(value) { return window.SLCDepartments ? window.SLCDepartments.short(value) : value; }
+    var VIEW_LABEL = { '': 'All combined', screened: 'Screened', checkup: 'Checkup', consultation: 'Consultation' };
+    var VIEW_TITLE = { '': 'Statistics', screened: 'Statistics: Screened Records', checkup: 'Statistics: Checkups', consultation: 'Statistics: Consultations' };
     var BMI_CLASS = [['under', 'fill-under'], ['normal', 'fill-normal'], ['over', 'fill-over'], ['obes', 'fill-obese']];
 
     // ---------- Drawing ----------
@@ -141,8 +149,12 @@
 
     function apply() {
         var chosen = college.value;
+        var viewKey = view ? view.value : '';
+        var title = document.getElementById('stat-title');
+        if (title) title.textContent = VIEW_TITLE[viewKey] || 'Statistics';
         var query = [];
         if (chosen) query.push('college=' + encodeURIComponent(chosen));
+        if (viewKey) query.push('scope=' + encodeURIComponent(viewKey));
         if (period.value === 'week') query.push('startDate=' + isoDaysAgo(7));
         else if (period.value === 'month') query.push('startDate=' + isoDaysAgo(30));
         var qs = query.length ? '?' + query.join('&') : '';
@@ -167,25 +179,26 @@
                 var rising = w.thisWeek >= trends.rule.minThisWeek && w.thisWeek >= w.lastWeek * trends.rule.ratio;
                 return { name: item.diagnosis, total: item.caseCount, last: w.lastWeek, now: w.thisWeek, rising: rising };
             });
-            var departments = dist.byCollege.map(function (c) { return { name: c.college, total: c.totalVisits }; });
+            var departments = dist.byCollege.map(function (c) { return { name: deptShort(c.college), total: c.totalVisits }; });
             var bmi = trends.bmi.map(function (b) { return { name: b.category, cls: bmiClass(b.category), total: b.count }; });
 
             draw('stat-conditions', 'stat-conditions-total', conditions, 'Condition', 'Cases', { one: 'case', many: 'cases' }, { trend: true });
-            draw('stat-colleges', 'stat-colleges-total', departments, 'Department', 'Visits', { one: 'visit', many: 'visits' }, { selectedName: chosen });
+            draw('stat-colleges', 'stat-colleges-total', departments, 'Department', 'Visits', { one: 'visit', many: 'visits' }, { selectedName: deptShort(chosen) });
             draw('stat-bmi', 'stat-bmi-total', bmi, 'Category', 'Records', { one: 'record', many: 'records' });
-            drawAlert(conditions, trends.rule, chosen ? ' in ' + chosen : '');
+            drawAlert(conditions, trends.rule, chosen ? ' in ' + deptShort(chosen) : '');
 
             var cases = sum(conditions);
             document.getElementById('stat-summary').textContent =
                 'Showing ' + cases + (cases === 1 ? ' case' : ' cases') + ' \u00B7 ' +
-                (chosen || 'All departments') + ' \u00B7 ' + PERIOD_LABEL[period.value];
+                (chosen ? deptShort(chosen) : 'All departments') + ' \u00B7 ' + PERIOD_LABEL[period.value] + ' \u00B7 ' + (VIEW_LABEL[viewKey] || 'All combined');
         }).catch(function (error) { showError(error.message); });
     }
 
-    [period, college].forEach(function (s) { s.addEventListener('change', apply); });
+    [period, college, view].filter(Boolean).forEach(function (s) { s.addEventListener('change', apply); });
     reset.addEventListener('click', function () {
         period.value = 'month';
         college.value = '';
+        if (view) view.value = '';
         apply();
     });
     apply();

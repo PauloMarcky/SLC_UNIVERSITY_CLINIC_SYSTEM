@@ -56,7 +56,7 @@
             field('Last name', dash(r.lastName)) +
             field('First name', dash(r.firstName)) +
             field('Middle name', dash(r.middleName)) +
-            field('Department', dash(r.college)) +
+            field('Department', dash(window.SLCDepartments ? window.SLCDepartments.short(r.college) : r.college)) +
             field('Course / Year', dash([r.course, r.year].filter(Boolean).join(' - '))) +
             field('Gender', dash(r.gender)) +
             field('Age', age === '' ? dash('') : escapeHtml(age)) +
@@ -117,6 +117,14 @@
                 '<td>' + dash(v.actionsTaken) + '</td>' +
                 '<td>' + dash(v.doctorName || v.createdByName) + '</td></tr>';
         }).join('') : emptyRow(6, 'No completed visits yet.');
+
+        const labs = visits.filter(function (v) { return v.labSourceName; });
+        $('r-labs').innerHTML = labs.length ? labs.map(function (v) {
+            return '<tr><td>' + escapeHtml(formatDate(v.visitDate)) + '</td>' +
+                '<td>' + dash(v.labSourceName) + '</td>' +
+                '<td>' + dash(v.labSourceLocation) + '</td>' +
+                '<td>' + dash(formatDate(v.labReceivedAt)) + '</td></tr>';
+        }).join('') : emptyRow(4, 'No outside laboratory results recorded yet.');
     }
 
     /* ---------- nurse: new assessment on the student's own page ---------- */
@@ -151,6 +159,20 @@
         };
         $('a-weight').addEventListener('input', updateBmi);
         $('a-height').addEventListener('input', updateBmi);
+        // The outside lab fields only appear while "External lab results" is ticked; unticking hides and clears them.
+        const syncLabFields = function () {
+            const on = $('a-labs').checked;
+            form.querySelectorAll('.lab-field').forEach(function (field) { field.hidden = !on; });
+            if (!on) ['a-lab-name', 'a-lab-location', 'a-lab-date'].forEach(function (id) { $(id).value = ''; });
+            else {
+                // Scroll the nearest scrolling box (the popup or the page) all the way down.
+                let box = $('a-lab-date').parentElement;
+                while (box && !(/(auto|scroll)/.test(getComputedStyle(box).overflowY) && box.scrollHeight > box.clientHeight)) box = box.parentElement;
+                const scroller = box || document.scrollingElement;
+                scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
+            }
+        };
+        $('a-labs').addEventListener('change', syncLabFields);
         form.addEventListener('submit', async function (event) {
             event.preventDefault();
             const button = $('a-send');
@@ -163,10 +185,13 @@
                         patientId: patient.id, visitType: $('a-type').value, visitDate: $('a-date').value || today,
                         complaint: $('a-complaint').value, bp: $('a-bp').value, weight: $('a-weight').value,
                         height: $('a-height').value, pulseRate: $('a-pulse').value, temperature: $('a-temp').value,
-                        initialDiagnosis: $('a-dx').value, externalLabsAttached: $('a-labs').checked
+                        initialDiagnosis: $('a-dx').value, externalLabsAttached: $('a-labs').checked,
+                        labSourceName: $('a-lab-name').value, labSourceLocation: $('a-lab-location').value,
+                        labReceivedAt: $('a-lab-date').value
                     }
                 });
                 form.reset();
+                syncLabFields();
                 close();
                 $('a-date').value = today;
                 updateBmi();
@@ -192,7 +217,7 @@
         document.title = name + ' - ULS Clinic System';
         $('r-name').textContent = name;
         const age = ageFrom(p.dateOfBirth);
-        $('r-line').textContent = ['ID ' + p.id, p.college, p.gender, age === '' ? '' : age + ' years old'].filter(Boolean).join(' · ');
+        $('r-line').textContent = ['ID ' + p.id, window.SLCDepartments ? window.SLCDepartments.short(p.college) : p.college, p.gender, age === '' ? '' : age + ' years old'].filter(Boolean).join(' · ');
         $('edit-record').setAttribute('href', '../nurse/add-student.html?id=' + encodeURIComponent(p.id));
         renderIdentification(p);
         renderHistory(history);

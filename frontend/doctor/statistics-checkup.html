@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0; url=statistics.html?view=checkup">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Statistics for Check up - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
@@ -9,30 +11,95 @@
     <link rel="stylesheet" href="../css/statistics.css">
     <script src="../js/ui.js" defer></script>
 </head>
+
 <body>
-    <header class="topbar"><h1>ULS Clinic Management System</h1><nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav></header>
+    <header class="topbar">
+        <h1>ULS Clinic Management System</h1>
+        <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
+    </header>
     <div class="layout">
-        <aside><nav aria-label="Menu">
-            <h4>Doctor</h4>
-            <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/></svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a href="consultation.html">Consultation</a></div></details>
-            <a href="queue.html">Exam Queue</a><a href="../nurse/medical-records.html">Student Records</a>
-            <details class="nav-group" open><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/></svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a class="on" href="statistics-checkup.html">Statistics for Check up</a><a href="statistics-consultation.html">Statistics for Consultation</a></div></details>
-            <a href="users.html">User Management</a>
-        </nav></aside>
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Doctor</h4>
+                <details class="nav-group">
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="4" y="5" width="16" height="16" rx="2" />
+                            <path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6" />
+                        </svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a
+                            href="consultation.html">Consultation</a></div>
+                </details>
+                <a href="queue.html">Queue</a><a href="../nurse/medical-records.html">Student Records</a>
+                <details class="nav-group" open>
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5" />
+                        </svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a class="on" href="statistics-checkup.html">Statistics for Check up</a><a
+                            href="statistics-consultation.html">Statistics for Consultation</a></div>
+                </details>
+                <a href="users.html">User Management</a>
+            </nav>
+        </aside>
         <main>
-            <div class="page-head"><div><h2>Statistics for Check up</h2><p class="sub">Wellness analytics and clearance trends</p></div><div class="toolbar"><a class="btn sec" href="statistics.html">Existing statistics overview</a></div></div>
-            <p class="note">Analytics placeholders. No clinic totals are shown until the checkup statistics data is connected.</p>
+            <div class="page-head">
+                <div>
+                    <h2>Statistics for Check up</h2>
+                    <p class="sub">Wellness analytics and clearance trends</p>
+                </div>
+                <div class="toolbar"><a class="btn sec" href="statistics.html">Overall statistics</a></div>
+            </div>
+            <p class="note">Analytics placeholders. No clinic totals are shown until the checkup statistics data is
+                connected.</p>
             <!-- TODO: Add a statistics endpoint for wellness visits, entrance clearance counts, and BMI categories; bind the chart placeholders to its response. -->
             <div class="cards">
-                <article class="card metric-placeholder"><small>Checkups in selected period</small><strong>—</strong><span>Wellness visits</span></article>
-                <article class="card metric-placeholder"><small>Entrance clearances</small><strong>—</strong><span>Clearance volume</span></article>
-                <article class="card metric-placeholder"><small>Average BMI</small><strong>—</strong><span>Checkup records only</span></article>
+                <article class="card metric-placeholder"><small>Checkups in selected
+                        period</small><strong>—</strong><span>Wellness visits</span></article>
+                <article class="card metric-placeholder"><small>Entrance
+                        clearances</small><strong>—</strong><span>Clearance volume</span></article>
+                <article class="card metric-placeholder"><small>Average BMI</small><strong>—</strong><span>Checkup
+                        records only</span></article>
             </div>
             <div class="analytics-grid">
-                <section class="box"><h3>Clearance Volume</h3><div class="pad"><div class="analytics-placeholder" role="img" aria-label="Placeholder for clearance volume chart"><div><svg class="chart-mark" viewBox="0 0 260 82" aria-hidden="true"><path class="guide" d="M1 18H259M1 41H259M1 64H259"/><rect x="20" y="45" width="24" height="28" rx="3"/><rect x="69" y="31" width="24" height="42" rx="3"/><rect x="118" y="39" width="24" height="34" rx="3"/><rect x="167" y="19" width="24" height="54" rx="3"/><rect x="216" y="27" width="24" height="46" rx="3"/></svg><strong>Chart placeholder</strong><p>Entrance clearances by week or month</p></div></div></div></section>
-                <section class="box"><h3>BMI Distribution</h3><div class="pad"><div class="analytics-placeholder" role="img" aria-label="Placeholder for BMI distribution chart"><div><svg class="chart-mark" viewBox="0 0 260 82" aria-hidden="true"><path class="guide" d="M1 18H259M1 41H259M1 64H259"/><path d="M8 61C37 57 45 48 69 49S103 32 130 38 162 24 189 29 222 16 252 12"/></svg><strong>Chart placeholder</strong><p>Wellness BMI categories for the selected period</p></div></div></div></section>
+                <section class="box">
+                    <h3>Clearance Volume</h3>
+                    <div class="pad">
+                        <div class="analytics-placeholder" role="img"
+                            aria-label="Placeholder for clearance volume chart">
+                            <div><svg class="chart-mark" viewBox="0 0 260 82" aria-hidden="true">
+                                    <path class="guide" d="M1 18H259M1 41H259M1 64H259" />
+                                    <rect x="20" y="45" width="24" height="28" rx="3" />
+                                    <rect x="69" y="31" width="24" height="42" rx="3" />
+                                    <rect x="118" y="39" width="24" height="34" rx="3" />
+                                    <rect x="167" y="19" width="24" height="54" rx="3" />
+                                    <rect x="216" y="27" width="24" height="46" rx="3" />
+                                </svg><strong>Chart placeholder</strong>
+                                <p>Entrance clearances by week or month</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="box">
+                    <h3>BMI Distribution</h3>
+                    <div class="pad">
+                        <div class="analytics-placeholder" role="img"
+                            aria-label="Placeholder for BMI distribution chart">
+                            <div><svg class="chart-mark" viewBox="0 0 260 82" aria-hidden="true">
+                                    <path class="guide" d="M1 18H259M1 41H259M1 64H259" />
+                                    <path d="M8 61C37 57 45 48 69 49S103 32 130 38 162 24 189 29 222 16 252 12" />
+                                </svg><strong>Chart placeholder</strong>
+                                <p>Wellness BMI categories for the selected period</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
     </div>
 </body>
+
 </html>

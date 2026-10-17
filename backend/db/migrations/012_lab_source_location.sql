@@ -1,0 +1,3 @@
+-- 012: where the outside laboratory / clinic is. Only the clinic name, its location and the date it was
+-- handed in are recorded (lab_source_name and lab_received_at already exist). The results stay on paper.
+-- @add-column visits lab_source_location VARCHAR(200) NOT NULL DEFAULT ''

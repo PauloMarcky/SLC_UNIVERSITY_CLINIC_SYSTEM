@@ -1,4 +1,4 @@
-/* Import students from Excel (nurse only), shown as a window on the Student Records page.
+/* Import students from Excel (nurses and doctors), shown as a window on the Student Records page.
    1. The file is read in a Web Worker (js/import-worker.js), so the page stays responsive on big files.
    2. A preview shows what is ready, already in the system, or has a problem. Nothing is saved yet.
    3. Saving sends one POST /api/patients per student, a few at a time, with a progress bar and a Cancel button.

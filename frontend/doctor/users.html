@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -11,6 +12,7 @@
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/users.js" defer></script>
 </head>
+
 <body>
     <header class="topbar">
         <h1>ULS Clinic Management System</h1>
@@ -20,25 +22,60 @@
         <aside>
             <nav aria-label="Menu">
                 <h4>Doctor</h4>
-                <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/></svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a href="consultation.html">Consultation</a></div></details>
-                <a href="queue.html">Exam Queue</a>
+                <details class="nav-group">
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="4" y="5" width="16" height="16" rx="2" />
+                            <path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6" />
+                        </svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a
+                            href="consultation.html">Consultation</a></div>
+                </details>
+                <a href="queue.html">Queue</a>
                 <a href="../nurse/medical-records.html">Student Records</a>
-                <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/></svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a href="statistics-consultation.html">Statistics for Consultation</a></div></details>
+                <details class="nav-group">
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5" />
+                        </svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a
+                            href="statistics-consultation.html">Statistics for Consultation</a></div>
+                </details>
                 <a class="on" href="users.html">User Management</a>
             </nav>
         </aside>
         <main>
             <div class="page-head">
-                <div><h2>User Management</h2><p class="sub">Manage clinic and portal accounts</p></div>
-                <div class="toolbar"><button class="btn" type="button" id="create-user" disabled>+ Create User</button></div>
+                <div>
+                    <h2>User Management</h2>
+                    <p class="sub">Manage clinic and portal accounts</p>
+                </div>
+                <div class="toolbar"><button class="btn" type="button" id="create-user" disabled>+ Create User</button>
+                </div>
             </div>
             <p class="note" id="user-message" role="status" aria-live="polite" hidden></p>
-            <p class="view-note">Password hashes and internal account IDs are never shown. Deactivated accounts are retained for clinic record integrity.</p>
+            <p class="view-note">Password hashes and internal account IDs are never shown. Deactivated accounts are
+                retained for clinic record integrity.</p>
             <section class="box" aria-labelledby="users-table-title">
                 <h3 id="users-table-title">System Users</h3>
                 <table class="user-management-table">
-                    <thead><tr><th scope="col">Name</th><th scope="col">Username</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
-                    <tbody id="user-rows"><tr><td class="log-placeholder" colspan="5">Loading users…</td></tr></tbody>
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Username</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-rows">
+                        <tr>
+                            <td class="log-placeholder" colspan="5">Loading users…</td>
+                        </tr>
+                    </tbody>
                 </table>
             </section>
         </main>
@@ -47,15 +84,34 @@
     <div class="modal" id="user-modal" hidden>
         <div class="modal-backdrop" data-close-user></div>
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
-            <div class="modal-head"><h3 id="user-modal-title">Create User</h3><button class="modal-x" type="button" data-close-user aria-label="Close">&times;</button></div>
+            <div class="modal-head">
+                <h3 id="user-modal-title">Create User</h3><button class="modal-x" type="button" data-close-user
+                    aria-label="Close">&times;</button>
+            </div>
             <form class="form" id="user-form" novalidate>
-                <div class="f"><label for="user-name">Name</label><input id="user-name" name="name" maxlength="200" autocomplete="name" required></div>
-                <div class="f" id="username-field"><label for="user-username">Username</label><input id="user-username" name="username" minlength="3" maxlength="100" pattern="[A-Za-z0-9._@-]{3,100}" autocomplete="username" required><p class="field-hint">3–100 letters, numbers, dots, underscores, @, or hyphens.</p></div>
-                <div class="f"><label for="user-role">Role</label><select id="user-role" name="role" required><option value="">Choose a role</option><option value="doctor">Doctor</option><option value="nurse">Nurse</option></select></div>
-                <div class="f" id="password-field"><label for="user-password">Temporary password</label><input id="user-password" name="password" type="password" minlength="12" maxlength="200" autocomplete="new-password" required><p class="field-hint">At least 12 characters. Share it securely with the account holder.</p></div>
-                <div class="f full"><label class="status-switch" for="user-active"><input id="user-active" name="active" type="checkbox" checked><span>Account is active</span></label></div>
-                <p class="field-hint full" id="self-edit-note" hidden>Your own role and active status cannot be changed here.</p>
-                <div class="full modal-actions"><button class="btn" type="submit" id="save-user">Create User</button><button class="btn sec" type="button" data-close-user>Cancel</button></div>
+                <div class="f"><label for="user-name">Name</label><input id="user-name" name="name" maxlength="200"
+                        autocomplete="name" required></div>
+                <div class="f" id="username-field"><label for="user-username">Username</label><input id="user-username"
+                        name="username" minlength="3" maxlength="100" pattern="[A-Za-z0-9._@-]{3,100}"
+                        autocomplete="username" required>
+                    <p class="field-hint">3–100 letters, numbers, dots, underscores, @, or hyphens.</p>
+                </div>
+                <div class="f"><label for="user-role">Role</label><select id="user-role" name="role" required>
+                        <option value="">Choose a role</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="nurse">Nurse</option>
+                    </select></div>
+                <div class="f" id="password-field"><label for="user-password">Temporary password</label><input
+                        id="user-password" name="password" type="password" minlength="12" maxlength="200"
+                        autocomplete="new-password" required>
+                    <p class="field-hint">At least 12 characters. Share it securely with the account holder.</p>
+                </div>
+                <div class="f full"><label class="status-switch" for="user-active"><input id="user-active" name="active"
+                            type="checkbox" checked><span>Account is active</span></label></div>
+                <p class="field-hint full" id="self-edit-note" hidden>Your own role and active status cannot be changed
+                    here.</p>
+                <div class="full modal-actions"><button class="btn" type="submit" id="save-user">Create
+                        User</button><button class="btn sec" type="button" data-close-user>Cancel</button></div>
             </form>
         </div>
     </div>
@@ -63,10 +119,19 @@
     <div class="modal" id="deactivate-modal" hidden>
         <div class="modal-backdrop" data-close-deactivate></div>
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deactivate-title">
-            <div class="modal-head"><h3 id="deactivate-title">Deactivate account?</h3><button class="modal-x" type="button" data-close-deactivate aria-label="Close">&times;</button></div>
-            <div class="user-confirm-body"><p id="deactivate-copy"></p><p class="field-hint">The account and its clinic records will remain in the system. The user will be signed out and unable to log in.</p></div>
-            <div class="form-actions"><button class="btn" type="button" id="confirm-deactivate">Deactivate account</button><button class="btn sec" type="button" data-close-deactivate>Cancel</button></div>
+            <div class="modal-head">
+                <h3 id="deactivate-title">Deactivate account?</h3><button class="modal-x" type="button"
+                    data-close-deactivate aria-label="Close">&times;</button>
+            </div>
+            <div class="user-confirm-body">
+                <p id="deactivate-copy"></p>
+                <p class="field-hint">The account and its clinic records will remain in the system. The user will be
+                    signed out and unable to log in.</p>
+            </div>
+            <div class="form-actions"><button class="btn" type="button" id="confirm-deactivate">Deactivate
+                    account</button><button class="btn sec" type="button" data-close-deactivate>Cancel</button></div>
         </div>
     </div>
 </body>
+
 </html>

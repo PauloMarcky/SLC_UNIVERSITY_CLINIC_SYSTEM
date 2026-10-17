@@ -240,7 +240,7 @@ export async function getPatientRecord(id, actor) {
             v.systolic, v.diastolic, v.weight_kg, v.height_cm,
             v.bmi, v.bmi_status, v.bp_status, v.diagnosis,
             v.notes, v.confidential, v.created_by_name, v.created_at,
-            v.lab_source_name, v.lab_received_at
+            v.lab_source_name, v.lab_source_location, v.lab_received_at
      FROM visits v
      WHERE v.patient_id = ?
        AND (? = 'doctor' OR v.confidential = 0)
@@ -266,7 +266,8 @@ export async function getPatientRecord(id, actor) {
       notes: Number(row.confidential) === 1 ? '' : row.notes || '',
       confidential: Number(row.confidential) === 1,
       createdByName: row.created_by_name,
-      labSourceName: row.lab_source_name || '',
+      labSourceName: Number(row.confidential) === 1 ? '' : row.lab_source_name || '',
+      labSourceLocation: Number(row.confidential) === 1 ? '' : row.lab_source_location || '',
       labReceivedAt: row.lab_received_at || null,
       createdAt: row.created_at
     }))

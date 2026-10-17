@@ -1,7 +1,7 @@
 /* Student Records list. Loads students from GET /api/patients 10 at a time:
    the first 10 when the page opens, then 10 more each time the bottom of the table scrolls into view.
    The server does the search, the department filter and the counting, so every student can be reached.
-   Doctors see the page read-only (no Add student button). */
+   Nurses and doctors can add and import students; only nurses can edit a record. */
 (function () {
     'use strict';
     const body = document.getElementById('mr-body');
@@ -54,7 +54,7 @@
         return '<tr>' +
             '<td>' + escapeHtml(s.id) + '</td>' +
             '<td><a href="' + link + '"><strong>' + escapeHtml(s.name) + '</strong></a></td>' +
-            '<td>' + (s.college ? escapeHtml(s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
+            '<td' + (s.college ? ' title="' + escapeHtml(s.college) + '"' : '') + '>' + (s.college ? escapeHtml(window.SLCDepartments ? window.SLCDepartments.short(s.college) : s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
             '<td>' + escapeHtml(ageFrom(s.dateOfBirth)) + '</td>' +
             '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">No visits yet</span>') + '</td>' +
             '' +
@@ -65,8 +65,8 @@
         let html = '<a href="#" data-department=""' + (department === '' ? ' class="on" aria-current="true"' : '') + '>All ' + num(all) + '</a>';
         colleges.forEach(function (c) {
             const active = department === c.name;
-            html += '<a href="#" data-department="' + escapeHtml(c.name) + '"' + (active ? ' class="on" aria-current="true"' : '') + '>' +
-                escapeHtml(c.name) + ' ' + num(c.count) + '</a>';
+            html += '<a href="#" data-department="' + escapeHtml(c.name) + '" title="' + escapeHtml(c.name) + '"' + (active ? ' class="on" aria-current="true"' : '') + '>' +
+                escapeHtml(window.SLCDepartments ? window.SLCDepartments.short(c.name) : c.name) + ' ' + num(c.count) + '</a>';
         });
         if (tabsBox) tabsBox.innerHTML = html;
     }
@@ -169,9 +169,9 @@
     // After an Excel import adds students, show them in the list.
     window.addEventListener('students:changed', function () { fetchPage(true); });
 
-    // Doctors see this page read-only: show the tag and hide Add student. Nurses see the button.
+    // Nurses and doctors both see Add student and Import from Excel. Any other role gets the read-only tag.
     api.getSession().then(function (session) {
-        if (session.user.role === 'doctor') {
+        if (session.user.role !== 'doctor' && session.user.role !== 'nurse') {
             const tag = document.getElementById('readonly-tag');
             const add = document.getElementById('add-student');
             const imp = document.getElementById('import-students');

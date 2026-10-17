@@ -16,9 +16,10 @@
             links: [
                 ['Exam Queue', '../doctor/queue.html'],
                 ['Student Records', '../nurse/medical-records.html'],
+                ['Statistics', '../doctor/statistics.html'],
                 ['User Management', '../doctor/users.html']
             ],
-            order: [['group', 0], ['link', 0], ['link', 1], ['group', 1], ['link', 2]],
+            order: [['group', 0], ['link', 0], ['link', 1], ['link', 2], ['link', 3]],
             groups: [
                 {
                     title: 'Consultations & Checkups',
@@ -45,7 +46,7 @@
     // Pages that are not in the menu highlight the menu item they belong to (per role).
     const PARENT_PAGES = {
         nurse: { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html', '/nurse/import-students.html': '/nurse/medical-records.html' },
-        doctor: { '/nurse/record-detail.html': '/nurse/medical-records.html' }
+        doctor: { '/nurse/record-detail.html': '/nurse/medical-records.html', '/nurse/add-student.html': '/nurse/medical-records.html', '/nurse/import-students.html': '/nurse/medical-records.html' }
     };
 
     const nav = document.querySelector('aside nav');

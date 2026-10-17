@@ -1,5 +1,6 @@
 import { pool } from '../db/pool.js';
 import { STAFF, requireAnyRole } from '../utils/authz.js';
+import { scopeCondition } from './statistics.service.js';
 
 const isBlank = v => v === undefined || v === null || String(v).trim() === '';
 
@@ -19,10 +20,12 @@ function isoDaysAgo(days) {
  * BMI categories (as stored on each visit) and this-week vs last-week case counts per diagnosis.
  * BMI follows the period and department filters. The weekly counts always cover the last 14 days.
  */
-export async function getTrends({ startDate, endDate, college } = {}, actor) {
+export async function getTrends({ startDate, endDate, college, scope } = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
 
   const bmiWhere = ["v.status = 'completed'", 'v.screened_copy_of IS NULL', 'v.bmi IS NOT NULL'];
+  const scopeSql = scopeCondition(scope);
+  if (scopeSql) bmiWhere.push(scopeSql);
   const bmiParams = [];
   if (!isBlank(startDate)) { bmiWhere.push('v.visit_date >= ?'); bmiParams.push(startDate); }
   if (!isBlank(endDate)) { bmiWhere.push('v.visit_date <= ?'); bmiParams.push(endDate); }
@@ -45,6 +48,7 @@ export async function getTrends({ startDate, endDate, college } = {}, actor) {
   const weekWhere = ["v.status = 'completed'", 'v.screened_copy_of IS NULL', "v.diagnosis <> ''",
     'v.diagnosis IS NOT NULL', 'v.visit_date >= ?', 'v.visit_date <= ?'];
   const weekParams = [thisStart, lastStart, lastEnd, lastStart, today];
+  if (scopeSql) weekWhere.push(scopeSql);
   if (!isBlank(college)) { weekWhere.push('p.college = ?'); weekParams.push(college); }
 
   const [weekRows] = await pool.execute(

@@ -11,7 +11,7 @@
         consultation: {
             url: '/api/visits',
             keep: v => v.visitType === 'Consultation',
-            cols: v => [v.visitDate, v.patientName, [v.course, v.college].filter(Boolean).join(' / ') || dash,
+            cols: v => [v.visitDate, v.patientName, [v.course, window.SLCDepartments ? window.SLCDepartments.short(v.college) : v.college].filter(Boolean).join(' / ') || dash,
                 v.complaint, v.diagnosis, v.actionsTaken || dash],
             empty: 'No consultations yet.'
         },

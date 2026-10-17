@@ -116,7 +116,9 @@
             (v.pulseRate ? ' \u00B7 Pulse ' + v.pulseRate : '') +
             (v.bodyTemperature != null ? ' \u00B7 Temp ' + v.bodyTemperature + ' \u00B0C' : '') +
             (v.initialDiagnosis ? ' \u00B7 Nurse dx: ' + v.initialDiagnosis : '') +
-            (v.externalLabsAttached ? ' \u00B7 External labs attached' : '');
+            (v.labSourceName
+                ? ' \u00B7 Outside lab: ' + v.labSourceName + (v.labSourceLocation ? ', ' + v.labSourceLocation : '') + (v.labReceivedAt ? ' (received ' + v.labReceivedAt + ')' : '')
+                : v.externalLabsAttached ? ' \u00B7 External labs attached' : '');
         $('purpose').value = v.complaint || '';
         // Screening is only for a Checkup, and its note only appears once the box is ticked.
         $('screen-box').hidden = v.visitType !== 'Checkup';
