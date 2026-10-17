@@ -1,6 +1,6 @@
 import { pool, withTransaction } from '../db/pool.js';
 import { HttpError } from '../utils/http-error.js';
-import { text, number, validDate, flag } from '../utils/validators.js';
+import { text, number, validDate, dateText, flag } from '../utils/validators.js';
 import { STAFF, requireAnyRole } from '../utils/authz.js';
 import { patient, assertPatient } from './patients.service.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions.service.js';
@@ -138,7 +138,7 @@ export async function listVisits({ search = '', type = '', college = '', copies 
   }
   if (college) {
     where.push('p.college = ?');
-    params.push(college.slice(0, 100));
+    params.push(college.slice(0, 255));
   }
   const [rows] = await pool.execute(
     `${SELECT_VISIT} ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
@@ -171,7 +171,7 @@ export async function createVisit(body, actor) {
   // Patient details are only used when a new patient is being added.
   const newPatient = {
     name: text(body.patientName, 'Patient name', 200, isNew),
-    college: text(body.college, 'College', 100),
+    college: text(body.college, 'College', 255),
     course: text(body.course, 'Course', 100),
     year: text(body.year, 'Year', 20),
     category: body.category === 'employee' ? 'employee' : 'student'
@@ -223,6 +223,20 @@ async function fetchVisit(id, actor) {
 }
 
 // ---------- nurse triage ----------
+// Date the outside lab result was handed to the nurse. Today unless the nurse picks another day.
+// It cannot be in the future or more than a year old. No lab clinic name means no lab date.
+function parseLabDate(value, labSourceName) {
+  if (!labSourceName) return null;
+  if (isBlank(value)) return localDate();
+  const date = dateText(value, 'Lab received date');
+  const lastYear = new Date();
+  lastYear.setFullYear(lastYear.getFullYear() - 1);
+  const oldest = `${lastYear.getFullYear()}-${String(lastYear.getMonth() + 1).padStart(2, '0')}-${String(lastYear.getDate()).padStart(2, '0')}`;
+  if (date > localDate()) throw new HttpError(400, 'The lab received date cannot be in the future.');
+  if (date < oldest) throw new HttpError(400, 'The lab received date cannot be more than one year ago.');
+  return date;
+}
+
 // Everything the nurse types at triage. Used by both "record" and "edit".
 function parseTriage(body) {
   const visitType = text(body.visitType, 'Visit type', 20, true);
@@ -240,6 +254,7 @@ function parseTriage(body) {
     nurseNotes: text(body.nurseNotes, 'Nurse notes', 2000),
     // Only the name of the outside clinic is typed. The results stay on paper, and the date is set by the system.
     labSourceName: text(body.labSourceName, 'Laboratory / medical center name', 200),
+    labReceivedAt: parseLabDate(body.labReceivedAt, text(body.labSourceName, 'Laboratory / medical center name', 200)),
     urgent: flag(body.urgent),
     externalLabsAttached: flag(body.externalLabsAttached)
   };
@@ -263,7 +278,7 @@ export async function triageVisit(body, actor) {
       v.bmi, v.bmiStatus, v.bpStatus,
       actor.id, actor.name, new Date().toISOString(),
       actor.id, actor.name, t.pulse, t.initialDiagnosis, t.labSourceName ? 1 : t.externalLabsAttached, t.temperature,
-      t.nurseNotes, t.labSourceName, t.labSourceName ? localDate() : null, t.urgent
+      t.nurseNotes, t.labSourceName, t.labReceivedAt, t.urgent
     ]
   );
   return fetchVisit(result.insertId, actor);
@@ -280,7 +295,7 @@ export async function updateTriage(id, body, actor) {
     if (found[0].status !== 'triaged') throw new HttpError(409, 'Only a visit that is still waiting for the doctor can be edited.');
     // Keep the original lab date unless the clinic name changed; a cleared name clears the date.
     const sameLab = t.labSourceName === found[0].lab_source_name;
-    const labDate = !t.labSourceName ? null : sameLab && found[0].lab_received_at ? found[0].lab_received_at : localDate();
+    const labDate = isBlank(body.labReceivedAt) && sameLab && found[0].lab_received_at ? found[0].lab_received_at : t.labReceivedAt;
     await connection.execute(
       `UPDATE visits SET visit_type = ?, visit_date = ?, complaint = ?, systolic = ?, diastolic = ?,
          weight_kg = ?, height_cm = ?, bmi = ?, bmi_status = ?, bp_status = ?, pulse_rate = ?,

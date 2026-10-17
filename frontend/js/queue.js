@@ -121,6 +121,7 @@
         // Screening is only for a Checkup, and its note only appears once the box is ticked.
         $('screen-box').hidden = v.visitType !== 'Checkup';
         $('screen-note-wrap').hidden = true;
+        $('rx-builder').closest('section').hidden = v.visitType === 'Checkup';
         $('exam-modal').hidden = false;
         document.body.classList.add('modal-open');
         $('o').focus();
@@ -129,7 +130,7 @@
     function hasInput() {
         const rx = window.PrescriptionBuilder;
         return Boolean($('o').value.trim() || $('x').value.trim() || $('act').value.trim() ||
-            $('hosp').checked || $('conf').checked || $('screen').checked ||
+            $('screen').checked ||
             (rx && rx.getPayload()));
     }
 
@@ -158,6 +159,15 @@
     $('screen').addEventListener('change', () => {
         $('screen-note-wrap').hidden = !$('screen').checked;
         if ($('screen').checked) $('screen-note').focus();
+        if (current && current.visitType === 'Checkup') {
+            $('rx-builder').closest('section').hidden = !$('screen').checked;
+            if ($('screen').checked) {
+                requestAnimationFrame(function () {
+                    $('rx-builder').closest('section').scrollIntoView({ behavior: 'smooth', block: 'end' });
+                });
+            }
+            if (!$('screen').checked && window.PrescriptionBuilder) window.PrescriptionBuilder.reset();
+        }
     });
     $('refresh').addEventListener('click', loadQueue);
 
@@ -166,8 +176,11 @@
         if (!current) return;
         if (!$('x').value.trim()) { $('x').focus(); return sayInModal('Enter the clinical diagnosis.'); }
         const rx = window.PrescriptionBuilder;
-        const rxError = rx ? rx.validate() : '';
+        const rxOn = !$('rx-builder').closest('section').hidden;
+        const rxError = rx && rxOn ? rx.validate() : '';
         if (rxError) return sayInModal(rxError);
+        // (temporary element check removed)
+        // (temporary element check removed)
         const screening = current.visitType === 'Checkup' && $('screen').checked;
         const button = $('complete');
         button.disabled = true;
@@ -177,9 +190,9 @@
                 method: 'POST',
                 body: {
                     diagnosis: $('x').value, soapObjective: $('o').value, actionsTaken: $('act').value,
-                    sentToHospital: $('hosp').checked, confidential: $('conf').checked,
+                    sentToHospital: false, confidential: false,
                     putToScreening: screening, screenedNote: screening ? $('screen-note').value : '',
-                    prescription: rx ? rx.getPayload() : null
+                    prescription: rx && rxOn ? rx.getPayload() : null
                 }
             });
             const done = current.id;

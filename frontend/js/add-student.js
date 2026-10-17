@@ -53,6 +53,8 @@
         form.querySelectorAll('input[name="' + name + '"]').forEach(function (r) { r.checked = r.value === value; });
     }
 
+    if (window.SLCDepartments) window.SLCDepartments.fillSelect($('dept'));
+
     $('dob').max = TODAY;
     $('dob').addEventListener('input', function () {
         const age = ageFrom($('dob').value);

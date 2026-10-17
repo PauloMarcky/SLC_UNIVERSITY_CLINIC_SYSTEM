@@ -77,8 +77,10 @@
         if (existingLoaded) return;
         existingLoaded = true;
         api.request('/api/patients?search=&limit=1').then(function (result) {
-            $('imp-dept-list').innerHTML = result.colleges.map(function (c) {
-                return '<option value="' + escapeHtml(c.name) + '"></option>';
+            const names = (window.SLCDepartments ? window.SLCDepartments.options : []).slice();
+            result.colleges.forEach(function (c) { if (names.indexOf(c.name) < 0) names.push(c.name); });
+            $('imp-dept-list').innerHTML = names.map(function (n) {
+                return '<option value="' + escapeHtml(n) + '"></option>';
             }).join('');
             if (result.all >= LIST_LIMIT) { existingAll = false; return null; }
             return api.request('/api/patients?search=').then(function (list) {

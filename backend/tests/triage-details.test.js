@@ -46,6 +46,12 @@ const localToday = () => {
   const two = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
 };
+const daysAgo = n => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  const two = x => String(x).padStart(2, '0');
+  return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
+};
 const TRIAGE = {
   patientId: '2026-00123', visitDate: localToday(), complaint: 'Headache',
   bp: '118/76', weight: 60, height: 165, visitType: 'Checkup'
@@ -64,11 +70,11 @@ test('triage keeps nurse notes, the outside lab clinic name and the urgent flag;
 
   const full = await f.request('/api/visits/triage', { actor: nurse, method: 'POST', body: {
     ...TRIAGE, visitType: 'Consultation', nurseNotes: 'Lab shows high WBC. Student looks pale.',
-    labSourceName: 'Santiago Diagnostic Center', labReceivedAt: '1999-01-01', urgent: true } });
+    labSourceName: 'Santiago Diagnostic Center', labReceivedAt: daysAgo(3), urgent: true } });
   assert.equal(full.status, 201);
   assert.equal(full.data.visit.nurseNotes, 'Lab shows high WBC. Student looks pale.');
   assert.equal(full.data.visit.labSourceName, 'Santiago Diagnostic Center');
-  assert.equal(full.data.visit.labReceivedAt, localToday(), 'the date is set by the system, not typed');
+  assert.equal(full.data.visit.labReceivedAt, daysAgo(3), 'the nurse picked the date the lab result was received');
   assert.equal(full.data.visit.externalLabsAttached, true);
   assert.equal(full.data.visit.urgent, true);
 
@@ -90,7 +96,7 @@ test('triage keeps nurse notes, the outside lab clinic name and the urgent flag;
   const record = await f.request('/api/patients/2026-00123/record', { actor: nurse });
   const row = record.data.record.visits.find(v => v.id === full.data.visit.id);
   assert.equal(row.labSourceName, 'Santiago Diagnostic Center');
-  assert.equal(row.labReceivedAt, localToday());
+  assert.equal(row.labReceivedAt, daysAgo(3));
 });
 
 test('medical history keeps the paper-form fields', async t => {
@@ -107,4 +113,33 @@ test('medical history keeps the paper-form fields', async t => {
   assert.equal(history.allergyMedicine, 'Penicillin');
   assert.equal(history.hepatitisB, true);
   assert.equal(history.asthma, true);
+});
+
+
+test('the lab received date defaults to today, and a future or very old date is refused', async t => {
+  const f = await fixture(t);
+  const nurse = await f.login('nurse.test');
+  const lab = { ...TRIAGE, labSourceName: 'Santiago Diagnostic Center' };
+  const post = body => f.request('/api/visits/triage', { actor: nurse, method: 'POST', body });
+
+  const noDate = await post(lab);
+  assert.equal(noDate.status, 201);
+  assert.equal(noDate.data.visit.labReceivedAt, localToday(), 'no date typed means today');
+
+  assert.equal((await post({ ...lab, labReceivedAt: daysAgo(-1) })).status, 400, 'tomorrow');
+  assert.equal((await post({ ...lab, labReceivedAt: daysAgo(400) })).status, 400, 'over a year ago');
+  assert.equal((await post({ ...lab, labReceivedAt: 'not-a-date' })).status, 400);
+
+  // A date without a clinic name is ignored: there is nothing to attach it to.
+  const orphan = await post({ ...TRIAGE, labReceivedAt: daysAgo(2) });
+  assert.equal(orphan.status, 201);
+  assert.equal(orphan.data.visit.labReceivedAt, null);
+
+  // Editing keeps the picked date unless a new one is sent.
+  const first = await post({ ...lab, labReceivedAt: daysAgo(5) });
+  const keep = await f.request(`/api/visits/${first.data.visit.id}`, { actor: nurse, method: 'PUT', body: { ...lab, complaint: 'Cough' } });
+  assert.equal(keep.status, 200);
+  assert.equal(keep.data.visit.labReceivedAt, daysAgo(5));
+  const change = await f.request(`/api/visits/${first.data.visit.id}`, { actor: nurse, method: 'PUT', body: { ...lab, labReceivedAt: daysAgo(1) } });
+  assert.equal(change.data.visit.labReceivedAt, daysAgo(1));
 });

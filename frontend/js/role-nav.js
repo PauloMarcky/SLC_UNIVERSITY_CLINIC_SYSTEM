@@ -6,7 +6,7 @@
         nurse: {
             title: 'Nurse',
             links: [
-                ['Assess', '../nurse/assess.html'],
+                
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Statistics', '../doctor/statistics.html']
             ]
@@ -74,7 +74,7 @@
             const details = document.createElement('details');
             details.className = 'nav-group';
             const active = group.pages.includes(current);
-            details.open = active;
+            details.open = false;
             if (active) details.classList.add('has-active');
             const summary = document.createElement('summary');
             summary.innerHTML = '<svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + group.icon + '</svg><span>' + group.title + '</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 10 4 4 4-4"></path></svg>';

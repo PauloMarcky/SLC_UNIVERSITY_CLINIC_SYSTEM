@@ -13,6 +13,7 @@
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/student-records.js" defer></script>
+    <script src="../js/departments.js" defer></script>
     <script src="../js/import-students.js" defer></script>
 </head>
 
@@ -31,7 +32,7 @@
             <div class="page-head" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
                 <div>
                     <h2>Student Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span></h2>
-                    <p class="sub">Search a student and open the record, or register a new student.</p>
+                    <p class="sub">Search a student and click the name to open the record, or register a new student.</p>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:12px">
                     <button type="button" class="btn sec" id="import-students">Import from Excel</button>
@@ -39,11 +40,9 @@
                 </div>
             </div>
             <div class="filters" role="search">
-                <div class="grow"><label for="mr-search">Search by name or ID</label><input id="mr-search" type="search"
-                        placeholder="Type a name or ID number" autocomplete="off"></div>
+                <div class="grow"><label for="mr-search">Search by name or ID</label><input id="mr-search" type="search" placeholder="Type a name or ID number" autocomplete="off"></div>
                 <div class="filters-clear"><button type="button" class="btn sec" id="mr-clear">Clear</button></div>
             </div>
-            <nav class="tabs" id="mr-tabs" aria-label="Department"></nav>
             <p class="filter-count" id="mr-count" role="status" aria-live="polite"></p>
             <section class="box">
                 <table class="record-table">
@@ -54,12 +53,11 @@
                             <th>Department</th>
                             <th>Age</th>
                             <th>Last visit</th>
-                            <th aria-label="Open"></th>
                         </tr>
                     </thead>
                     <tbody id="mr-body">
                         <tr>
-                            <td colspan="6">Loading students...</td>
+                            <td colspan="5">Loading students...</td>
                         </tr>
                     </tbody>
                 </table>

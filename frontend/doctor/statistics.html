@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="../css/statistics.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
-    <script src="../js/statistics.js" defer></script>
+    <script src="../js/departments.js" defer></script>
+    <script src="../js/statistics-live.js" defer></script>
 </head>
 
 <body>
@@ -35,29 +36,32 @@
                     <p class="sub">Raw visit data converted to graphs to spot outbreaks.</p>
                 </div>
             </div>
-            <p class="note">Sample data only. The filters and the outbreak check work on the sample numbers below; real
-                figures and alerts need the backend.</p>
+            <!-- sample-data note removed
+                -->
             <div class="filters" role="group" aria-label="Statistics filters">
                 <div><label for="stat-period">Period</label><select id="stat-period" autocomplete="off">
                         <option value="all">All time</option>
                         <option value="month" selected>This month</option>
                         <option value="week">This week</option>
                     </select></div>
-                <div><label for="stat-college">College</label><select id="stat-college" autocomplete="off">
-                        <option value="" selected>All colleges</option>
-                        <option>Business</option>
-                        <option>Engineering</option>
-                        <option>IT</option>
-                        <option>Nursing</option>
+                <div><label for="stat-college">Department</label><select id="stat-college" autocomplete="off">
+                        <option value="" selected>All departments</option>
+                        <!-- -->
+                        <!-- -->
+                        <!-- -->
+                        <!-- -->
                     </select></div>
-                <div><label for="stat-group">Group</label><select id="stat-group" autocomplete="off">
+                <div hidden aria-hidden="true"><label for="stat-group">Group</label><select id="stat-group" autocomplete="off" disabled>
                         <option selected>Students</option>
                         <option>Deans</option>
                         <option>Full-Time Faculty</option>
                         <option>Part-Time/City Faculty</option>
                         <option>Maintenance</option>
                     </select></div>
-                <div class="filters-clear"><button type="button" class="btn sec" id="stat-reset">Reset</button></div>
+                <div class="filters-clear">
+                    <button type="button" class="btn sec" id="stat-reset">Reset</button>
+                    <a href="/api/statistics/export" class="btn sec" id="stat-export" download style="margin-left: 0.5rem; text-decoration: none; display: inline-flex; align-items: center;">Export CSV</a>
+                </div>
             </div>
             <p class="filter-count" id="stat-summary" role="status" aria-live="polite"></p>
             <div class="alert" id="stat-alert" role="status" aria-live="polite" hidden></div>
@@ -67,7 +71,7 @@
             </section>
             <div class="two">
                 <section class="box">
-                    <h3 class="stat-head">Cases per College <span class="stat-total" id="stat-colleges-total"></span></h3>
+                    <h3 class="stat-head">Cases per Department <span class="stat-total" id="stat-colleges-total"></span></h3>
                     <div class="pad"><div class="stat-list" id="stat-colleges" role="list"></div></div>
                 </section>
                 <section class="box">

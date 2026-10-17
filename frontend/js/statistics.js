@@ -6,9 +6,11 @@
 
     var period = document.getElementById('stat-period');
     var college = document.getElementById('stat-college');
-    var group = document.getElementById('stat-group');
+    // The Group filter was removed. The College dropdown is now the Department dropdown.
     var reset = document.getElementById('stat-reset');
-    if (!period || !college || !group) return;
+    if (!period || !college) return;
+    while (college.options.length > 1) college.remove(1);
+    if (window.SLCDepartments) window.SLCDepartments.fillSelect(college);
 
     // ---------- Sample data ----------
     var COLLEGES = ['Engineering', 'Business', 'IT', 'Nursing'];
@@ -56,7 +58,7 @@
     // ---------- Calculations ----------
     function pick(cells, collegeName) {
         // cells = counts per college; sum them all, or take one college.
-        if (!collegeName) return cells.reduce(function (a, b) { return a + b; }, 0);
+        if (!collegeName || COLLEGES.indexOf(collegeName) < 0) return cells.reduce(function (a, b) { return a + b; }, 0);
         return cells[COLLEGES.indexOf(collegeName)];
     }
 
@@ -65,7 +67,7 @@
     }
 
     function compute(state) {
-        var factor = GROUP_FACTOR[state.group];
+        var factor = 1;
         var slots = PERIOD_SLOTS[state.period];
 
         var conditions = CONDITIONS.map(function (cond) {
@@ -187,34 +189,78 @@
         }
     }
 
+    function loadLiveStatistics(state) {
+        var query = [];
+        if (state.college) query.push('college=' + encodeURIComponent(state.college));
+        if (state.period === 'week') {
+            var d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+            query.push('startDate=' + d.toISOString().split('T')[0]);
+        } else if (state.period === 'month') {
+            var d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            query.push('startDate=' + d.toISOString().split('T')[0]);
+        }
+        var qs = query.length ? '?' + query.join('&') : '';
+        var exportBtn = document.getElementById('stat-export');
+        if (exportBtn) exportBtn.href = '/api/statistics/export' + qs;
+
+        Promise.all([
+            fetch('/api/statistics/morbidity' + qs).then(function (r) { return r.ok ? r.json() : null; }),
+            fetch('/api/statistics/distribution' + qs).then(function (r) { return r.ok ? r.json() : null; })
+        ]).then(function (res) {
+            var morb = res[0] && res[0].morbidity;
+            var dist = res[1] && res[1].distribution;
+            if (!morb || !dist) return;
+
+            if (morb.items && morb.items.length) {
+                var conditions = morb.items.map(function (item) {
+                    return { name: item.diagnosis, total: item.caseCount, last: item.caseCount, now: item.caseCount, rising: false };
+                });
+                draw(document.getElementById('stat-conditions'), document.getElementById('stat-conditions-total'),
+                    conditions, 'Condition / Illness', 'Cases', { one: 'case', many: 'cases' }, { trend: false });
+            }
+            if (dist.byCollege && dist.byCollege.length) {
+                var colleges = dist.byCollege.map(function (c) {
+                    return { name: c.college, total: c.totalVisits };
+                });
+                draw(document.getElementById('stat-colleges'), document.getElementById('stat-colleges-total'),
+                    colleges, 'Department', 'Visits', { one: 'visit', many: 'visits' }, { selectedName: state.college });
+            }
+            var summaryNode = document.getElementById('stat-summary');
+            if (summaryNode && (morb.items && morb.items.length)) {
+                summaryNode.textContent += ' \u00B7 Live Data';
+            }
+        }).catch(function () {});
+    }
+
     function apply() {
         var state = {
             period: period.value,
             college: college.value,
-            group: group.value
+            department: college.value
         };
         var result = compute(state);
-        var scope = (state.college ? ' in ' + state.college : '') + (state.group !== 'Students' ? ' (' + state.group + ')' : '');
+        loadLiveStatistics(state);
+        var scope = state.college ? ' in ' + state.college : '';
 
         draw(document.getElementById('stat-conditions'), document.getElementById('stat-conditions-total'),
             result.conditions, 'Condition', 'Cases', { one: 'case', many: 'cases' }, { trend: true });
         draw(document.getElementById('stat-colleges'), document.getElementById('stat-colleges-total'),
-            result.colleges, 'College', 'Cases', { one: 'case', many: 'cases' }, { selectedName: state.college });
+            result.colleges, 'Department', 'Cases', { one: 'case', many: 'cases' }, { selectedName: state.college });
         draw(document.getElementById('stat-bmi'), document.getElementById('stat-bmi-total'),
             result.bmi, 'Category', 'Records', { one: 'record', many: 'records' });
         drawAlert(result, scope);
 
         var cases = sum(result.conditions);
         document.getElementById('stat-summary').textContent =
-            'Showing ' + cases + (cases === 1 ? ' case' : ' cases') + ' \u00B7 ' + state.group + ' \u00B7 ' +
-            (state.college || 'All colleges') + ' \u00B7 ' + PERIOD_LABEL[state.period];
+            'Showing ' + cases + (cases === 1 ? ' case' : ' cases') + ' \u00B7 ' +
+            (state.college || 'All departments') + ' \u00B7 ' + PERIOD_LABEL[state.period];
     }
 
-    [period, college, group].forEach(function (s) { s.addEventListener('change', apply); });
+    [period, college].forEach(function (s) { s.addEventListener('change', apply); });
     reset.addEventListener('click', function () {
         period.value = 'month';
         college.value = '';
-        group.value = 'Students';
+        // (no Group filter to reset)
         apply();
     });
     apply();

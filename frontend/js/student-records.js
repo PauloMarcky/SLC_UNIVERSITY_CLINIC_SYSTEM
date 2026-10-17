@@ -10,7 +10,7 @@
     const count = document.getElementById('mr-count');
     const tabsBox = document.getElementById('mr-tabs');
     const api = window.ClinicAPI;
-    if (!body || !search || !tabsBox || !api) return;
+    if (!body || !api) return;
 
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const PAGE = 10;            // students fetched and drawn at a time
@@ -46,7 +46,7 @@
     }
 
     function messageRow(text) {
-        return '<tr class="no-match"><td colspan="6">' + escapeHtml(text) + '</td></tr>';
+        return '<tr class="no-match"><td colspan="5">' + escapeHtml(text) + '</td></tr>';
     }
 
     function rowHtml(s) {
@@ -57,7 +57,7 @@
             '<td>' + (s.college ? escapeHtml(s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
             '<td>' + escapeHtml(ageFrom(s.dateOfBirth)) + '</td>' +
             '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">No visits yet</span>') + '</td>' +
-            '<td><a href="' + link + '">Open &rsaquo;</a></td>' +
+            '' +
             '</tr>';
     }
 
@@ -68,7 +68,7 @@
             html += '<a href="#" data-department="' + escapeHtml(c.name) + '"' + (active ? ' class="on" aria-current="true"' : '') + '>' +
                 escapeHtml(c.name) + ' ' + num(c.count) + '</a>';
         });
-        tabsBox.innerHTML = html;
+        if (tabsBox) tabsBox.innerHTML = html;
     }
 
     function setCount() {
@@ -92,7 +92,7 @@
     function addSentinel() {
         sentinel = document.createElement('tr');
         sentinel.className = 'no-match';
-        sentinel.innerHTML = '<td colspan="6">Scroll down to load more...</td>';
+        sentinel.innerHTML = '<td colspan="5">Scroll down to load more...</td>';
         body.appendChild(sentinel);
         observer.observe(sentinel);
     }
@@ -115,7 +115,7 @@
         busy = true;
         if (reset) {
             loaded = 0;
-            query = search.value.trim();
+            query = search ? search.value.trim() : '';
             removeSentinel();
             body.innerHTML = messageRow('Loading students...');
         }
@@ -148,18 +148,18 @@
         }
     }
 
-    tabsBox.addEventListener('click', function (event) {
+    if (tabsBox) tabsBox.addEventListener('click', function (event) {
         const tab = event.target.closest('a[data-department]');
         if (!tab) return;
         event.preventDefault();
         department = tab.dataset.department;
         fetchPage(true);
     });
-    search.addEventListener('input', function () {
+    if (search) search.addEventListener('input', function () {
         clearTimeout(timer);
         timer = setTimeout(function () { fetchPage(true); }, 250);
     });
-    clear.addEventListener('click', function () {
+    if (clear) clear.addEventListener('click', function () {
         search.value = '';
         department = '';
         fetchPage(true);

@@ -15,6 +15,13 @@
     <script src="../js/rx-api.js" defer></script>
     <script src="../js/record-prescriptions.js" defer></script>
     <script src="../js/record-detail.js" defer></script>
+<style>
+        .asm { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .asm[hidden] { display: none; }
+        .asm-backdrop { position: absolute; inset: 0; background: rgba(10, 25, 50, .55); }
+        .asm-card { position: relative; width: min(760px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; margin: 0; }
+        .asm-x { position: absolute; top: 12px; right: 14px; border: 0; background: none; font-size: 28px; line-height: 1; cursor: pointer; color: inherit; }
+    </style>
 </head>
 
 <body>
@@ -46,6 +53,7 @@
                     </div>
                     <div class="record-head-actions" id="r-actions">
                         <a class="btn sec" id="edit-record" href="../nurse/add-student.html">Edit record</a>
+                        <button type="button" class="btn" id="start-assess" hidden>Start assessment</button>
                     </div>
                 </section>
 
@@ -97,6 +105,37 @@
                         </table>
                     </div>
                 </section>
+
+                <div class="asm" id="assessment-modal" hidden>
+                <div class="asm-backdrop" data-close-assess></div>
+                <form class="box visit-form asm-card" id="assessment-box" role="dialog" aria-modal="true" aria-labelledby="a-title" novalidate>
+                    <button type="button" class="asm-x" data-close-assess aria-label="Close">&times;</button>
+                    <p class="note" id="a-error" role="alert" hidden></p>
+                    <section class="form-section">
+                        <h3 id="a-title">New assessment</h3>
+                        <div class="form">
+                            <div class="f"><label for="a-type">Visit type</label><select id="a-type">
+                                    <option value="Consultation">Consultation (sick)</option>
+                                    <option value="Checkup">Checkup (routine)</option>
+                                </select></div>
+                            <div class="f"><label for="a-date">Date (auto)</label><input id="a-date" readonly></div>
+                            <div class="f full"><label for="a-complaint">Chief complaint / purpose of visit *</label><input id="a-complaint" maxlength="500"></div>
+                            <div class="f"><label for="a-bp">Blood pressure *</label><input id="a-bp" placeholder="120/80" inputmode="numeric"></div>
+                            <div class="f"><label for="a-pulse">Pulse rate (bpm)</label><input id="a-pulse" type="number" min="20" max="250"></div>
+                            <div class="f"><label for="a-temp">Body temperature (&deg;C)</label><input id="a-temp" type="number" min="30" max="45" step="0.1"></div>
+                            <div class="f"><label for="a-weight">Weight (kg) *</label><input id="a-weight" type="number" min="1" max="500" step="0.1"></div>
+                            <div class="f"><label for="a-height">Height (cm) *</label><input id="a-height" type="number" min="30" max="300" step="0.1"></div>
+                            <div class="f"><label for="a-bmi">BMI (auto)</label><input id="a-bmi" value="Enter weight and height" readonly></div>
+                            <div class="f full"><label for="a-dx">Initial nurse diagnosis</label><input id="a-dx" maxlength="200"></div>
+                            <div class="f full"><label><input type="checkbox" id="a-labs"> External lab results or documents attached to the printed chart</label></div>
+                        </div>
+                    </section>
+                    <div class="form-actions">
+                        <button class="btn" type="submit" id="a-send">Send to doctor</button>
+                        <button class="btn sec" type="button" data-close-assess>Cancel</button>
+                    </div>
+                </form>
+                </div>
 
                 <section class="box" id="rx-history"></section>
             </div>

@@ -112,6 +112,17 @@
                 summary.parentElement.open = true;
             }
         });
+        sidebar.addEventListener('click', function (event) {
+            var remember = function () {
+                var open = Array.from(sidebar.querySelectorAll('.nav-group')).filter(function (g) { return g.open; })
+                    .map(function (g) { var s = g.querySelector('summary > span'); return s ? s.textContent.trim() : ''; });
+                try { sessionStorage.setItem('clinic-nav-open', JSON.stringify(open)); } catch (error) { /* optional */ }
+            };
+            if (event.target.closest('.nav-group > summary')) setTimeout(remember, 0);
+            else if (event.target.closest('a') && !event.target.closest('.nav-group')) {
+                try { sessionStorage.removeItem('clinic-nav-open'); } catch (error) { /* optional */ }
+            }
+        });
         sidebar.addEventListener('pointerover', function (event) {
             var target = event.target.closest('[data-nav-label]');
             if (target !== tooltipTarget) showTooltip(target);
@@ -209,11 +220,13 @@
                 }
                 if (link.classList.contains('on')) link.setAttribute('aria-current', 'page');
             });
+            var saved = [];
+            try { saved = JSON.parse(sessionStorage.getItem('clinic-nav-open') || '[]'); } catch (error) { /* optional */ }
             aside.querySelectorAll('.nav-group').forEach(function (group) {
                 var label = group.querySelector('summary > span');
                 if (label) label.classList.add('nav-label');
                 if (group.querySelector('a.on, a[aria-current="page"]')) group.classList.add('has-active');
-                group.open = true;
+                group.open = group.classList.contains('has-active') || saved.indexOf(label ? label.textContent.trim() : '') >= 0;
                 var head = group.querySelector('summary');
                 if (head) head.tabIndex = -1;
             });

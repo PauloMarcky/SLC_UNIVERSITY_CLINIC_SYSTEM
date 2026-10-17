@@ -119,6 +119,68 @@
         }).join('') : emptyRow(6, 'No completed visits yet.');
     }
 
+    /* ---------- nurse: new assessment on the student's own page ---------- */
+    function setupAssessment(patient) {
+        const form = $('assessment-box');
+        if (!form) return;
+        const pad = function (v) { return String(v).padStart(2, '0'); };
+        const now = new Date();
+        const today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+        $('a-date').value = today;
+        const modal = $('assessment-modal');
+        const open = function () {
+            $('a-error').hidden = true;
+            modal.hidden = false;
+            document.body.style.overflow = 'hidden';
+            $('a-complaint').focus();
+        };
+        const close = function () {
+            modal.hidden = true;
+            document.body.style.overflow = '';
+            $('start-assess').focus();
+        };
+        $('start-assess').addEventListener('click', open);
+        modal.querySelectorAll('[data-close-assess]').forEach(function (el) { el.addEventListener('click', close); });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !modal.hidden) close();
+        });
+        $('start-assess').hidden = false;
+        const updateBmi = function () {
+            const kg = parseFloat($('a-weight').value), cm = parseFloat($('a-height').value);
+            $('a-bmi').value = kg > 0 && cm > 0 ? (kg / Math.pow(cm / 100, 2)).toFixed(1) : 'Enter weight and height';
+        };
+        $('a-weight').addEventListener('input', updateBmi);
+        $('a-height').addEventListener('input', updateBmi);
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const button = $('a-send');
+            button.disabled = true;
+            try {
+                await api.getSession();
+                const result = await api.request('/api/visits/triage', {
+                    method: 'POST',
+                    body: {
+                        patientId: patient.id, visitType: $('a-type').value, visitDate: $('a-date').value || today,
+                        complaint: $('a-complaint').value, bp: $('a-bp').value, weight: $('a-weight').value,
+                        height: $('a-height').value, pulseRate: $('a-pulse').value, temperature: $('a-temp').value,
+                        initialDiagnosis: $('a-dx').value, externalLabsAttached: $('a-labs').checked
+                    }
+                });
+                form.reset();
+                close();
+                $('a-date').value = today;
+                updateBmi();
+                showMessage('Assessment saved. Visit #' + result.visit.id + ' for ' + patient.name + ' is in the doctor\u2019s queue.');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                if (error.status === 401) { window.location.assign('/index.html'); return; }
+                $('a-error').textContent = error.message;
+                $('a-error').hidden = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } finally { button.disabled = false; }
+        });
+    }
+
     /* ---------- page ---------- */
     function fullName(r) {
         const first = [r.firstName, r.middleName].filter(Boolean).join(' ');
@@ -157,6 +219,8 @@
             if (session.user.role === 'doctor') {
                 $('readonly-tag').hidden = false;
                 $('r-actions').hidden = true;
+            } else if (session.user.role === 'nurse') {
+                setupAssessment(patient);
             }
         })
         .catch(fail);

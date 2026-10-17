@@ -42,7 +42,7 @@ function listedPatient(r) {
  */
 export async function searchPatientsPage({ search, college, limit, offset }, actor) {
   const term = (search || '').trim().slice(0, 200);
-  const chosen = (college || '').trim().slice(0, 100);
+  const chosen = (college || '').trim().slice(0, 255);
   const size = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
   const skip = Math.max(parseInt(offset, 10) || 0, 0);
   const hideConfidential = actor && actor.role !== 'doctor' ? 'AND v.confidential = 0' : '';
@@ -88,7 +88,7 @@ function parseIdentity(body) {
   const category = body.category === 'employee' ? 'employee' : 'student';
   const name = [firstName, middleName, lastName].filter(Boolean).join(' ');
   if (name.length > 200) throw new HttpError(400, 'Patient name is too long.');
-  const college = text(body.college, 'College', 100);
+  const college = text(body.college, 'College', 255);
   const course = text(body.course, 'Course', 100);
   const year = text(body.year, 'Year', 20);
   return {
