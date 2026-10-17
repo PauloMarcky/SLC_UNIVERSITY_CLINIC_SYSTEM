@@ -7,8 +7,11 @@
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/log-table.css">
+    <link rel="stylesheet" href="../css/visit-log.css">
     <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
+    <script src="../vendor/xlsx.full.min.js" defer></script>
     <script src="../js/visit-log.js" defer></script>
 </head>
 <body>
@@ -23,13 +26,19 @@
         </nav></aside>
         <main>
             <div class="page-head"><div><h2>Consultation</h2><p class="sub">Active sickness and treatment log</p></div><div class="toolbar"><a class="btn" href="queue.html">Exam Queue</a></div></div>
-            <div class="diagnosis-legend" aria-label="Clinical diagnosis priority guide"><span class="diagnosis-tag routine">Routine</span><span class="diagnosis-tag follow-up">Follow-up</span><span class="diagnosis-tag urgent">Urgent</span></div>
             <!-- Records load from /api/visits through js/visit-log.js -->
             <section class="box" aria-labelledby="consultation-log-title">
                 <h3 id="consultation-log-title">Medical Consultations</h3>
+                <div class="log-filters" role="search" aria-label="Search and filter records">
+                    <div class="lf-field lf-search"><label for="log-search">Search</label><input id="log-search" type="search" placeholder="Student name or ID number" autocomplete="off"></div>
+                    <div class="lf-field"><label for="log-range">Date</label><select id="log-range"><option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="all" selected>All</option></select></div>
+                    <label class="lf-check"><input type="checkbox" id="log-hospital"> Sent to hospital</label>
+                    <div class="lf-actions"><button type="button" class="btn sec" id="log-clear">Clear</button><button type="button" class="btn" id="log-export">Export to Excel</button></div>
+                </div>
+                <p class="log-count" id="log-count" aria-live="polite"></p>
                 <div class="sheet-scroll"><table class="log-table sheet-table">
                     <colgroup><col style="width:6%"><col style="width:9%"><col style="width:4%"><col style="width:4%"><col style="width:8%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:5%"><col style="width:4%"><col style="width:12%"><col style="width:12%"><col style="width:8%"><col style="width:7%"></colgroup>
-                    <thead><tr><th scope="col">Date</th><th scope="col">Patient</th><th scope="col">Sex</th><th scope="col">Age</th><th scope="col">Course - Year Level</th><th scope="col">Height (m)</th><th scope="col">Weight (kg)</th><th scope="col">BMI</th><th scope="col">Blood Pressure</th><th scope="col">Body Temp (&deg;C)</th><th scope="col">No. of Visit</th><th scope="col">PURPOSE OF CONSULT</th><th scope="col">PERTINENT P.E. &amp; LABORATORY FINDINGS</th><th scope="col">CLINICAL DIAGNOSIS</th><th scope="col">ACTION TAKEN</th></tr></thead>
+                    <thead><tr><th scope="col">Date</th><th scope="col">Student</th><th scope="col">Sex</th><th scope="col">Age</th><th scope="col">Course - Year Level</th><th scope="col">Height (m)</th><th scope="col">Weight (kg)</th><th scope="col">BMI</th><th scope="col">Blood Pressure</th><th scope="col">Body Temp (&deg;C)</th><th scope="col">No. of Visit</th><th scope="col">PURPOSE OF CONSULT</th><th scope="col">PERTINENT P.E. &amp; LABORATORY FINDINGS</th><th scope="col">CLINICAL DIAGNOSIS</th><th scope="col">ACTION TAKEN</th></tr></thead>
                     <tbody id="log-rows" data-log="consultation"><tr><td colspan="15" class="log-placeholder">Loading consultations...</td></tr></tbody>
                 </table></div>
             </section>

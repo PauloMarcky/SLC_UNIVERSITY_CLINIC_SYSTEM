@@ -6,8 +6,12 @@
     <title>Screening - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/log-table.css">
+    <link rel="stylesheet" href="../css/visit-log.css">
     <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
+    <script src="../vendor/xlsx.full.min.js" defer></script>
     <script src="../js/visit-log.js" defer></script>
 </head>
 <body>
@@ -21,16 +25,21 @@
             <a href="users.html">User Management</a>
         </nav></aside>
         <main>
-            <div class="page-head"><div><h2>Screening</h2><p class="sub">ENTRANCE clearance screening log</p></div></div>
-            <p class="view-note">Use this view to review entrance clearance vitals, pertinent examination and laboratory findings, and the resulting action.</p>
+            <div class="page-head"><div><h2>Screening</h2><p class="sub">Entrance clearance records</p></div></div>
             <!-- Records load from /api/visits/screened through js/visit-log.js -->
             <section class="box" aria-labelledby="screening-log-title">
                 <h3 id="screening-log-title">Entrance Clearance Screening</h3>
-                <table class="log-table">
+                <div class="log-filters" role="search" aria-label="Search and filter records">
+                    <div class="lf-field lf-search"><label for="log-search">Search</label><input id="log-search" type="search" placeholder="Student name or ID number" autocomplete="off"></div>
+                    <div class="lf-field"><label for="log-range">Date</label><select id="log-range"><option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="all" selected>All</option></select></div>
+                    <div class="lf-actions"><button type="button" class="btn sec" id="log-clear">Clear</button><button type="button" class="btn" id="log-export">Export to Excel</button></div>
+                </div>
+                <p class="log-count" id="log-count" aria-live="polite"></p>
+                <div class="sheet-scroll"><table class="log-table sheet-table is-screening">
                     <colgroup><col style="width:11%"><col style="width:16%"><col style="width:12%"><col style="width:8%"><col style="width:11%"><col style="width:10%"><col style="width:17%"><col style="width:15%"></colgroup>
                     <thead><tr><th scope="col">Date</th><th scope="col">Student</th><th scope="col">Course</th><th scope="col">BMI</th><th scope="col">Blood Pressure</th><th scope="col">Body Temperature</th><th scope="col">PERTINENT P.E. &amp; LABORATORY FINDINGS</th><th scope="col">ACTION TAKEN</th></tr></thead>
                     <tbody id="log-rows" data-log="screening"><tr><td colspan="8" class="log-placeholder">Loading screening records...</td></tr></tbody>
-                </table>
+                </table></div>
             </section>
             <!-- the old combined visit list link was removed: this page shows its own records -->
         </main>

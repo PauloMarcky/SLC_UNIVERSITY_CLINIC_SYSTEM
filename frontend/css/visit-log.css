@@ -1,0 +1,23 @@
+/* Doctor log pages: filter bar and fixed Date + Student columns. Loaded after log-table.css; style.css is untouched. */
+.log-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin: 0; padding: 18px 24px 8px; }
+.log-filters .lf-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.log-filters .lf-search { flex: 2 1 240px; }
+.log-filters .lf-field label { font-size: .8125rem; font-weight: 600; color: var(--m); }
+.log-filters input[type=search], .log-filters select { width: 100%; }
+.log-filters .lf-check { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; font-weight: 600; cursor: pointer; }
+.log-filters .lf-check input { width: 20px; height: 20px; }
+.log-filters .lf-actions { display: flex; gap: 10px; margin-left: auto; }
+.box>.log-count { margin: 0; padding: 4px 24px 12px; color: var(--m); font-size: .875rem; }
+
+/* Screening has fewer columns than the sheet pages */
+.sheet-table.is-screening { min-width: 1100px; }
+
+/* Names do not wrap; the first two columns stay put while scrolling sideways */
+.sheet-table td:nth-child(2) { white-space: nowrap; min-width: 0; }
+.sheet-table th:nth-child(1), .sheet-table td:nth-child(1) { position: sticky; left: 0; z-index: 2; min-width: 112px; width: 112px; max-width: 112px; }
+.sheet-table th:nth-child(2), .sheet-table td:nth-child(2) { position: sticky; left: 112px; z-index: 2; min-width: 170px; box-shadow: 2px 0 0 var(--bd); }
+.sheet-table th:nth-child(-n+2) { z-index: 3; background: var(--surface-soft); }
+.sheet-table td:nth-child(-n+2) { background: var(--surface); }
+.sheet-table tbody tr:nth-child(even) td:nth-child(-n+2) { background: var(--surface-soft); }
+.sheet-table tbody tr:hover td:nth-child(-n+2) { background: var(--surface-hover); }
+.sheet-table td.log-placeholder { position: static; min-width: 0; width: auto; max-width: none; box-shadow: none; background: transparent; }

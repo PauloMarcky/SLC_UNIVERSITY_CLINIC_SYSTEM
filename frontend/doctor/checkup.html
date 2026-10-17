@@ -7,8 +7,11 @@
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/log-table.css">
+    <link rel="stylesheet" href="../css/visit-log.css">
     <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
+    <script src="../vendor/xlsx.full.min.js" defer></script>
     <script src="../js/visit-log.js" defer></script>
 </head>
 <body>
@@ -23,10 +26,16 @@
         </nav></aside>
         <main>
             <div class="page-head"><div><h2>Checkup</h2><p class="sub">Routine wellness and vitals log</p></div></div>
-            <p class="view-note">Wellness checkups can use the clinical diagnosis field for general states such as normal, follow-up recommended, or referred.</p>
             <!-- Records load from /api/visits through js/visit-log.js -->
             <section class="box" aria-labelledby="checkup-log-title">
                 <h3 id="checkup-log-title">Wellness Checkups</h3>
+                <div class="log-filters" role="search" aria-label="Search and filter records">
+                    <div class="lf-field lf-search"><label for="log-search">Search</label><input id="log-search" type="search" placeholder="Student name or ID number" autocomplete="off"></div>
+                    <div class="lf-field"><label for="log-range">Date</label><select id="log-range"><option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="all" selected>All</option></select></div>
+                    <div class="lf-field"><label for="log-bmi">BMI</label><select id="log-bmi"><option value="">All</option><option>Underweight</option><option>Normal</option><option>Overweight</option><option>Obese</option></select></div>
+                    <div class="lf-actions"><button type="button" class="btn sec" id="log-clear">Clear</button><button type="button" class="btn" id="log-export">Export to Excel</button></div>
+                </div>
+                <p class="log-count" id="log-count" aria-live="polite"></p>
                 <div class="sheet-scroll"><table class="log-table sheet-table">
                     <colgroup><col style="width:6%"><col style="width:9%"><col style="width:4%"><col style="width:4%"><col style="width:8%"><col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:6%"><col style="width:5%"><col style="width:4%"><col style="width:12%"><col style="width:12%"><col style="width:8%"><col style="width:7%"></colgroup>
                     <thead><tr><th scope="col">Date</th><th scope="col">Student</th><th scope="col">Sex</th><th scope="col">Age</th><th scope="col">Course - Year Level</th><th scope="col">Height (m)</th><th scope="col">Weight (kg)</th><th scope="col">BMI</th><th scope="col">Blood Pressure</th><th scope="col">Body Temp (&deg;C)</th><th scope="col">No. of Visit</th><th scope="col">PURPOSE OF VISIT</th><th scope="col">PERTINENT P.E. &amp; LABORATORY FINDINGS</th><th scope="col">CLINICAL DIAGNOSIS</th><th scope="col">ACTION TAKEN</th></tr></thead>
