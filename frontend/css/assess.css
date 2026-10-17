@@ -1,0 +1,111 @@
+/* Nurse Assess page. Loaded after style.css; every class here starts with "as-". */
+
+/* ---- Find the patient ---- */
+.as-find { overflow:visible; }
+.as-find-body { display:grid; gap:8px; padding:20px 24px 24px; }
+.as-find-body .btn { justify-self:start; margin-top:6px; }
+.as-combo { position:relative; }
+.as-combo input { width:100%; }
+.as-list { position:absolute; z-index:30; inset:calc(100% + 6px) 0 auto 0; max-height:min(360px,50vh); overflow-y:auto; margin:0; padding:6px; list-style:none; border:1px solid var(--bd); border-radius:12px; background:var(--surface); box-shadow:0 12px 32px #071b3826; }
+.as-opt { display:grid; gap:2px; padding:10px 12px; border-radius:8px; cursor:pointer; }
+.as-opt b { font-size:.9375rem; font-weight:650; overflow-wrap:anywhere; }
+.as-opt small { color:var(--m); font-size:.8125rem; }
+.as-opt[aria-selected="true"],.as-opt:hover { background:var(--gl); }
+.as-opt-empty { padding:12px; color:var(--m); font-size:.875rem; cursor:default; }
+.as-opt-empty:hover { background:transparent; }
+.as-opt-register { display:inline; padding:0; border:0; background:none; color:var(--g); font-size:.875rem; font-weight:650; text-decoration:underline; text-underline-offset:3px; }
+.as-opt-register:hover { color:var(--gd); }
+.as-opt-more { padding:8px 12px; color:var(--m); font-size:.8125rem; cursor:default; }
+.as-opt-more:hover { background:transparent; }
+
+/* ---- Quick register ---- */
+.as-register { padding:20px 24px 24px; border-top:1px solid var(--bd); background:var(--surface-soft); }
+.as-register h4 { margin-bottom:14px; font-size:1rem; }
+.as-register-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; margin-bottom:16px; }
+.as-register-grid .as-wide { grid-column:1/-1; }
+.as-register .f input:not([type=checkbox]),.as-register .f select { width:100%; }
+.as-more { margin-bottom:16px; }
+.as-more>summary { display:inline-block; margin-bottom:14px; color:var(--g); font-size:.875rem; font-weight:600; cursor:pointer; }
+.as-register>.field-error { margin:0 0 12px; }
+
+/* ---- Today's patients ---- */
+.as-today { padding-bottom:6px; }
+.as-today-head { display:flex; flex-wrap:wrap; align-items:center; gap:8px 14px; padding:16px 24px; border-bottom:1px solid var(--bd); }
+.as-today-head h3 { margin-right:auto; }
+.as-today-head .field-hint { margin:0; }
+.as-today-head .btn { min-height:38px; padding:6px 14px; }
+.as-today-cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px 28px; padding:16px 24px 18px; }
+.as-today-cols h4 { margin-bottom:8px; font-size:.875rem; color:var(--m); font-weight:650; }
+.as-count { color:var(--t); }
+.as-today-list { display:grid; gap:6px; margin:0; padding:0; list-style:none; max-height:320px; overflow-y:auto; }
+.as-today-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:1px 12px; align-items:center; width:100%; padding:10px 12px; border:1px solid var(--bd); border-radius:10px; background:var(--field-bg); color:var(--t); text-align:left; font:inherit; }
+button.as-today-row { cursor:pointer; }
+button.as-today-row:hover { background:var(--gl); border-color:var(--g); }
+.as-today-row b { font-size:.9375rem; font-weight:650; overflow-wrap:anywhere; }
+.as-today-row small { grid-column:1; color:var(--m); font-size:.8125rem; overflow-wrap:anywhere; }
+.as-today-row .pill { grid-column:2; grid-row:1/span 2; align-self:center; white-space:nowrap; }
+.as-today-empty { padding:10px 2px; color:var(--m); font-size:.875rem; }
+
+/* ---- Selected patient bar ---- */
+.as-bar { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px; padding:20px 24px; margin-bottom:16px; border-left:4px solid var(--g); }
+.as-bar-main { min-width:0; flex:1 1 320px; }
+.as-bar h3 { font-size:1.375rem; letter-spacing:-.3px; overflow-wrap:anywhere; }
+.as-bar-meta { margin-top:2px; color:var(--m); font-size:.9375rem; }
+.as-chips { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 0; padding:0; list-style:none; }
+.as-chips .pill { font-size:.8125rem; padding:5px 12px; }
+.as-chips .none { color:var(--m); font-size:.8125rem; padding:5px 0; font-weight:500; background:none; }
+.as-bar-actions { display:flex; flex-wrap:wrap; gap:10px; }
+.as-bar-actions .btn { min-height:40px; }
+
+/* ---- Collapsible history and past visits ---- */
+.as-fold { margin-bottom:16px; overflow:hidden; }
+.as-fold>summary { display:flex; align-items:center; gap:12px; padding:16px 24px; cursor:pointer; list-style:none; }
+.as-fold>summary::-webkit-details-marker { display:none; }
+.as-fold>summary::after { content:''; flex:none; width:9px; height:9px; margin:0 4px 3px auto; border:solid var(--m); border-width:0 2px 2px 0; transform:rotate(45deg); transition:transform .18s ease; }
+.as-fold[open]>summary::after { transform:rotate(-135deg); margin-bottom:-3px; }
+.as-fold>summary:hover { background:var(--surface-hover); }
+.as-fold[open]>summary { border-bottom:1px solid var(--bd); }
+.as-fold-title { font-weight:650; }
+.as-fold-note { min-width:0; color:var(--m); font-size:.875rem; overflow-wrap:anywhere; }
+.as-fold-note.unsaved { color:var(--warning); font-weight:650; }
+.as-fold-body { display:grid; gap:18px; padding:20px 24px 24px; }
+.as-fold-body .choice { margin-top:0; }
+.as-fold-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 20px; }
+.as-fold-grid .f input { width:100%; }
+.as-fold-grid #h-allergy-row { grid-column:1/-1; }
+.as-past td { white-space:normal; min-width:110px; }
+.as-past td:nth-child(3),.as-past td:nth-child(4) { min-width:180px; }
+
+/* ---- Assessment ---- */
+.as-date { margin-left:10px; color:var(--m); font-size:.875rem; font-weight:400; }
+.as-seg label { flex:1 1 220px; padding:14px 18px; }
+.as-seg label>span { display:grid; gap:1px; }
+.as-seg b { font-size:.9375rem; font-weight:650; }
+.as-seg small { color:var(--m); font-size:.8125rem; }
+.as-vitals { grid-template-columns:repeat(3,minmax(0,1fr)); padding-top:4px; border-top:1px solid var(--bd); margin-top:4px; padding-top:20px; }
+.as-rest { padding-top:0; }
+.as-vitals #b { font-weight:650; color:var(--t)!important; }
+.as-send-error { flex:1 1 240px; margin:0; }
+
+/* ---- Done ---- */
+.as-done { padding:24px; margin-bottom:24px; border:1px solid var(--bd); border-left:4px solid var(--success); border-radius:var(--radius); background:var(--success-bg); color:var(--success); }
+.as-done h3 { font-size:1.25rem; }
+.as-done p { margin:6px 0 18px; color:var(--t); }
+.as-done:focus { outline:none; }
+
+@media(max-width:1150px) {
+  .as-vitals { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:900px) {
+  .as-today-cols { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:760px) {
+  .as-today-head,.as-today-cols { padding-inline:18px; }
+  .as-find-body,.as-register,.as-bar,.as-fold-body { padding-inline:18px; }
+  .as-fold>summary { padding-inline:18px; flex-wrap:wrap; gap:4px 12px; }
+  .as-register-grid,.as-fold-grid { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:480px) {
+  .as-vitals { grid-template-columns:minmax(0,1fr); }
+  .as-bar-actions .btn { flex:1 1 140px; }
+}

@@ -22,6 +22,7 @@
     let busy = false;
     let ticket = 0;             // lets a newer request cancel an older one
     let sentinel = null;
+    let isNurse = false;        // set once the session is known
     let timer;
     const num = n => Number(n).toLocaleString('en-US');
 
@@ -56,9 +57,10 @@
             '<td>' + escapeHtml(s.id) + '</td>' +
             '<td><a href="' + link + '"><strong>' + escapeHtml(s.name) + '</strong></a></td>' +
             '<td>' + (s.college ? escapeHtml(s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
-            '<td>' + escapeHtml(ageFrom(s.dateOfBirth)) + '</td>' +
+            '<td>' + (ageFrom(s.dateOfBirth) === '' ? '<span style="color:var(--m)">&mdash;</span>' : escapeHtml(ageFrom(s.dateOfBirth))) + '</td>' +
             '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">No visits yet</span>') + '</td>' +
-            '<td><a href="' + link + '">Open &rsaquo;</a></td>' +
+            '<td class="row-actions"><a href="' + link + '">Open &rsaquo;</a>' +
+            '<a class="row-assess" style="margin-left:16px" href="../nurse/assess.html?patient=' + encodeURIComponent(s.id) + '"' + (isNurse ? '' : ' hidden') + '>Assess</a></td>' +
             '</tr>';
     }
 
@@ -170,6 +172,10 @@
     // Nurses get the "register a new student" hint added to the note under the title.
     api.getSession().then(function (session) {
         const sub = document.getElementById('mr-sub');
+        if (session.user.role === 'nurse') {   // only nurses can assess: show the Assess links
+            isNurse = true;
+            body.querySelectorAll('.row-assess').forEach(function (a) { a.hidden = false; });
+        }
         if (session.user.role === 'doctor') {
             const tag = document.getElementById('readonly-tag');
             const add = document.getElementById('add-student');
@@ -178,9 +184,9 @@
             if (add) add.hidden = true;
             if (imp) imp.hidden = true;
         } else if (sub) {
-            sub.textContent = 'Search a student and open the record, or register a new student.';
+            sub.textContent = 'Search a student, open the record or assess them now, or register a new student.';
         }
     }).catch(fail);
 
     fetchPage(true);
-})();
+})();

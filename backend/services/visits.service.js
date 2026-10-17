@@ -264,7 +264,7 @@ export async function triageVisit(body, actor) {
 
 // ---------- doctor queue ----------
 export async function queueVisits(actor) {
-  requireAnyRole(actor, ['doctor'], 'Only a doctor can view the exam queue.');
+  requireAnyRole(actor, ['doctor', 'nurse'], 'Only clinic staff can view the exam queue.');
   const [rows] = await pool.execute(
     `${SELECT_VISIT} WHERE v.status = 'triaged' ORDER BY v.visit_date ASC, v.id ASC LIMIT 200`
   );

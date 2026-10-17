@@ -148,6 +148,7 @@
         const age = ageFrom(p.dateOfBirth);
         $('r-line').textContent = ['ID ' + p.id, p.college, p.gender, age === '' ? '' : age + ' years old'].filter(Boolean).join(' · ');
         $('edit-record').setAttribute('href', '../nurse/add-student.html?id=' + encodeURIComponent(p.id));
+        $('assess-record').setAttribute('href', '../nurse/assess.html?patient=' + encodeURIComponent(p.id));
         renderIdentification(p);
         renderHistory(history);
         renderVisits(visits);

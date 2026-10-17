@@ -1,6 +1,6 @@
 /* Statistics for Checkup and Statistics for Consultation.
    Both pages load this one script; <main data-stat-type="Checkup"|"Consultation"> says which page it is.
-   Real numbers from GET /api/statistics (doctor only). The Period uses the device clock. */
+   Real numbers from GET /api/statistics (doctor and nurse; a nurse never sees confidential visits). The Period uses the device clock. */
 (function () {
     'use strict';
 
@@ -183,6 +183,14 @@
             showError(error.message);
         }
     }
+
+    // A nurse sees the same numbers without the confidential visits, and not the sample overview page.
+    api.getSession().then(session => {
+        if (session.user.role === 'doctor') return;
+        document.querySelectorAll('.page-head a[href="statistics.html"]').forEach(link => { link.hidden = true; });
+        const note = el('p', 'field-hint', 'Confidential visits are not counted here.');
+        summary.after(note);
+    }).catch(() => { /* the numbers still load; the server decides who may see them */ });
 
     period.addEventListener('change', load);
     college.addEventListener('change', load);

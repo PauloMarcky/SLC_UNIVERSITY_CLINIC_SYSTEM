@@ -7,8 +7,20 @@
             title: 'Nurse',
             links: [
                 ['Assess', '../nurse/assess.html'],
-                ['Student Records', '../nurse/medical-records.html'],
-                ['Statistics', '../doctor/statistics.html']
+                ['Student Records', '../nurse/medical-records.html']
+            ],
+            order: [['link', 0], ['link', 1], ['group', 0]],
+            groups: [
+                {
+                    title: 'Statistics',
+                    alwaysOpen: true,
+                    icon: '<path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/>',
+                    pages: ['/doctor/statistics-checkup.html', '/doctor/statistics-consultation.html'],
+                    links: [
+                        ['Statistics for Checkup', '../doctor/statistics-checkup.html'],
+                        ['Statistics for Consultation', '../doctor/statistics-consultation.html']
+                    ]
+                }
             ]
         },
         doctor: {

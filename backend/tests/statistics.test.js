@@ -77,7 +77,6 @@ test('statistics: counts, filters, screening copies, free-text diagnoses and acc
 
   // Access: nobody logged in, a nurse, bad input.
   assert.equal((await f.request('/api/statistics?type=Checkup')).status, 401);
-  assert.equal((await stats('type=Checkup', nurse)).status, 403);
   for (const bad of ['', 'type=Other', 'type=Checkup&from=17-10-2026', 'type=Checkup&to=x',
     'type=Checkup&from=2026-02-01&to=2026-01-01', 'type=Checkup&from=2026-02-31']) {
     assert.equal((await stats(bad)).status, 400, bad);
@@ -126,4 +125,16 @@ test('statistics: counts, filters, screening copies, free-text diagnoses and acc
   assert.equal(nursing.total, 1);
   assert.deepEqual(nursing.topDiagnoses, [{ label: 'Headache', count: 1 }]);
   assert.equal(nursing.byCollege.length, 3);
+
+  // A nurse may open the pages, but a confidential visit is never counted, listed or named.
+  const nc = (await stats('type=Checkup', nurse)).data;
+  assert.equal(nc.total, 4);
+  const nq = (await stats('type=Consultation', nurse)).data;
+  assert.equal(nq.total, 3);
+  assert.equal(nq.sentToHospital, 0);
+  assert.deepEqual(nq.topDiagnoses.map(row => row.label.toLowerCase()), ['flu']);
+  assert.equal(nq.distinctDiagnoses, 1);
+  assert.deepEqual(labelsOf(nq.byCollege), ['IT', 'Engineering']);
+  assert.ok(!nq.colleges.includes('Nursing'));
+  assert.equal((await stats('type=Consultation&college=Nursing', nurse)).data.total, 0);
 });

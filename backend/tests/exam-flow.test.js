@@ -60,8 +60,11 @@ test('exam flow: free-text diagnosis, confidential checkbox and screening rules'
   const idA = a.data.visit.id;
   const idB = b.data.visit.id;
 
-  // Only the doctor sees the queue and completes visits.
-  assert.equal((await f.request('/api/visits/queue', { actor: nurse })).status, 403);
+  // The nurse can see who is waiting (the Assess page lists them); only the doctor completes visits.
+  assert.equal((await f.request('/api/visits/queue')).status, 401);
+  const nurseQueue = await f.request('/api/visits/queue', { actor: nurse });
+  assert.equal(nurseQueue.status, 200);
+  assert.deepEqual(nurseQueue.data.visits.map(v => v.id).sort(), [idA, idB].sort());
   const queue = await f.request('/api/visits/queue', { actor: doctor });
   assert.equal(queue.status, 200);
   assert.deepEqual(queue.data.visits.map(v => v.id).sort(), [idA, idB].sort());

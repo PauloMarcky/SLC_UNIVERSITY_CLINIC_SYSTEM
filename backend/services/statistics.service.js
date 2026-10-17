@@ -11,10 +11,11 @@ const NO_COLLEGE = 'No department';
 // Read-only counts over completed visits, for the two Statistics pages.
 //   - Only completed visits count (a patient still in the Exam Queue is not a case yet).
 //   - A Screening copy is the same checkup saved a second time, so copies are never counted.
-//   - Doctor only for now. Before a nurse is allowed in, confidential visits must be left out
-//     of every count here, and the top diagnoses must not list a confidential diagnosis.
+//   - Doctor and nurse. For a nurse every confidential visit is left out of every count, the
+//     department list and the top diagnoses, the same way the nurse never sees them elsewhere.
 export async function visitStatistics(query, actor) {
-  requireAnyRole(actor, ['doctor'], 'Only a doctor can view statistics.');
+  requireAnyRole(actor, ['doctor', 'nurse'], 'Only clinic staff can view statistics.');
+  const hideConfidential = actor.role !== 'doctor';
 
   const type = text(query.type, 'Visit type', 20, true);
   if (!VISIT_TYPES.includes(type)) throw new HttpError(400, 'Invalid visit type.');
@@ -26,6 +27,7 @@ export async function visitStatistics(query, actor) {
   // visit_date holds YYYY-MM-DD text, so comparing the text compares the dates. "to" is included.
   const base = ["v.status = 'completed'", 'v.visit_type = ?', 'v.screened_copy_of IS NULL'];
   const baseParams = [type];
+  if (hideConfidential) base.push('v.confidential = 0');
   if (from) { base.push('v.visit_date >= ?'); baseParams.push(from); }
   if (to) { base.push('v.visit_date <= ?'); baseParams.push(to); }
 
@@ -56,6 +58,7 @@ export async function visitStatistics(query, actor) {
   const colleges = (await run(
     `SELECT DISTINCT TRIM(p.college) AS college ${FROM}
      WHERE v.status = 'completed' AND v.visit_type = ? AND v.screened_copy_of IS NULL
+       ${hideConfidential ? 'AND v.confidential = 0' : ''}
        AND TRIM(COALESCE(p.college, '')) <> '' ORDER BY college ASC`, [type]
   )).map(r => r.college);
 
