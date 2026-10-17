@@ -9,6 +9,10 @@
 .log-filters .lf-actions { display: flex; gap: 10px; margin-left: auto; }
 .box>.log-count { margin: 0; padding: 4px 24px 12px; color: var(--m); font-size: .875rem; }
 
+.box>.log-pager { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin: 0; padding: 0 24px 12px; }
+.box>.log-pager[hidden] { display: none; }
+.log-pager .log-page-label { color: var(--m); font-size: .875rem; min-width: 96px; text-align: center; }
+
 /* Screening has fewer columns than the sheet pages */
 .sheet-table.is-screening { min-width: 1100px; }
 

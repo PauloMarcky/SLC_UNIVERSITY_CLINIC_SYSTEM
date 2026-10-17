@@ -80,16 +80,62 @@ export const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college, p.co
                              (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.id <= v.id) AS visit_number
                       FROM visits v JOIN patients p ON p.id = v.patient_id`;
 
-export async function listVisits({ search = '', type = '', college = '' }, actor) {
-  const where = ["v.status = 'completed'"];
-  const params = [];
-  const term = search.trim().slice(0, 200);
+const BMI_GROUPS = ['Underweight', 'Normal', 'Overweight', 'Obese'];
+const MAX_PAGE_SIZE = 2000;
+const DEFAULT_PAGE_SIZE = 50;
+
+// Paging is only used when the caller sends page or pageSize. Without them the old behaviour stays: newest 200, no total.
+function pagingOf({ page, pageSize }) {
+  if (page === undefined && pageSize === undefined) return null;
+  const size = pageSize === undefined ? DEFAULT_PAGE_SIZE : Number(pageSize);
+  const number = page === undefined ? 1 : Number(page);
+  if (!Number.isInteger(size) || size < 1) throw new HttpError(400, 'pageSize must be a whole number of 1 or more.');
+  if (!Number.isInteger(number) || number < 1) throw new HttpError(400, 'page must be a whole number of 1 or more.');
+  const limit = Math.min(size, MAX_PAGE_SIZE);
+  return { limit, offset: (number - 1) * limit, page: number, pageSize: limit };
+}
+
+// Filters shared by both lists. `dateColumn` is the column the "from" date is compared with (both hold YYYY-MM-DD text).
+function filterOf({ search = '', from = '', bmi = '', sentToHospital = '' }, actor, dateColumn, where, params) {
+  const term = String(search).trim().slice(0, 200);
   if (term) {
     where.push('(INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0)');
     params.push(term, term);
     // Stop non-doctors from finding hidden patients by searching their name.
     if (actor.role !== 'doctor') where.push('v.confidential = 0');
   }
+  if (from) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(from)) throw new HttpError(400, 'from must look like 2026-10-17.');
+    where.push(`${dateColumn} >= ?`);
+    params.push(from);
+  }
+  if (bmi) {
+    if (!BMI_GROUPS.includes(bmi)) throw new HttpError(400, 'Invalid BMI group.');
+    where.push('v.bmi_status = ?');
+    params.push(bmi);
+  }
+  if (sentToHospital === '1' || sentToHospital === 'true') where.push('v.sent_to_hospital = 1');
+}
+
+async function runList(where, params, orderBy, paging, actor) {
+  const clause = where.length ? 'WHERE ' + where.join(' AND ') : '';
+  // limit and offset are checked whole numbers, so they are safe to write into the SQL text.
+  const limit = paging ? `LIMIT ${paging.limit} OFFSET ${paging.offset}` : 'LIMIT 200';
+  const [rows] = await pool.execute(`${SELECT_VISIT} ${clause} ORDER BY ${orderBy} ${limit}`, params);
+  const visits = rows.map(row => rowToVisit(row, actor.role));
+  if (!paging) return { visits };
+  const [count] = await pool.execute(
+    `SELECT COUNT(*) AS n FROM visits v JOIN patients p ON p.id = v.patient_id ${clause}`, params
+  );
+  return { visits, total: Number(count[0].n), page: paging.page, pageSize: paging.pageSize };
+}
+
+export async function listVisits(query, actor) {
+  const { type = '', college = '', excludeScreenedCopies = '' } = query;
+  const paging = pagingOf(query);
+  const where = ["v.status = 'completed'"];
+  const params = [];
+  filterOf(query, actor, 'v.visit_date', where, params);
   if (type) {
     if (!VISIT_TYPES.includes(type)) throw new HttpError(400, 'Invalid visit type.');
     where.push('v.visit_type = ?');
@@ -99,12 +145,9 @@ export async function listVisits({ search = '', type = '', college = '' }, actor
     where.push('p.college = ?');
     params.push(college.slice(0, 100));
   }
-  const [rows] = await pool.execute(
-    `${SELECT_VISIT} ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
-     ORDER BY v.visit_date DESC, v.id DESC LIMIT 200`,
-    params
-  );
-  return rows.map(row => rowToVisit(row, actor.role));
+  // The Checkup page lists the original checkup, not its Screening copy.
+  if (excludeScreenedCopies === '1' || excludeScreenedCopies === 'true') where.push('v.screened_copy_of IS NULL');
+  return runList(where, params, 'v.visit_date DESC, v.id DESC', paging, actor);
 }
 
 export async function createVisit(body, actor) {
@@ -311,10 +354,11 @@ export async function screenVisit(id, body, actor) {
   return fetchVisit(id, actor);
 }
 
-export async function screenedVisits(actor) {
+export async function screenedVisits(actor, query = {}) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
-  const [rows] = await pool.execute(
-    `${SELECT_VISIT} WHERE v.is_screened = 1 ORDER BY v.screened_at DESC, v.id DESC LIMIT 200`
-  );
-  return rows.map(row => rowToVisit(row, actor.role));
+  const paging = pagingOf(query);
+  const where = ['v.is_screened = 1'];
+  const params = [];
+  filterOf(query, actor, 'v.screened_at', where, params);
+  return runList(where, params, 'v.screened_at DESC, v.id DESC', paging, actor);
 }
