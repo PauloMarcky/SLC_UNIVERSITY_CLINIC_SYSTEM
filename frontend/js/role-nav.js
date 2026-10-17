@@ -37,7 +37,7 @@
                     icon: '<path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/>',
                     pages: ['/doctor/statistics-checkup.html', '/doctor/statistics-consultation.html', '/doctor/statistics.html'],
                     links: [
-                        ['Statistics for Check up', '../doctor/statistics-checkup.html'],
+                        ['Statistics for Checkup', '../doctor/statistics-checkup.html'],
                         ['Statistics for Consultation', '../doctor/statistics-consultation.html']
                     ]
                 }
