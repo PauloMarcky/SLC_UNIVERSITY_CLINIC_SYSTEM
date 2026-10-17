@@ -10,3 +10,53 @@
 }
 .exam-modal #rx-builder { padding: 12px 24px 24px; }
 @media (max-width: 640px) { .exam-modal #rx-builder { padding-inline: 20px; } }
+
+/* ---- Queue list (Arrived / Patient / vitals cells) ---- */
+.sr-only-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.queue-updated { margin-right: 12px; font-size: .875rem; color: var(--m); }
+.page-head .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.queue-row { cursor: pointer; }
+.queue-row td { vertical-align: middle; padding-top: 14px; padding-bottom: 14px; }
+.queue-row .q-main, .queue-row .q-name { display: block; font-weight: 600; color: var(--t); }
+.queue-row .q-name { font-size: 1rem; }
+.queue-row .q-sub { display: block; margin-top: 2px; font-size: .8125rem; color: var(--m); }
+.queue-row td:not(.is-abnormal) > .q-main { font-weight: 500; }
+.queue-row td.is-abnormal > .q-main { font-weight: 700; }
+.vital-flag { display: inline-block; margin-top: 3px; padding: 2px 9px; border-radius: 999px; font-size: .75rem; font-weight: 650; line-height: 1.5; color: var(--warning); background: var(--warning-bg); }
+.queue-row td.is-abnormal > .vital-flag { display: block; width: fit-content; }
+.note.is-success { border-color: var(--success); color: var(--success); background: var(--success-bg); }
+
+/* ---- Examine pop-up: vitals tiles, nurse diagnosis, quick-fill, tick boxes ---- */
+.exam-modal .exam-summary { padding-bottom: 4px; }
+.exam-modal .vitals { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; padding: 10px 24px 4px; }
+.exam-modal .vital { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 10px 12px; border: 1px solid var(--bd); border-radius: 12px; background: var(--surface-soft); }
+.exam-modal .vital-label { font-size: .75rem; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; color: var(--m); }
+.exam-modal .vital-value { font-size: 1.1875rem; line-height: 1.25; color: var(--t); overflow-wrap: anywhere; }
+.exam-modal .vital.is-abnormal { border-color: var(--warning); background: var(--warning-bg); }
+.exam-modal .vital.is-abnormal .vital-flag { margin-top: 2px; padding: 0; background: none; font-size: .75rem; }
+
+.exam-modal .nurse-dx { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 12px 24px 0; padding: 12px 14px; border: 1px solid var(--bd); border-left: 4px solid var(--g); border-radius: 10px; background: var(--gl); }
+.exam-modal .nurse-dx[hidden] { display: none; }
+.exam-modal .nurse-dx-label { display: block; font-size: .75rem; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; color: var(--m); }
+.exam-modal .nurse-dx-text { display: block; margin-top: 2px; font-size: 1rem; font-weight: 600; color: var(--t); overflow-wrap: anywhere; }
+
+.exam-modal .purpose-label { display: block; margin-bottom: 4px; font-size: .875rem; font-weight: 600; }
+.exam-modal .purpose-text { margin: 0; font-size: 1.0625rem; font-weight: 600; color: var(--t); overflow-wrap: anywhere; }
+
+.exam-modal .label-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.exam-modal .label-row label { margin: 0; }
+.exam-modal .chip { min-height: 34px; padding: 5px 13px; border: 1px solid var(--g); border-radius: 999px; color: var(--g); background: var(--field-bg); font-size: .8125rem; font-weight: 650; cursor: pointer; }
+.exam-modal .chip:hover { background: var(--gl); }
+.exam-modal .chip[hidden] { display: none; }
+.exam-modal .choice label[hidden] { display: none; }
+.exam-modal .tick-hint { grid-column: 1 / -1; margin: -2px 0 0; }
+
+/* Soft fade above the sticky buttons, so a heading is not chopped hard when scrolling */
+.exam-modal .form-actions { position: sticky; }
+.exam-modal .form-actions::before { content: ""; position: absolute; left: 0; right: 0; top: -26px; height: 26px; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--surface)); }
+
+@media (max-width: 900px) { .exam-modal .vitals { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .exam-modal .vitals { padding-inline: 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exam-modal .nurse-dx { margin-inline: 20px; }
+}

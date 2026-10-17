@@ -21,18 +21,17 @@
             <h4>Doctor</h4>
             <details class="nav-group" open><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6"/></svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a class="on" href="consultation.html">Consultation</a></div></details>
             <a href="queue.html">Exam Queue</a><a href="../nurse/medical-records.html">Student Records</a>
-            <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/></svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a href="statistics-consultation.html">Statistics for Consultation</a></div></details>
+            <details class="nav-group"><summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5"/></svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg></summary><div class="nav-children"><a href="statistics-checkup.html">Statistics for Checkup</a><a href="statistics-consultation.html">Statistics for Consultation</a></div></details>
             <a href="users.html">User Management</a>
         </nav></aside>
         <main>
             <div class="page-head"><div><h2>Consultation</h2><p class="sub">Active sickness and treatment log</p></div><div class="toolbar"><a class="btn" href="queue.html">Exam Queue</a></div></div>
             <!-- Records load from /api/visits through js/visit-log.js -->
-            <section class="box" aria-labelledby="consultation-log-title">
-                <h3 id="consultation-log-title">Medical Consultations</h3>
+            <section class="box" aria-label="Medical consultation records">
                 <div class="log-filters" role="search" aria-label="Search and filter records">
                     <div class="lf-field lf-search"><label for="log-search">Search</label><input id="log-search" type="search" placeholder="Student name or ID number" autocomplete="off"></div>
                     <div class="lf-field"><label for="log-range">Date</label><select id="log-range"><option value="today">Today</option><option value="week">This week</option><option value="month">This month</option><option value="all" selected>All</option></select></div>
-                    <label class="lf-check"><input type="checkbox" id="log-hospital"> Sent to hospital</label>
+                    <label class="lf-check"><input type="checkbox" id="log-hospital"> Sent to hospital</label>
                     <div class="lf-actions"><button type="button" class="btn sec" id="log-clear">Clear</button><button type="button" class="btn" id="log-export">Export to Excel</button></div>
                 </div>
                 <p class="log-count" id="log-count" aria-live="polite"></p>
