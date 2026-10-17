@@ -4,13 +4,18 @@ import {
   listVisits, createVisit, triageVisit, queueVisits, screenedVisits, completeVisit, screenVisit
 } from '../services/visits.service.js';
 
+// Only the filter and paging options the services know about are passed on.
+const LOG_OPTIONS = ['search', 'from', 'bmi', 'sentToHospital', 'excludeScreenedCopies', 'page', 'pageSize'];
+const optionsOf = query => Object.fromEntries(LOG_OPTIONS.filter(key => query[key] !== undefined).map(key => [key, query[key]]));
+
 export async function list(req, res) {
-  const visits = await listVisits({
+  const result = await listVisits({
+    ...optionsOf(req.query),
     search: req.query.search || '',
     type: req.query.type || '',
     college: req.query.college || ''
   }, req.session.user);
-  res.status(200).json({ visits });
+  res.status(200).json(result);
 }
 
 export async function create(req, res) {
@@ -26,7 +31,7 @@ export async function queue(req, res) {
 }
 
 export async function screened(req, res) {
-  res.status(200).json({ visits: await screenedVisits(req.session.user) });
+  res.status(200).json(await screenedVisits(req.session.user, optionsOf(req.query)));
 }
 
 export async function complete(req, res) {
