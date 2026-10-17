@@ -45,7 +45,7 @@ function stripDelimiters(sql) {
   return sql
     .replace(/^[ \t]*DELIMITER[ \t]+\$\$[ \t]*$/gim, '')
     .replace(/^[ \t]*DELIMITER[ \t]+;[ \t]*$/gim, '')
-    .replace(/END\$\$/g, 'END');
+    .replace(/END\$\$/g, 'END;');
 }
 
 async function ensureDatabaseExists() {
