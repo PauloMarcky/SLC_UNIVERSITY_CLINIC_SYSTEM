@@ -50,7 +50,11 @@
 .head-note { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 .head-note span { font-size:.8125rem; font-weight:400; color:var(--m); }
 /* Identification: 3 columns, label above value */
-.id-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px 24px; padding:24px; }
+.id-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px 24px; padding:20px 24px; }
+.id-grid[hidden] { display:none; }
+.id-more { border-top:1px solid var(--bd); }
+.more-toggle { padding:6px 12px; border:1px solid var(--field-border); border-radius:8px; background:var(--field-bg); color:var(--g); font:inherit; font-size:.8125rem; font-weight:600; cursor:pointer; }
+.more-toggle:hover { background:var(--gl); color:var(--gd); border-color:var(--g); }
 .id-item { display:flex; flex-direction:column; gap:5px; min-width:0; }
 .id-item.span-2 { grid-column:span 2; }
 .id-label { font-size:.75rem; font-weight:650; letter-spacing:.3px; text-transform:uppercase; color:var(--m); }
@@ -65,12 +69,15 @@
 .yn.no { font-weight:400; color:var(--m); }
 .yn.yes-warn { color:var(--warning); }
 .yn.yes-ok { color:var(--success); }
-/* Vital signs and findings tables */
+/* Visits table (vital signs sit beside each visit; units sit under the heading so the number columns stay narrow) */
 .entry-table { min-width:560px; }
-.findings-table { min-width:760px; }
-.findings-table td { white-space:normal; vertical-align:top; }
-.findings-table td:nth-child(1), .findings-table td:nth-child(2) { white-space:nowrap; }
-.findings-table td:nth-child(3) { min-width:260px; }
+.visits-table { min-width:980px; }
+.visits-table th, .visits-table td { padding:12px 8px; }
+.visits-table th { white-space:nowrap; vertical-align:bottom; }
+.visits-table th small { display:block; font-weight:400; letter-spacing:0; text-transform:none; color:var(--m); }
+.visits-table td { white-space:normal; vertical-align:top; }
+.visits-table td:nth-child(1), .visits-table td:nth-child(2), .visits-table td:nth-child(n+4):nth-child(-n+9) { white-space:nowrap; }
+.visits-table td:nth-child(3), .visits-table td:nth-child(10), .visits-table td:nth-child(11) { min-width:140px; }
 .type-wellness { font-weight:650; color:var(--success); }
 .type-consult { font-weight:650; color:var(--g); }
 @media(max-width:900px) {
@@ -78,7 +85,7 @@
   .id-gap { display:none; }
 }
 @media(max-width:640px) {
-  .id-grid { grid-template-columns:minmax(0,1fr); padding:20px; }
+  .id-grid { grid-template-columns:minmax(0,1fr); padding:18px 20px; }
   .id-item.span-2 { grid-column:auto; }
   .hx-table th[scope=row] { padding:14px 12px 14px 20px; }
 }
@@ -92,4 +99,4 @@
 .entry-panel .form-actions { position:static; box-shadow:none; }
 .entry-panel .bp-pair input { width:100%; }
 .entry-panel .f .choice label { padding:10px 14px; }
-.entry-panel .hx-extra .full { grid-column:1/-1; }
+.entry-panel .hx-extra .full { grid-column:1/-1; }

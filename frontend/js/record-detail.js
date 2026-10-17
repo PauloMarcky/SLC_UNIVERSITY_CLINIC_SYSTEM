@@ -1,7 +1,7 @@
 /* Student Record page: loads the real record.
    GET /api/patients/:id          identification
    GET /api/patients/:id/history  past medical history
-   GET /api/visits?search=<id>    completed visits (the server hides confidential ones from the nurse)
+   GET /api/visits?search=<id>    completed visits with their vital signs (the server hides confidential ones from the nurse)
    Editing opens the Add / Edit form (add-student.html?id=...). Vital signs are recorded on the Assess page.
    The prescriptions box is filled by record-prescriptions.js from the same ?id= in the address. */
 (function () {
@@ -49,24 +49,37 @@
         return '<div class="id-item' + (extra ? ' ' + extra : '') + '"><span class="id-label">' + escapeHtml(label) + '</span><span class="id-value">' + valueHtml + '</span></div>';
     }
 
+    // The main facts show at once; "More details" opens the rest (names, contacts, address, guardian).
     function renderIdentification(r) {
         const age = ageFrom(r.dateOfBirth);
         $('r-ident').innerHTML =
             field('Identification no.', dash(r.id)) +
-            field('Last name', dash(r.lastName)) +
-            field('First name', dash(r.firstName)) +
-            field('Middle name', dash(r.middleName)) +
             field('Department', dash(r.college)) +
             field('Course / Year', dash([r.course, r.year].filter(Boolean).join(' - '))) +
             field('Gender', dash(r.gender)) +
             field('Age', age === '' ? dash('') : escapeHtml(age)) +
-            field('Date of birth', dash(formatDate(r.dateOfBirth))) +
+            field('Date of birth', dash(formatDate(r.dateOfBirth)));
+        $('r-ident-more').innerHTML =
+            field('Last name', dash(r.lastName)) +
+            field('First name', dash(r.firstName)) +
+            field('Middle name', dash(r.middleName)) +
             field('Status', dash(r.civilStatus)) +
             field('Nationality', dash(r.nationality)) +
             field('Contact number', dash(r.contactNumber)) +
             field('Address', dash(r.address), 'span-2') +
             field('Name of guardian', dash(r.guardianName)) +
             field('Contact no. in case of emergency', dash(r.guardianContact));
+    }
+
+    const toggle = $('ident-toggle');
+    const more = $('r-ident-more');
+    if (toggle && more) {
+        toggle.addEventListener('click', function () {
+            const open = more.hidden;          // hidden now means it is about to open
+            more.hidden = !open;
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.textContent = open ? 'Fewer details' : 'More details';
+        });
     }
 
     /* ---------- Past medical history ---------- */
@@ -79,44 +92,47 @@
             '<td class="hx-detail">' + (detail ? escapeHtml(detail) : '<span class="empty-dash">&mdash;</span>') + '</td></tr>';
     }
 
+    // Items answered Yes are listed first, then the No ones (each group keeps the form's order).
     function renderHistory(h) {
         const other = String(h.otherCondition || '').trim();
         const vaccines = String(h.vaccines || '').trim();
-        $('r-history').innerHTML =
-            historyRow('Asthma', '', h.asthma ? yes('warn') : no(), '') +
-            historyRow('Allergy', '', h.allergy ? yes('warn') : no(), h.allergy ? h.allergyDetails : '') +
-            historyRow('Febrile convulsion', 'Mataas na lagnat', h.febrileConvulsion ? yes('warn') : no(), '') +
-            historyRow('Fainting spell / Dizzy spell', 'Hinihimatay', h.faintingSpell ? yes('warn') : no(), '') +
-            historyRow('Epilepsy', '', h.epilepsy ? yes('warn') : no(), '') +
-            historyRow('Vaccines', 'Bakuna', vaccines ? yes('ok') : no(), vaccines) +
-            '<tr><th scope="row">Other</th><td class="hx-answer">' + (other ? yes('warn') : '<span class="yn no">None</span>') + '</td>' +
-            '<td class="hx-detail">' + (other ? escapeHtml(other) : '<span class="empty-dash">&mdash;</span>') + '</td></tr>';
+        const items = [
+            { on: !!h.asthma, html: historyRow('Asthma', '', h.asthma ? yes('warn') : no(), '') },
+            { on: !!h.allergy, html: historyRow('Allergy', '', h.allergy ? yes('warn') : no(), h.allergy ? h.allergyDetails : '') },
+            { on: !!h.febrileConvulsion, html: historyRow('Febrile convulsion', 'Mataas na lagnat', h.febrileConvulsion ? yes('warn') : no(), '') },
+            { on: !!h.faintingSpell, html: historyRow('Fainting spell / Dizzy spell', 'Hinihimatay', h.faintingSpell ? yes('warn') : no(), '') },
+            { on: !!h.epilepsy, html: historyRow('Epilepsy', '', h.epilepsy ? yes('warn') : no(), '') },
+            { on: !!vaccines, html: historyRow('Vaccines', 'Bakuna', vaccines ? yes('ok') : no(), vaccines) },
+            { on: !!other, html: '<tr><th scope="row">Other</th><td class="hx-answer">' + (other ? yes('warn') : '<span class="yn no">None</span>') + '</td>' +
+                '<td class="hx-detail">' + (other ? escapeHtml(other) : '<span class="empty-dash">&mdash;</span>') + '</td></tr>' }
+        ];
+        const ordered = items.filter(function (i) { return i.on; }).concat(items.filter(function (i) { return !i.on; }));
+        $('r-history').innerHTML = ordered.map(function (i) { return i.html; }).join('');
     }
 
-    /* ---------- Visits (already newest first from the server) ---------- */
+    /* ---------- Visits: one table, vital signs beside each visit (already newest first from the server) ---------- */
     function emptyRow(cols, text) {
         return '<tr class="no-match"><td colspan="' + cols + '">' + escapeHtml(text) + '</td></tr>';
     }
     const has = function (n) { return typeof n === 'number' && isFinite(n) && n > 0; };
+    const cell = function (n, digits) { return has(n) ? escapeHtml(digits === undefined ? n : Number(n).toFixed(digits)) : dash(''); };
 
     function renderVisits(visits) {
-        $('r-vitals').innerHTML = visits.length ? visits.map(function (v) {
+        $('r-visits').innerHTML = visits.length ? visits.map(function (v) {
             const bp = /^\d+\/\d+$/.test(v.bp || '') ? v.bp.replace('/', ' / ') : '';
-            return '<tr><td>' + escapeHtml(formatDate(v.visitDate)) + '</td>' +
-                '<td>' + (has(v.heightCm) ? escapeHtml(v.heightCm) + ' cm' : dash('')) + '</td>' +
-                '<td>' + (has(v.weightKg) ? escapeHtml(v.weightKg) + ' kg' : dash('')) + '</td>' +
-                '<td>' + (has(v.bmi) ? escapeHtml(v.bmi) : dash('')) + '</td>' +
-                '<td>' + dash(bp) + '</td></tr>';
-        }).join('') : emptyRow(5, 'No vital signs recorded yet.');
-
-        $('r-findings').innerHTML = visits.length ? visits.map(function (v) {
             return '<tr><td>' + escapeHtml(formatDate(v.visitDate)) + '</td>' +
                 '<td>' + dash(v.visitType) + '</td>' +
                 '<td>' + dash(v.complaint) + '</td>' +
+                '<td>' + dash(bp) + '</td>' +
+                '<td>' + cell(v.bodyTemperature, 1) + '</td>' +
+                '<td>' + cell(v.pulseRate) + '</td>' +
+                '<td>' + cell(v.weightKg) + '</td>' +
+                '<td>' + cell(v.heightCm) + '</td>' +
+                '<td>' + cell(v.bmi) + '</td>' +
                 '<td>' + dash(v.diagnosis) + '</td>' +
                 '<td>' + dash(v.actionsTaken) + '</td>' +
                 '<td>' + dash(v.doctorName || v.createdByName) + '</td></tr>';
-        }).join('') : emptyRow(6, 'No completed visits yet.');
+        }).join('') : emptyRow(12, 'No completed visits yet.');
     }
 
     /* ---------- page ---------- */

@@ -1,16 +1,17 @@
 /* Student Records list. Loads students from GET /api/patients 10 at a time:
    the first 10 when the page opens, then 10 more each time the bottom of the table scrolls into view.
    The server does the search, the department filter and the counting, so every student can be reached.
-   Doctors see the page read-only (no Add student button). */
+   One toolbar: search, Department dropdown (built from the server's department counts), Clear.
+   Doctors see the page read-only (Read-only tag, no Add or Import buttons, no "register" hint). */
 (function () {
     'use strict';
     const body = document.getElementById('mr-body');
     const search = document.getElementById('mr-search');
     const clear = document.getElementById('mr-clear');
     const count = document.getElementById('mr-count');
-    const tabsBox = document.getElementById('mr-tabs');
+    const select = document.getElementById('mr-department');
     const api = window.ClinicAPI;
-    if (!body || !search || !tabsBox || !api) return;
+    if (!body || !search || !select || !api) return;
 
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const PAGE = 10;            // students fetched and drawn at a time
@@ -61,14 +62,19 @@
             '</tr>';
     }
 
-    function buildTabs(all, colleges) {
-        let html = '<a href="#" data-department=""' + (department === '' ? ' class="on" aria-current="true"' : '') + '>All ' + num(all) + '</a>';
-        colleges.forEach(function (c) {
-            const active = department === c.name;
-            html += '<a href="#" data-department="' + escapeHtml(c.name) + '"' + (active ? ' class="on" aria-current="true"' : '') + '>' +
-                escapeHtml(c.name) + ' ' + num(c.count) + '</a>';
+    // Department dropdown: one option per department that has a match for the current search.
+    // The chosen department stays in the list (with 0) even when the search has no match in it.
+    function buildDepartments(all, colleges) {
+        const list = colleges.slice();
+        if (department && !list.some(function (c) { return c.name === department; })) {
+            list.push({ name: department, count: 0 });
+        }
+        let html = '<option value="">All departments (' + num(all) + ')</option>';
+        list.forEach(function (c) {
+            html += '<option value="' + escapeHtml(c.name) + '">' + escapeHtml(c.name) + ' (' + num(c.count) + ')</option>';
         });
-        tabsBox.innerHTML = html;
+        select.innerHTML = html;
+        select.value = department;
     }
 
     function setCount() {
@@ -123,14 +129,10 @@
             const result = await api.request('/api/patients?search=' + encodeURIComponent(query) +
                 '&college=' + encodeURIComponent(department) + '&limit=' + PAGE + '&offset=' + loaded);
             if (mine !== ticket) return;
-            if (reset && department && !result.colleges.some(function (c) { return c.name === department; })) {
-                department = '';            // the chosen department has no match for this search
-                return fetchPage(true);
-            }
             removeSentinel();
             if (reset) {
                 body.innerHTML = '';
-                buildTabs(result.all, result.colleges);
+                buildDepartments(result.all, result.colleges);
             }
             total = result.total;
             body.insertAdjacentHTML('beforeend', result.patients.map(rowHtml).join(''));
@@ -148,11 +150,8 @@
         }
     }
 
-    tabsBox.addEventListener('click', function (event) {
-        const tab = event.target.closest('a[data-department]');
-        if (!tab) return;
-        event.preventDefault();
-        department = tab.dataset.department;
+    select.addEventListener('change', function () {
+        department = select.value;
         fetchPage(true);
     });
     search.addEventListener('input', function () {
@@ -162,12 +161,15 @@
     clear.addEventListener('click', function () {
         search.value = '';
         department = '';
+        select.value = '';
         fetchPage(true);
         search.focus();
     });
 
-    // Doctors see this page read-only: show the tag and hide Add student. Nurses see the button.
+    // Doctors see this page read-only: show the tag and hide the Add and Import buttons.
+    // Nurses get the "register a new student" hint added to the note under the title.
     api.getSession().then(function (session) {
+        const sub = document.getElementById('mr-sub');
         if (session.user.role === 'doctor') {
             const tag = document.getElementById('readonly-tag');
             const add = document.getElementById('add-student');
@@ -175,8 +177,10 @@
             if (tag) tag.hidden = false;
             if (add) add.hidden = true;
             if (imp) imp.hidden = true;
+        } else if (sub) {
+            sub.textContent = 'Search a student and open the record, or register a new student.';
         }
     }).catch(fail);
 
     fetchPage(true);
-})();
+})();
