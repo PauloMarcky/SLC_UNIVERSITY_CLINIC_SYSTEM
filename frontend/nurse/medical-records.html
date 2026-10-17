@@ -27,8 +27,8 @@
         <main>
             <div class="page-head" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
                 <div>
-                    <h2>Student Records <span class="pill neutral readonly-tag" id="readonly-tag" hidden>Read-only</span></h2>
-                    <p class="sub">Search a student and open the record, or register a new student.</p>
+                    <h2>Student Records</h2>
+                    <p class="sub"><span class="pill neutral readonly-tag" id="readonly-tag" style="margin:0 8px 0 0" hidden>Read-only</span><span id="mr-sub">Search a student and open the record.</span></p>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:12px">
                     <a class="btn sec" id="import-students" href="../nurse/import-students.html">Import from Excel</a>
@@ -38,9 +38,11 @@
             <div class="filters" role="search">
                 <div class="grow"><label for="mr-search">Search by name or ID</label><input id="mr-search" type="search"
                         placeholder="Type a name or ID number" autocomplete="off"></div>
+                <div><label for="mr-department">Department</label><select id="mr-department">
+                        <option value="">All departments</option>
+                    </select></div>
                 <div class="filters-clear"><button type="button" class="btn sec" id="mr-clear">Clear</button></div>
             </div>
-            <nav class="tabs" id="mr-tabs" aria-label="Department"></nav>
             <p class="filter-count" id="mr-count" role="status" aria-live="polite"></p>
             <section class="box">
                 <table class="record-table">
@@ -65,4 +67,4 @@
     </div>
 </body>
 
-</html>
+</html>

@@ -19,7 +19,7 @@
 
 <body>
     <header class="topbar">
-        <h1>ULS Clinic Management System <span>Prototype v5 (HTML/CSS)</span></h1>
+        <h1>Student Record</h1>
         <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
     </header>
     <div class="layout">
@@ -50,8 +50,11 @@
                 </section>
 
                 <section class="box">
-                    <h3>Identification</h3>
+                    <h3 class="head-note">Identification
+                        <button type="button" class="more-toggle" id="ident-toggle" aria-expanded="false" aria-controls="r-ident-more">More details</button>
+                    </h3>
                     <div class="id-grid" id="r-ident"></div>
+                    <div class="id-grid id-more" id="r-ident-more" hidden></div>
                 </section>
 
                 <section class="box">
@@ -62,38 +65,26 @@
                 </section>
 
                 <section class="box">
-                    <h3 class="head-note">Vital Signs <span>From completed visits &middot; newest first</span></h3>
-                    <div class="table-scroll">
-                        <table class="entry-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Height</th>
-                                    <th>Weight</th>
-                                    <th>BMI</th>
-                                    <th>Blood pressure</th>
-                                </tr>
-                            </thead>
-                            <tbody id="r-vitals"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <section class="box">
                     <h3 class="head-note">Visits <span>Completed visits &middot; newest first</span></h3>
                     <div class="table-scroll">
-                        <table class="entry-table findings-table">
+                        <table class="entry-table visits-table">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Type</th>
                                     <th>Complaint</th>
+                                    <th>BP</th>
+                                    <th>Temp<small>&deg;C</small></th>
+                                    <th>Pulse<small>bpm</small></th>
+                                    <th>Weight<small>kg</small></th>
+                                    <th>Height<small>cm</small></th>
+                                    <th>BMI</th>
                                     <th>Diagnosis</th>
                                     <th>Action taken</th>
                                     <th>Doctor</th>
                                 </tr>
                             </thead>
-                            <tbody id="r-findings"></tbody>
+                            <tbody id="r-visits"></tbody>
                         </table>
                     </div>
                 </section>
@@ -104,4 +95,4 @@
     </div>
 </body>
 
-</html>
+</html>
