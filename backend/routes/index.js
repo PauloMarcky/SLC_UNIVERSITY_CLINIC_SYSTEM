@@ -10,6 +10,7 @@ import { visitsRoutes } from './visits.routes.js';
 import { certificatesRoutes } from './certificates.routes.js';
 import { inventoryRoutes } from './inventory.routes.js';
 import { prescriptionsRoutes } from './prescriptions.routes.js';
+import { statisticsRoutes } from './statistics.routes.js';
 
 /**
  * Everything under /api. The order is the security model:
@@ -28,6 +29,7 @@ export function createApiRouter({ allowedOrigin, loginLimiter }) {
     .use(usersRoutes)
     .use(patientsRoutes)
     .use(visitsRoutes)
+    .use(statisticsRoutes)
     .use(inventoryRoutes)
     .use(prescriptionsRoutes)
     .use(certificatesRoutes)
