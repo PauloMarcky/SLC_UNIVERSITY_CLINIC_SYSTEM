@@ -181,7 +181,12 @@ function historyOf(row) {
     faintingSpell: Number(r.fainting_spell) === 1,
     epilepsy: Number(r.epilepsy) === 1,
     vaccines: r.vaccines || '',
-    otherCondition: r.other_condition || ''
+    otherCondition: r.other_condition || '',
+    asthmaLastAttack: r.asthma_last_attack || '',
+    asthmaMedicine: r.asthma_medicine || '',
+    allergyFood: r.allergy_food || '',
+    allergyMedicine: r.allergy_medicine || '',
+    hepatitisB: Number(r.hepatitis_b) === 1
   };
 }
 
@@ -196,12 +201,16 @@ export async function saveHistory(patientId, body, actor) {
   await assertPatient(patientId);
   await pool.execute(
     `INSERT INTO patient_medical_history(patient_id, asthma, allergy, allergy_details,
-       febrile_convulsion, fainting_spell, epilepsy, vaccines, other_condition, updated_at, updated_by)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?)
+       febrile_convulsion, fainting_spell, epilepsy, vaccines, other_condition, updated_at, updated_by,
+       asthma_last_attack, asthma_medicine, allergy_food, allergy_medicine, hepatitis_b)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
      ON DUPLICATE KEY UPDATE asthma = VALUES(asthma), allergy = VALUES(allergy),
        allergy_details = VALUES(allergy_details), febrile_convulsion = VALUES(febrile_convulsion),
        fainting_spell = VALUES(fainting_spell), epilepsy = VALUES(epilepsy),
        vaccines = VALUES(vaccines), other_condition = VALUES(other_condition),
+       asthma_last_attack = VALUES(asthma_last_attack), asthma_medicine = VALUES(asthma_medicine),
+       allergy_food = VALUES(allergy_food), allergy_medicine = VALUES(allergy_medicine),
+       hepatitis_b = VALUES(hepatitis_b),
        updated_at = VALUES(updated_at), updated_by = VALUES(updated_by)`,
     [
       patientId, flag(body.asthma), flag(body.allergy),
@@ -209,7 +218,12 @@ export async function saveHistory(patientId, body, actor) {
       flag(body.febrileConvulsion), flag(body.faintingSpell), flag(body.epilepsy),
       text(body.vaccines, 'Vaccines', 300),
       text(body.otherCondition, 'Other condition', 300),
-      new Date().toISOString(), actor.id
+      new Date().toISOString(), actor.id,
+      text(body.asthmaLastAttack, 'Date of last asthma attack', 50),
+      text(body.asthmaMedicine, 'Asthma medicine', 300),
+      text(body.allergyFood, 'Food allergy', 300),
+      text(body.allergyMedicine, 'Allergy medicine', 300),
+      flag(body.hepatitisB)
     ]
   );
   return getHistory(patientId);
@@ -225,7 +239,8 @@ export async function getPatientRecord(id, actor) {
     `SELECT v.id, v.visit_type, v.visit_date, v.complaint,
             v.systolic, v.diastolic, v.weight_kg, v.height_cm,
             v.bmi, v.bmi_status, v.bp_status, v.diagnosis,
-            v.notes, v.confidential, v.created_by_name, v.created_at
+            v.notes, v.confidential, v.created_by_name, v.created_at,
+            v.lab_source_name, v.lab_received_at
      FROM visits v
      WHERE v.patient_id = ?
        AND (? = 'doctor' OR v.confidential = 0)
@@ -241,16 +256,18 @@ export async function getPatientRecord(id, actor) {
       visitType: row.visit_type,
       visitDate: row.visit_date,
       complaint: Number(row.confidential) === 1 ? 'Confidential' : row.complaint,
-      bp: `${row.systolic}/${row.diastolic}`,
-      bpStatus: row.bp_status,
-      weightKg: Number(row.weight_kg),
-      heightCm: Number(row.height_cm),
-      bmi: Number(row.bmi),
-      bmiStatus: row.bmi_status,
+      bp: row.systolic == null || row.diastolic == null ? '' : `${row.systolic}/${row.diastolic}`,
+      bpStatus: row.bp_status || '',
+      weightKg: row.weight_kg == null ? null : Number(row.weight_kg),
+      heightCm: row.height_cm == null ? null : Number(row.height_cm),
+      bmi: row.bmi == null ? null : Number(row.bmi),
+      bmiStatus: row.bmi_status || '',
       diagnosis: Number(row.confidential) === 1 ? 'Confidential' : row.diagnosis,
       notes: Number(row.confidential) === 1 ? '' : row.notes || '',
       confidential: Number(row.confidential) === 1,
       createdByName: row.created_by_name,
+      labSourceName: row.lab_source_name || '',
+      labReceivedAt: row.lab_received_at || null,
       createdAt: row.created_at
     }))
   };

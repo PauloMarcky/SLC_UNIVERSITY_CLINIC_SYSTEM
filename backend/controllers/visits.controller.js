@@ -1,14 +1,15 @@
 import { readJson } from '../utils/http.js';
 import { routeId } from '../utils/validators.js';
 import {
-  listVisits, createVisit, triageVisit, queueVisits, screenedVisits, completeVisit, screenVisit
+  listVisits, createVisit, triageVisit, updateTriage, cancelVisit, queueVisits, screenedVisits, completeVisit, screenVisit
 } from '../services/visits.service.js';
 
 export async function list(req, res) {
   const visits = await listVisits({
     search: req.query.search || '',
     type: req.query.type || '',
-    college: req.query.college || ''
+    college: req.query.college || '',
+    copies: req.query.copies || ''
   }, req.session.user);
   res.status(200).json({ visits });
 }
@@ -32,6 +33,16 @@ export async function screened(req, res) {
 export async function complete(req, res) {
   const id = routeId(req.params.id);
   res.status(200).json({ visit: await completeVisit(id, await readJson(req), req.session.user) });
+}
+
+export async function update(req, res) {
+  const id = routeId(req.params.id);
+  res.status(200).json({ visit: await updateTriage(id, await readJson(req), req.session.user) });
+}
+
+export async function cancel(req, res) {
+  const id = routeId(req.params.id);
+  res.status(200).json({ visit: await cancelVisit(id, req.session.user) });
 }
 
 export async function screen(req, res) {

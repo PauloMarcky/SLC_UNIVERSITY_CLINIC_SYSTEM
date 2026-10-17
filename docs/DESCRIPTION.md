@@ -2,7 +2,7 @@
 
 Combines Prototype v1 (Doctor/Nurse workflows, requirements tracking, inventory, statistics) with the HTML/CSS multi-page prototype (student/employee portals). Based on the MOM with the ULS Clinic Doctor. Open `index.html` to start.
 
-**Certificate workflow:** the certificate module now uses a Node.js/SQLite backend with authenticated nurse and doctor accounts, drafts, approval and revision requests, activity history, notifications, and approved-only A4 printing. Follow [the setup guide](docs/CERTIFICATES.md) and open the server URL to use it. Opening HTML files directly does not enable certificate operations.
+**Certificate workflow:** the certificate module now uses a Node.js/MySQL backend with authenticated nurse and doctor accounts, drafts, approval and revision requests, activity history, notifications, and approved-only A4 printing. Follow [the setup guide](docs/CERTIFICATES.md) and open the server URL to use it. Opening HTML files directly does not enable certificate operations.
 
 **Other modules remain prototypes:** their sample data is fictional. Search, pagination, auto-calculated Age/BMI/BP, record date-stamping, inventory deduction, and expiry alerts in those modules still need a backend. The certificate database reuses the fictional patient records already represented by the project.
 

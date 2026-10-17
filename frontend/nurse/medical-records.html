@@ -7,10 +7,13 @@
     <title>Student Records - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/import-students.css">
+    <link rel="stylesheet" href="../css/import-modal.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/student-records.js" defer></script>
+    <script src="../js/import-students.js" defer></script>
 </head>
 
 <body>
@@ -31,7 +34,7 @@
                     <p class="sub">Search a student and open the record, or register a new student.</p>
                 </div>
                 <div style="display:flex;flex-wrap:wrap;gap:12px">
-                    <a class="btn sec" id="import-students" href="../nurse/import-students.html">Import from Excel</a>
+                    <button type="button" class="btn sec" id="import-students">Import from Excel</button>
                     <a class="btn" id="add-student" href="../nurse/add-student.html">+ Add student</a>
                 </div>
             </div>
@@ -62,6 +65,98 @@
                 </table>
             </section>
         </main>
+    </div>
+
+    <!-- Import students from Excel -->
+    <div class="modal import-modal" id="import-modal" hidden>
+        <div class="modal-backdrop" data-close-import></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="import-title">
+            <div class="modal-head">
+                <h3 id="import-title">Import Students from Excel</h3>
+                <button class="modal-x" type="button" data-close-import aria-label="Close">&times;</button>
+            </div>
+            <p class="imp-lead">Add many students at once. You will see a preview before anything is saved.</p>
+            <p class="note save-result" id="imp-message" role="alert" tabindex="-1" hidden></p>
+
+            <!-- Step 1: choose the file -->
+            <section class="box" id="imp-pick" aria-labelledby="imp-pick-title">
+                <h3 id="imp-pick-title">1. Choose the file</h3>
+                <div class="form">
+                    <div class="f full">
+                        <label for="imp-file">Excel file (.xlsx or .xls)</label>
+                        <input id="imp-file" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+                    </div>
+                    <div class="f">
+                        <label for="imp-dept">Department for every student in this file (optional)</label>
+                        <input id="imp-dept" maxlength="100" list="imp-dept-list" placeholder="e.g. College of Arts and Sciences" autocomplete="off">
+                        <datalist id="imp-dept-list"></datalist>
+                    </div>
+                    <div class="f">
+                        <span class="label-text">Columns the file needs</span>
+                        <p class="imp-hint"><strong>Code</strong>, <strong>Last Name</strong> and <strong>First Name</strong> are required. <strong>Middle Name</strong>, <strong>Sex</strong> (M or F), <strong>Course</strong> and <strong>Year</strong> are optional. The columns can be in any order.</p>
+                    </div>
+                </div>
+                <div class="imp-reading" id="imp-reading" role="status" aria-live="polite" hidden>
+                    <div class="imp-bar indeterminate" aria-hidden="true"><span></span></div>
+                    <p id="imp-reading-text">Reading the Excel file...</p>
+                </div>
+            </section>
+
+            <section class="box" id="imp-done" aria-labelledby="imp-done-title" tabindex="-1" hidden>
+                <h3 id="imp-done-title">Import finished</h3>
+                <div class="imp-counts" id="imp-done-counts"></div>
+                <p class="imp-hint imp-done-note" id="imp-done-note"></p>
+                <div class="form-actions">
+                    <button type="button" class="btn" id="imp-close-done">Close</button>
+                    <button type="button" class="btn sec" id="imp-download" hidden>Download rows not added (CSV)</button>
+                    <button type="button" class="btn sec" id="imp-new">Import another file</button>
+                </div>
+            </section>
+
+            <!-- Step 2: preview -->
+            <section class="box" id="imp-preview" aria-labelledby="imp-preview-title" hidden>
+                <h3 id="imp-preview-title">2. Check the preview</h3>
+                <p class="imp-file" id="imp-file-info"></p>
+                <div class="imp-counts" id="imp-counts"></div>
+                <nav class="tabs imp-tabs" id="imp-tabs" aria-label="Show rows"></nav>
+                <div class="imp-table-wrap">
+                    <table class="record-table imp-table">
+                        <thead>
+                            <tr>
+                                <th>Row</th>
+                                <th>Code</th>
+                                <th>Last name</th>
+                                <th>First name</th>
+                                <th>Middle name</th>
+                                <th>Sex</th>
+                                <th>Course</th>
+                                <th>Year</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="imp-body"></tbody>
+                    </table>
+                </div>
+                <p class="imp-limit" id="imp-limit" hidden></p>
+                <div class="form-actions" id="imp-actions">
+                    <button type="button" class="btn" id="imp-start">Import students</button>
+                    <button type="button" class="btn sec" id="imp-again">Choose another file</button>
+                </div>
+            </section>
+
+            <!-- Step 3: saving -->
+            <section class="box" id="imp-run" aria-labelledby="imp-run-title" hidden>
+                <h3 id="imp-run-title">3. Saving</h3>
+                <div class="imp-saving">
+                    <progress id="imp-progress" class="imp-progress" max="1" value="0" aria-label="Import progress"></progress>
+                    <p id="imp-progress-text" role="status" aria-live="polite"></p>
+                    <p class="imp-hint">Keep this window open until it finishes. You can use Cancel to stop; students already saved stay saved.</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn sec" id="imp-cancel">Cancel</button>
+                </div>
+            </section>
+        </div>
     </div>
 </body>
 

@@ -22,6 +22,13 @@ export async function closePool() {
 // Test helper: empties the tables the tests touch and re-seeds four sample patients.
 // The inventory/prescription tables are listed first because they point at visits and patients.
 export async function resetDatabase() {
+  // Safety guard: this function empties tables. Only ever run it on a test database.
+  if (!/_test$/i.test(String(env.db.database))) {
+    throw new Error(
+      `Refusing to reset database "${env.db.database}": tests only run on a database whose name ends with _test. ` +
+      'Run the tests with "npm test" (it loads backend/.env.test).'
+    );
+  }
   const connection = await pool.getConnection();
   try {
     await connection.query('SET FOREIGN_KEY_CHECKS = 0');

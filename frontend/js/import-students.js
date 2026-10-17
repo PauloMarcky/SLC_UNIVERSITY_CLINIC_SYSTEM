@@ -1,12 +1,15 @@
-/* Import students from Excel (nurse only).
+/* Import students from Excel (nurse only), shown as a window on the Student Records page.
    1. The file is read in a Web Worker (js/import-worker.js), so the page stays responsive on big files.
    2. A preview shows what is ready, already in the system, or has a problem. Nothing is saved yet.
    3. Saving sends one POST /api/patients per student, a few at a time, with a progress bar and a Cancel button.
-      A student whose ID already exists (409) is skipped, never overwritten. */
+      A student whose ID already exists (409) is skipped, never overwritten.
+   When students were added, the page is told through the "students:changed" event so the list refreshes. */
 (function () {
     'use strict';
     const api = window.ClinicAPI;
-    if (!api || !document.getElementById('imp-file')) return;
+    const modal = document.getElementById('import-modal');
+    const openButton = document.getElementById('import-students');
+    if (!api || !modal || !openButton || !document.getElementById('imp-file')) return;
     const $ = id => document.getElementById(id);
 
     const MAX_BYTES = Infinity; // no file size limit
@@ -16,7 +19,8 @@
 
     let rows = [];              // [{row, id, lastName, ..., status, note}]
     let existingIds = new Set();
-    let existingAll = true;     // false when the list endpoint hit its limit
+    let existingAll = false;    // true only when every existing student ID was loaded
+    let existingLoaded = false;
     let filter = 'all';
     let reader = null;          // the Web Worker
     let importing = false;
@@ -24,6 +28,7 @@
     let fileName = '';
     let sheetInfo = '';
     let dept = '';
+    let lastFocus = null;
 
     const num = n => Number(n).toLocaleString('en-US');
     function escapeHtml(value) {
@@ -40,28 +45,52 @@
     }
     function show(id, visible) { $(id).hidden = !visible; }
     function count(statuses) { return rows.filter(r => statuses.indexOf(r.status) !== -1).length; }
-
-    /* ---------- session and existing students ---------- */
     function authFail(error) {
         if (error.status === 401) { window.location.assign('/index.html'); return true; }
         return false;
     }
 
-    api.getSession().then(function (session) {
-        if (session.user.role !== 'nurse') window.location.replace('../nurse/medical-records.html'); // doctors are read-only
-    }).catch(function (error) { if (!authFail(error)) message(error.message); });
+    /* ---------- open and close the window ---------- */
+    function openModal() {
+        lastFocus = document.activeElement;
+        modal.hidden = false;
+        document.body.classList.add('modal-open');
+        loadExisting();
+        if (!importing && !rows.length) $('imp-file').focus();
+    }
+    function closeModal() {
+        if (importing) { message('The import is still running. Use Cancel to stop it first.', true); return; }
+        reset();
+        modal.hidden = true;
+        document.body.classList.remove('modal-open');
+        if (lastFocus && lastFocus.isConnected) lastFocus.focus();
+    }
+    openButton.addEventListener('click', openModal);
+    modal.querySelectorAll('[data-close-import]').forEach(function (el) { el.addEventListener('click', closeModal); });
+    $('imp-close-done').addEventListener('click', closeModal);
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && !modal.hidden) closeModal();
+    });
 
-    api.request('/api/patients?search=').then(function (result) {
-        const colleges = [];
-        existingAll = result.patients.length < LIST_LIMIT;
-        result.patients.forEach(function (p) {
-            existingIds.add(String(p.id).toLowerCase());
-            const c = String(p.college || '').trim();
-            if (c && colleges.indexOf(c) === -1) colleges.push(c);
+    /* ---------- existing students (loaded the first time the window opens) ---------- */
+    function loadExisting() {
+        if (existingLoaded) return;
+        existingLoaded = true;
+        api.request('/api/patients?search=&limit=1').then(function (result) {
+            $('imp-dept-list').innerHTML = result.colleges.map(function (c) {
+                return '<option value="' + escapeHtml(c.name) + '"></option>';
+            }).join('');
+            if (result.all >= LIST_LIMIT) { existingAll = false; return null; }
+            return api.request('/api/patients?search=').then(function (list) {
+                list.patients.forEach(function (p) { existingIds.add(String(p.id).toLowerCase()); });
+                existingAll = true;
+            });
+        }).catch(function (error) {
+            existingLoaded = false;
+            existingAll = false;
+            authFail(error);
         });
-        colleges.sort();
-        $('imp-dept-list').innerHTML = colleges.map(c => '<option value="' + escapeHtml(c) + '"></option>').join('');
-    }).catch(function (error) { if (!authFail(error)) existingAll = false; });
+    }
 
     /* ---------- step 1: read the file ---------- */
     function stopReader() { if (reader) { reader.terminate(); reader = null; } }
@@ -334,6 +363,7 @@
         show('imp-preview', true);
         $('imp-done').scrollIntoView({ block: 'start' });
         $('imp-done').focus();
+        if (tally.added) window.dispatchEvent(new CustomEvent('students:changed'));   // refresh the list behind the window
     }
 
     /* ---------- download the rows that were not added ---------- */

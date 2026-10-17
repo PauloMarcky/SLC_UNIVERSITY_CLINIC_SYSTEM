@@ -1,0 +1,33 @@
+/* Patient search dropdown on the Assess page. Loaded after style.css. */
+.pt-search { position: relative; }
+.pt-search input { width: 100%; padding-left: 44px; padding-right: 46px; }
+.pt-icon { position: absolute; left: 14px; top: 14px; width: 18px; height: 18px; color: var(--m); pointer-events: none; }
+.pt-clear { position: absolute; right: 6px; top: 5px; width: 36px; height: 36px; border: 0; border-radius: 8px; background: transparent; color: var(--m); font-size: 1.4rem; line-height: 1; }
+.pt-clear:hover { background: var(--gl); color: var(--g); }
+.pt-clear[hidden] { display: none; }
+
+.pt-results { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px); margin: 0; padding: 6px; list-style: none;
+  max-height: 380px; overflow-y: auto; background: var(--surface-solid, var(--page-bg)); border: 1px solid var(--bd); border-radius: 12px;
+  box-shadow: 0 12px 32px #071b3830; }
+.pt-results[hidden] { display: none; }
+.pt-results li[role="option"] { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+.pt-results li[role="option"].is-active { background: var(--gl); box-shadow: inset 3px 0 var(--g); }
+.pt-main { display: flex; flex-direction: column; min-width: 0; }
+.pt-main strong { font-weight: 650; color: var(--t); overflow-wrap: anywhere; }
+.pt-main small { color: var(--m); font-size: .8125rem; overflow-wrap: anywhere; }
+.pt-last { flex: none; font-size: .8125rem; color: var(--m); white-space: nowrap; }
+.pt-results mark { background: var(--warning-bg); color: inherit; border-radius: 3px; padding: 0 1px; }
+.pt-state, .pt-foot { padding: 14px 12px; color: var(--m); font-size: .875rem; }
+.pt-foot { margin-top: 4px; border-top: 1px solid var(--bd); padding: 10px 12px 6px; font-size: .8125rem; }
+
+.pt-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding: 14px 16px;
+  border: 1px solid var(--bd); border-left: 3px solid var(--g); border-radius: 12px; background: var(--gl); }
+.pt-card[hidden] { display: none; }
+.pt-card-main { display: flex; flex-direction: column; min-width: 0; }
+.pt-card-main strong { font-size: 1.0625rem; color: var(--t); overflow-wrap: anywhere; }
+.pt-card-main span { color: var(--m); font-size: .875rem; overflow-wrap: anywhere; }
+.pt-card-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pt-card .btn { min-height: 38px; padding: 7px 12px; }
+@media (max-width: 640px) {
+  .pt-results li[role="option"] { flex-direction: column; align-items: flex-start; gap: 2px; }
+}

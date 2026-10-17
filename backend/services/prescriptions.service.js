@@ -1,6 +1,7 @@
 import { pool, withTransaction } from '../db/pool.js';
 import { HttpError } from '../utils/http-error.js';
 import { text, wholeNumber } from '../utils/validators.js';
+import { STAFF, requireAnyRole } from '../utils/authz.js';
 
 // Keep in sync with RX_FREQUENCIES in frontend/js/rx-api.js
 export const FREQUENCIES = [
@@ -132,6 +133,7 @@ export async function listForPatient(patientId, actor) {
  * Everything is one transaction: if any line fails, nothing is deducted.
  */
 export async function dispensePrescription(id, actor) {
+  requireAnyRole(actor, STAFF, 'Clinic staff access required.');
   await withTransaction(async connection => {
     const [rxRows] = await connection.execute('SELECT * FROM prescriptions WHERE id = ? FOR UPDATE', [id]);
     const rx = rxRows[0];

@@ -32,8 +32,8 @@ export const env = Object.freeze({
     database: process.env.DB_NAME
   }),
   clinic: Object.freeze({
-    universityName: process.env.UNIVERSITY_NAME || 'Saint Louis College',
-    clinicName: process.env.CLINIC_NAME || 'University Clinic',
+    universityName: process.env.UNIVERSITY_NAME || 'University of La Salette, Inc.',
+    clinicName: process.env.CLINIC_NAME || 'Health Services Department',
     clinicAddress: process.env.CLINIC_ADDRESS || '',
     clinicContact: process.env.CLINIC_CONTACT || ''
   })

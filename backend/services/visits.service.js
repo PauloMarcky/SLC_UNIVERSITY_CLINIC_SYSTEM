@@ -7,6 +7,13 @@ import { parseItems, createPrescriptionInTx, getPrescription } from './prescript
 
 export const VISIT_TYPES = ['Consultation', 'Checkup'];
 
+// Today's date on the server clock (local time, not UTC), as YYYY-MM-DD.
+function localDate() {
+  const d = new Date();
+  const two = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
+}
+
 export function parseBp(value) {
   const match = /^(\d{2,3})\/(\d{2,3})$/.exec(text(value, 'Blood pressure', 10, true));
   if (!match) throw new HttpError(400, 'Blood pressure must look like 120/80.');
@@ -25,6 +32,32 @@ export function bmiOf(weightKg, heightCm) {
   return { bmi, status };
 }
 
+export const CHECKUP_RESULTS = ['Cleared', 'Needs screening'];
+
+const isBlank = value => value === undefined || value === null || String(value).trim() === '';
+
+/**
+ * Blood pressure, weight and height. A Consultation needs all three. For a Checkup each one is optional,
+ * but a value that is typed must still be realistic. BMI needs both weight and height; BP status needs BP.
+ */
+export function parseVitals(body, required) {
+  const vitals = { systolic: null, diastolic: null, weight: null, height: null, bmi: null, bmiStatus: null, bpStatus: null };
+  if (required || !isBlank(body.bp)) {
+    const { systolic, diastolic } = parseBp(body.bp);
+    vitals.systolic = systolic;
+    vitals.diastolic = diastolic;
+    vitals.bpStatus = bpStatusOf(systolic, diastolic);
+  }
+  if (required || !isBlank(body.weight)) vitals.weight = number(body.weight, 'Weight', 1, 500);
+  if (required || !isBlank(body.height)) vitals.height = number(body.height, 'Height', 30, 300);
+  if (vitals.weight !== null && vitals.height !== null) {
+    const { bmi, status } = bmiOf(vitals.weight, vitals.height);
+    vitals.bmi = bmi;
+    vitals.bmiStatus = status;
+  }
+  return vitals;
+}
+
 export function bpStatusOf(systolic, diastolic) {
   if (systolic >= 140 || diastolic >= 90) return 'Hypertension Stage 2';
   if (systolic >= 130 || diastolic >= 80) return 'Hypertension Stage 1';
@@ -39,18 +72,18 @@ export function rowToVisit(row, role) {
     id: row.id,
     patientId: hidden ? null : row.patient_id,
     patientName: hidden ? 'Student (hidden)' : row.patient_name,
-    college: row.college,
+    college: hidden ? '' : row.college,
     visitType: row.visit_type,
     visitDate: row.visit_date,
     complaint: hidden ? 'Confidential' : row.complaint,
     diagnosis: hidden ? 'Confidential' : row.diagnosis,
     notes: hidden ? '' : row.notes || '',
-    bp: `${row.systolic}/${row.diastolic}`,
-    bpStatus: row.bp_status,
-    weightKg: Number(row.weight_kg),
-    heightCm: Number(row.height_cm),
-    bmi: Number(row.bmi),
-    bmiStatus: row.bmi_status,
+    bp: hidden || row.systolic == null || row.diastolic == null ? '' : `${row.systolic}/${row.diastolic}`,
+    bpStatus: hidden ? '' : row.bp_status || '',
+    weightKg: hidden || row.weight_kg == null ? null : Number(row.weight_kg),
+    heightCm: hidden || row.height_cm == null ? null : Number(row.height_cm),
+    bmi: hidden || row.bmi == null ? null : Number(row.bmi),
+    bmiStatus: hidden ? '' : row.bmi_status || '',
     confidential: Number(row.confidential) === 1,
     createdByName: row.created_by_name,
     status: row.status,
@@ -59,29 +92,37 @@ export function rowToVisit(row, role) {
     screenedAt: row.screened_at || null,
     doctorName: row.doctor_name || null,
     nurseName: row.nurse_name || null,
-    pulseRate: row.pulse_rate == null ? null : Number(row.pulse_rate),
-    initialDiagnosis: row.initial_diagnosis || '',
+    pulseRate: hidden || row.pulse_rate == null ? null : Number(row.pulse_rate),
+    initialDiagnosis: hidden ? '' : row.initial_diagnosis || '',
     externalLabsAttached: Number(row.external_labs_attached) === 1,
     sentToHospital: Number(row.sent_to_hospital) === 1,
-    course: row.course || '',
-    age: row.date_of_birth ? Math.floor((Date.now() - new Date(row.date_of_birth).getTime()) / 31557600000) : null,
+    course: hidden ? '' : row.course || '',
+    age: !hidden && row.date_of_birth ? Math.floor((Date.now() - new Date(row.date_of_birth).getTime()) / 31557600000) : null,
     actionsTaken: hidden ? '' : row.actions_taken || '',
     soapObjective: hidden ? '' : row.soap_objective || '',
-    sex: row.gender || '',
-    yearLevel: row.year || '',
+    sex: hidden ? '' : row.gender || '',
+    yearLevel: hidden ? '' : row.year || '',
     visitNumber: Number(row.visit_number) || 1,
-    bodyTemperature: row.body_temperature == null ? null : Number(row.body_temperature),
+    bodyTemperature: hidden || row.body_temperature == null ? null : Number(row.body_temperature),
     screenedCopyOf: row.screened_copy_of == null ? null : Number(row.screened_copy_of),
+    urgent: Number(row.urgent) === 1,
+    nurseNotes: hidden ? '' : row.nurse_notes || '',
+    labSourceName: hidden ? '' : row.lab_source_name || '',
+    labReceivedAt: hidden ? null : row.lab_received_at || null,
+    checkupResult: row.checkup_result || null,
+    isScreeningCopy: row.screened_copy_of != null,
     createdAt: row.created_at
   };
 }
 
 export const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college, p.course, p.year, p.gender, p.date_of_birth,
-                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.id <= v.id) AS visit_number
+                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.status <> 'cancelled' AND vc.id <= v.id) AS visit_number
                       FROM visits v JOIN patients p ON p.id = v.patient_id`;
 
-export async function listVisits({ search = '', type = '', college = '' }, actor) {
+export async function listVisits({ search = '', type = '', college = '', copies = '' }, actor) {
   const where = ["v.status = 'completed'"];
+  // copies=exclude hides the Screening copies, so a screened checkup is not listed twice.
+  if (copies === 'exclude') where.push('v.screened_copy_of IS NULL');
   const params = [];
   const term = search.trim().slice(0, 200);
   if (term) {
@@ -182,7 +223,94 @@ async function fetchVisit(id, actor) {
 }
 
 // ---------- nurse triage ----------
+// Everything the nurse types at triage. Used by both "record" and "edit".
+function parseTriage(body) {
+  const visitType = text(body.visitType, 'Visit type', 20, true);
+  if (!VISIT_TYPES.includes(visitType)) throw new HttpError(400, 'Select a valid visit type.');
+  const isConsultation = visitType === 'Consultation';
+  const vitals = parseVitals(body, isConsultation);   // a Checkup may have no vitals
+  const pulse = isBlank(body.pulseRate) ? null : Math.round(number(body.pulseRate, 'Pulse rate', 20, 250));
+  const temperature = isBlank(body.temperature) ? null : number(body.temperature, 'Body temperature', 30, 45);
+  return {
+    visitType,
+    visitDate: validDate(body.visitDate),
+    complaint: text(body.complaint, 'Complaint', 500, isConsultation),
+    vitals, pulse, temperature,
+    initialDiagnosis: text(body.initialDiagnosis, 'Initial diagnosis', 200),
+    nurseNotes: text(body.nurseNotes, 'Nurse notes', 2000),
+    // Only the name of the outside clinic is typed. The results stay on paper, and the date is set by the system.
+    labSourceName: text(body.labSourceName, 'Laboratory / medical center name', 200),
+    urgent: flag(body.urgent),
+    externalLabsAttached: flag(body.externalLabsAttached)
+  };
+}
+
 export async function triageVisit(body, actor) {
+  requireAnyRole(actor, ['nurse'], 'Only a nurse can record triage.');
+  const patientId = text(body.patientId, 'Patient ID', 50, true);
+  await assertPatient(patientId);
+  const t = parseTriage(body);
+  const v = t.vitals;
+  const [result] = await pool.execute(
+    `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
+       weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
+       created_by, created_by_name, created_at, status, nurse_id, nurse_name,
+       pulse_rate, initial_diagnosis, external_labs_attached, body_temperature,
+       nurse_notes, lab_source_name, lab_received_at, urgent)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,'','',0,?,?,?,'triaged',?,?,?,?,?,?,?,?,?,?)`,
+    [
+      patientId, t.visitType, t.visitDate, t.complaint, v.systolic, v.diastolic, v.weight, v.height,
+      v.bmi, v.bmiStatus, v.bpStatus,
+      actor.id, actor.name, new Date().toISOString(),
+      actor.id, actor.name, t.pulse, t.initialDiagnosis, t.labSourceName ? 1 : t.externalLabsAttached, t.temperature,
+      t.nurseNotes, t.labSourceName, t.labSourceName ? localDate() : null, t.urgent
+    ]
+  );
+  return fetchVisit(result.insertId, actor);
+}
+
+// The nurse can correct a visit until the doctor has it; after that it is the doctor's record.
+export async function updateTriage(id, body, actor) {
+  requireAnyRole(actor, ['nurse'], 'Only a nurse can edit a visit that is waiting for the doctor.');
+  const t = parseTriage(body);
+  const v = t.vitals;
+  await withTransaction(async connection => {
+    const [found] = await connection.execute('SELECT status, lab_source_name, lab_received_at FROM visits WHERE id = ? FOR UPDATE', [id]);
+    if (!found[0]) throw new HttpError(404, 'Visit not found.');
+    if (found[0].status !== 'triaged') throw new HttpError(409, 'Only a visit that is still waiting for the doctor can be edited.');
+    // Keep the original lab date unless the clinic name changed; a cleared name clears the date.
+    const sameLab = t.labSourceName === found[0].lab_source_name;
+    const labDate = !t.labSourceName ? null : sameLab && found[0].lab_received_at ? found[0].lab_received_at : localDate();
+    await connection.execute(
+      `UPDATE visits SET visit_type = ?, visit_date = ?, complaint = ?, systolic = ?, diastolic = ?,
+         weight_kg = ?, height_cm = ?, bmi = ?, bmi_status = ?, bp_status = ?, pulse_rate = ?,
+         initial_diagnosis = ?, external_labs_attached = ?, body_temperature = ?, nurse_notes = ?,
+         lab_source_name = ?, lab_received_at = ?, urgent = ?
+       WHERE id = ?`,
+      [
+        t.visitType, t.visitDate, t.complaint, v.systolic, v.diastolic, v.weight, v.height,
+        v.bmi, v.bmiStatus, v.bpStatus, t.pulse, t.initialDiagnosis,
+        t.labSourceName ? 1 : t.externalLabsAttached, t.temperature, t.nurseNotes,
+        t.labSourceName, labDate, t.urgent, id
+      ]
+    );
+  });
+  return fetchVisit(id, actor);
+}
+
+// A visit entered by mistake is cancelled, not deleted, and only while it is still waiting.
+export async function cancelVisit(id, actor) {
+  requireAnyRole(actor, ['nurse'], 'Only a nurse can cancel a visit that is waiting for the doctor.');
+  const [result] = await pool.execute("UPDATE visits SET status = 'cancelled' WHERE id = ? AND status = 'triaged'", [id]);
+  if (!result.affectedRows) {
+    await fetchVisit(id, actor);   // 404 if it does not exist
+    throw new HttpError(409, 'Only a visit that is still waiting for the doctor can be cancelled.');
+  }
+  return fetchVisit(id, actor);
+}
+
+// OLD VERSION, no longer used. Safe to delete in the Phase 7 cleanup.
+async function oldTriageVisit(body, actor) {
   requireAnyRole(actor, ['nurse'], 'Only a nurse can record triage.');
   const patientId = text(body.patientId, 'Patient ID', 50, true);
   await assertPatient(patientId);
@@ -199,6 +327,11 @@ export async function triageVisit(body, actor) {
     ? null
     : Math.round(number(rawPulse, 'Pulse rate', 20, 250));
   const initialDiagnosis = text(body.initialDiagnosis, 'Initial diagnosis', 200);
+  const nurseNotes = text(body.nurseNotes, 'Nurse notes', 2000);
+  // Only the name of the outside clinic is typed. The results stay on paper, and the date is set by the system.
+  const labSourceName = text(body.labSourceName, 'Laboratory / medical center name', 200);
+  const labReceivedAt = labSourceName ? localDate() : null;
+  const urgent = flag(body.urgent);
   const rawTemp = body.temperature;
   const temperature = rawTemp === undefined || rawTemp === null || String(rawTemp).trim() === ''
     ? null
@@ -207,13 +340,15 @@ export async function triageVisit(body, actor) {
     `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
        weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
        created_by, created_by_name, created_at, status, nurse_id, nurse_name,
-       pulse_rate, initial_diagnosis, external_labs_attached, body_temperature)
-     VALUES(?,?,?,?,?,?,?,?,?,?,?,'','',0,?,?,?,'triaged',?,?,?,?,?,?)`,
+       pulse_rate, initial_diagnosis, external_labs_attached, body_temperature,
+       nurse_notes, lab_source_name, lab_received_at, urgent)
+     VALUES(?,?,?,?,?,?,?,?,?,?,?,'','',0,?,?,?,'triaged',?,?,?,?,?,?,?,?,?,?)`,
     [
       patientId, visitType, visitDate, complaint, systolic, diastolic, weight, height,
       bmi, status, bpStatusOf(systolic, diastolic),
       actor.id, actor.name, new Date().toISOString(),
-      actor.id, actor.name, pulse, initialDiagnosis, flag(body.externalLabsAttached), temperature
+      actor.id, actor.name, pulse, initialDiagnosis, labSourceName ? 1 : flag(body.externalLabsAttached), temperature,
+      nurseNotes, labSourceName, labReceivedAt, urgent
     ]
   );
   return fetchVisit(result.insertId, actor);
@@ -223,7 +358,7 @@ export async function triageVisit(body, actor) {
 export async function queueVisits(actor) {
   requireAnyRole(actor, ['doctor'], 'Only a doctor can view the exam queue.');
   const [rows] = await pool.execute(
-    `${SELECT_VISIT} WHERE v.status = 'triaged' ORDER BY v.visit_date ASC, v.id ASC LIMIT 200`
+    `${SELECT_VISIT} WHERE v.status = 'triaged' ORDER BY v.urgent DESC, v.visit_date ASC, v.id ASC LIMIT 200`
   );
   return rows.map(row => rowToVisit(row, actor.role));
 }
@@ -238,6 +373,9 @@ export async function completeVisit(id, body, actor) {
   const rxItems = parseItems(body.prescription);   // validated before anything is saved
   const screenedNote = text(body.screenedNote, 'Screening note', 300);
   const wantsScreening = body.putToScreening === true;
+  // The doctor picks Cleared or Needs screening. Older screens only send the screening tick, so fall back to it.
+  const checkupResult = isBlank(body.checkupResult) ? (wantsScreening ? 'Needs screening' : 'Cleared') : body.checkupResult;
+  if (!CHECKUP_RESULTS.includes(checkupResult)) throw new HttpError(400, 'Checkup result must be Cleared or Needs screening.');
 
   const rxId = await withTransaction(async connection => {
     const [found] = await connection.execute(
@@ -246,16 +384,16 @@ export async function completeVisit(id, body, actor) {
     const visit = found[0];
     if (!visit) throw new HttpError(404, 'Visit not found.');
     if (visit.status !== 'triaged') throw new HttpError(409, 'This visit has already been completed.');
-    const screen = wantsScreening && visit.visit_type === 'Checkup';
+    const screen = checkupResult === 'Needs screening' && visit.visit_type === 'Checkup';
     const now = new Date().toISOString();
     // The original stays a plain Checkup; Screening gets its own copy (below).
     await connection.execute(
-      `UPDATE visits SET diagnosis = ?, confidential = ?, status = 'completed',
+      `UPDATE visits SET diagnosis = ?, confidential = ?, status = 'completed', checkup_result = ?,
          doctor_id = ?, doctor_name = ?, completed_at = ?,
          soap_objective = ?, actions_taken = ?, sent_to_hospital = ?
        WHERE id = ?`,
       [
-        diagnosis, confidential, actor.id, actor.name, now,
+        diagnosis, confidential, visit.visit_type === 'Checkup' ? checkupResult : null, actor.id, actor.name, now,
         soapObjective, actionsTaken, flag(body.sentToHospital),
         id
       ]
@@ -280,13 +418,15 @@ async function copyToScreening(connection, visitId, actor, note, when) {
        pulse_rate, initial_diagnosis, external_labs_attached, body_temperature,
        soap_subjective, soap_objective, soap_assessment, soap_plan, actions_taken,
        sent_to_hospital, completed_at, is_screened, screened_by, screened_at, screened_note,
+       nurse_notes, lab_source_name, lab_received_at, urgent,
        screened_copy_of)
      SELECT patient_id, visit_type, visit_date, complaint, systolic, diastolic,
        weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
        created_by, created_by_name, created_at, status, nurse_id, nurse_name, doctor_id, doctor_name,
        pulse_rate, initial_diagnosis, external_labs_attached, body_temperature,
        soap_subjective, soap_objective, soap_assessment, soap_plan, actions_taken,
-       sent_to_hospital, completed_at, 1, ?, ?, ?, id
+       sent_to_hospital, completed_at, 1, ?, ?, ?,
+       nurse_notes, lab_source_name, lab_received_at, urgent, id
        FROM visits WHERE id = ?`,
     [actor.id, when, note, visitId]
   );
@@ -307,6 +447,7 @@ export async function screenVisit(id, body, actor) {
     const [already] = await connection.execute('SELECT id FROM visits WHERE screened_copy_of = ? LIMIT 1', [id]);
     if (already[0]) throw new HttpError(409, 'This checkup is already in Screening.');
     await copyToScreening(connection, id, actor, note, new Date().toISOString());
+    await connection.execute("UPDATE visits SET checkup_result = 'Needs screening' WHERE id = ?", [id]);
   });
   return fetchVisit(id, actor);
 }

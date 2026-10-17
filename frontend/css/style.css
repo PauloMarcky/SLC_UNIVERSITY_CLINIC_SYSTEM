@@ -421,3 +421,124 @@ main:focus { outline:none; }
   th,td { white-space:normal; padding:6px; }
   .form-actions { position:static; box-shadow:none; }
 }
+
+
+
+
+/* =====================================================================
+   SIMPLE LAYOUT FOR OLDER USERS
+   Large text, strong contrast, big buttons, a plain sidebar with no
+   pictures, no animation. Everything here overrides the rules above.
+   =====================================================================
+:root {
+  --clinic-sidebar-width:300px; --clinic-header-height:84px;
+  --g:#0b4a9c; --gd:#08356f; --gl:#e3edf9; --t:#111d2b; --m:#34465a;
+  --bd:#9aa9ba; --field-border:#5b6b7f; --shadow:none; --radius:10px;
+  --button-bg:#0b4a9c; --button-hover:#08356f; --focus:#b35c00;
+  --sidebar-surface:#f1f4f8; --sidebar-ink:#111d2b; --sidebar-muted:#34465a;
+  --sidebar-link:#ffffff; --sidebar-hover:#dfe8f3; --sidebar-line:#9aa9ba;
+}
+html { font-size:112.5%; }
+body { line-height:1.7; }
+*,*::before,*::after { transition:none!important; animation:none!important; }
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible { outline:4px solid var(--focus); outline-offset:3px; }
+
+.topbar { backdrop-filter:none; background:#fff; border-bottom:2px solid var(--bd); padding:12px 28px; }
+.topbar h1 { font-size:1.5rem; letter-spacing:0; }
+.topbar h1::after { content:none; }
+.topbar nav a { font-size:1.125rem; padding:10px 16px; }
+
+.layout>aside,.app>aside { background:var(--sidebar-surface)!important; background-image:none!important; border-right:2px solid var(--bd); box-shadow:none; padding:20px 16px; overflow-y:auto; }
+.clinic-sidebar-brand { display:none!important; }
+.nav-icon,.nav-chevron { display:none!important; }
+aside nav { gap:10px; }
+aside h4 { font-size:1.125rem; letter-spacing:0; text-transform:none; color:var(--sidebar-muted); padding:4px 8px 10px; }
+aside a,.nav-group>summary {
+  min-height:60px; padding:14px 16px; font-size:1.25rem; font-weight:600; line-height:1.3;
+  color:var(--sidebar-ink); background:var(--sidebar-link); border:2px solid var(--sidebar-line); border-radius:10px;
+}
+aside a:hover { background:var(--sidebar-hover); border-color:var(--g); color:var(--sidebar-ink); }
+aside a.on,aside a[aria-current="page"] { background:var(--g); color:#fff; border-color:var(--gd); box-shadow:none; font-weight:700; }
+.nav-group>summary { background:transparent; border:0; min-height:0; padding:10px 8px 2px; font-size:1.125rem; font-weight:700; color:var(--sidebar-muted); cursor:default; pointer-events:none; }
+.nav-group.has-active>summary { background:transparent; color:var(--sidebar-muted); box-shadow:none; }
+.nav-children { max-height:none!important; opacity:1!important; visibility:visible!important; margin:0; padding-left:0; border-left:0; gap:10px; }
+.nav-children a { background:var(--sidebar-link); }
+.nav-label { white-space:normal; overflow:visible; opacity:1!important; visibility:visible!important; }
+aside a[data-logout] { background:#fff; border-color:var(--g); color:var(--g); justify-content:center; font-weight:700; }
+aside a[data-logout]:hover { background:var(--g); color:#fff; }
+
+@media(min-width:761px) { .menu-toggle { display:none!important; } }
+
+main h2 { font-size:1.875rem; line-height:1.3; letter-spacing:0; }
+main h3 { font-size:1.5rem; }
+.sub { font-size:1.125rem; color:var(--m); }
+.layout>main>.page-head,.layout>main>.certificate-heading,.layout>main>.sub,.app>main>header,.layout>main>.filters,.app>main>.filters,.layout>main>.filter-count { border:2px solid var(--bd); border-radius:10px; box-shadow:none; }
+
+.btn,.menu-toggle,button.btn { min-height:56px; padding:12px 26px; font-size:1.125rem; font-weight:700; border:2px solid var(--button-bg); border-radius:10px; }
+.btn:hover:not(:disabled) { transform:none; box-shadow:none; }
+.btn.sec,.menu-toggle { color:var(--g); border-color:var(--g); background:#fff; }
+.btn:disabled { opacity:.55; }
+
+label { font-size:1.125rem; font-weight:700; color:var(--t); }
+input:not([type=checkbox]):not([type=radio]),select,textarea { min-height:56px; padding:12px 14px; font-size:1.125rem; border:2px solid var(--field-border); border-radius:10px; }
+textarea { min-height:120px; }
+input::placeholder,textarea::placeholder { color:#4a5a6c; }
+input[type=checkbox],input[type=radio] { width:26px; height:26px; margin-right:10px; }
+select option { font-size:1.125rem; }
+
+table { font-size:1.125rem; }
+th { font-size:1.0625rem; font-weight:700; color:var(--t); }
+th,td { padding:14px 12px; border-color:var(--bd); }
+tbody tr:hover { background:var(--gl); }
+
+.pill,.badge,small,.id-label,.hx-detail { font-size:1rem; }
+.pill { padding:4px 12px; font-weight:700; border:1px solid currentColor; }
+.alert { font-size:1.125rem; border-width:2px; }
+
+
+END OF DISABLED SIMPLE BLOCK */
+
+/* ===== MODERATE LAYOUT: original look, sidebar without picture or logo, slightly larger text ===== */
+:root { --clinic-sidebar-width:290px; }
+html { font-size:106.25%; }
+
+.layout>aside,.app>aside { background-image:none!important; }
+.clinic-sidebar-brand { display:none!important; }
+aside a,.nav-group>summary { min-height:52px; font-size:1.0625rem; }
+aside h4 { font-size:.9375rem; }
+.nav-label { white-space:normal; }
+
+.topbar h1 { font-size:1.3rem; }
+main h2 { font-size:1.5rem; }
+.sub { font-size:1rem; }
+
+.btn,.menu-toggle { min-height:50px; font-size:1rem; font-weight:600; }
+label { font-size:1rem; font-weight:600; }
+input:not([type=checkbox]):not([type=radio]),select,textarea { min-height:50px; font-size:1.0625rem; }
+input[type=checkbox],input[type=radio] { width:22px; height:22px; }
+table { font-size:1rem; }
+th,td { padding:12px; }
+.alert { font-size:1rem; }
+
+
+
+/* ===== Sidebar title brought back (no background picture) + better Menu button ===== */
+.clinic-sidebar-brand { display:flex!important; align-items:center; gap:12px; min-height:76px; padding:0 2px 18px; margin-bottom:16px; border-bottom:1px solid var(--sidebar-line); }
+.clinic-sidebar-brand img { width:54px; height:auto; }
+.clinic-sidebar-brand span { font-size:14px; font-weight:700; line-height:1.45; letter-spacing:.4px; color:#fff; }
+
+.menu-toggle { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:50px; padding:0 20px; border:2px solid var(--g); border-radius:12px; background:#fff; color:var(--g); font-size:1.0625rem; font-weight:700; white-space:nowrap; cursor:pointer; }
+.menu-toggle svg { flex:none; }
+.menu-toggle:hover { background:var(--g); border-color:var(--g); color:#fff; }
+@media(max-width:420px) { .menu-toggle { padding:0 12px; gap:8px; } }
+
+
+
+/* ===== Menu button: icon only. Sidebar: no visible scrollbar (scrolling still works). ===== */
+.menu-toggle span { display:none!important; }
+.menu-toggle { width:50px; min-width:50px; padding:0!important; gap:0; }
+
+.layout>aside,.app>aside,
+aside nav:not(.sidebar-logout) { scrollbar-width:none; -ms-overflow-style:none; }
+.layout>aside::-webkit-scrollbar,.app>aside::-webkit-scrollbar,
+aside nav:not(.sidebar-logout)::-webkit-scrollbar { display:none; width:0; height:0; }

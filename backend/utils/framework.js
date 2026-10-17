@@ -1,8 +1,8 @@
 // A tiny router that follows Express conventions: Router(), app.use(), (req, res, next),
 // error handlers with 4 arguments, req.params, req.query, res.status().json().
-// It exists so the server has no dependency beyond mysql2 and can be tested without installing anything.
+// It is a thin wrapper over Express 5, so the rest of the project imports Router and createApp from here and never imports 'express' directly.
 //
-// TO USE REAL EXPRESS INSTEAD (npm i express, v5 so async errors reach the error handler):
+// HISTORY: an earlier version used a hand-written router. This file now uses real Express 5, and the notes below are no longer needed:
 //   replace the whole body of this file with:
 //     import express from 'express';
 //     export const Router = express.Router;

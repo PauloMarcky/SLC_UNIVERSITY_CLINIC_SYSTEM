@@ -5,7 +5,7 @@ SLC UNIVERSITY CLINIC SYSTEM - LOCAL SETUP
 Plain-text copy of SETUP.md. Complete instructions to run the backend.
 
 PREREQUISITES
-  Node.js 24 or newer   https://nodejs.org
+  Node.js 22.9 or newer   https://nodejs.org
   MySQL 8.x             https://dev.mysql.com/downloads/mysql/
   Git                   https://git-scm.com
 

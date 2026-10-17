@@ -1,0 +1,15 @@
+/* Import students modal on the Student Records page. Loaded after style.css and import-students.css. */
+.import-modal .modal-card { width: min(1040px, 100%); }
+.import-modal .modal-head { position: sticky; top: 0; z-index: 2; }
+.import-modal .imp-lead { margin: 0; padding: 16px 24px 0; font-size: .875rem; color: var(--m); }
+.import-modal .note { margin: 16px 24px 0; }
+.import-modal .box { margin: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; overflow: visible; }
+.import-modal .box + .box { border-top: 1px solid var(--bd); }
+.import-modal .box > h3 { padding: 18px 24px; }
+.import-modal .form { padding: 20px 24px; }
+.import-modal .form-actions { position: static; box-shadow: none; border-top: 0; padding: 16px 24px 20px; background: transparent; }
+@media (max-width: 640px) {
+  .import-modal .imp-lead { padding-inline: 20px; }
+  .import-modal .note { margin-inline: 20px; }
+  .import-modal .form, .import-modal .form-actions { padding-inline: 20px; }
+}

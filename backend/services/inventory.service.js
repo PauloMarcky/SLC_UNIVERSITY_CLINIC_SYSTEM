@@ -1,6 +1,7 @@
 import { pool, withTransaction } from '../db/pool.js';
 import { HttpError } from '../utils/http-error.js';
 import { text, wholeNumber, dateText } from '../utils/validators.js';
+import { STAFF, requireAnyRole } from '../utils/authz.js';
 
 export const NEAR_EXPIRY_DAYS = 60;
 export const ADJUST_REASONS = ['damaged', 'lost', 'expired_disposal', 'correction'];
@@ -74,6 +75,7 @@ export async function listBatches(medicineId) {
 
 /** Stock in. Either an existing medicineId, or newMedicine {name, category, unit, reorderLevel}. */
 export async function receiveStock(body, actor) {
+  requireAnyRole(actor, STAFF, 'Clinic staff access required.');
   const lotNo = text(body.lotNo, 'Lot number', 60, true);
   const quantity = wholeNumber(body.quantity, 'Quantity', 1, 1000000);
   const expiryDate = dateText(body.expiryDate, 'Expiry date');
@@ -128,6 +130,7 @@ export async function receiveStock(body, actor) {
 
 /** Damaged / lost / disposal remove stock (send a positive number); correction is signed. */
 export async function adjustStock(body, actor) {
+  requireAnyRole(actor, ['doctor'], 'Only a doctor can adjust stock.');
   const batchId = wholeNumber(body.batchId, 'Batch', 1, Number.MAX_SAFE_INTEGER);
   const reason = text(body.reason, 'Reason', 30, true);
   if (!ADJUST_REASONS.includes(reason)) throw new HttpError(400, 'Choose a valid reason.');

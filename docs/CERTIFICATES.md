@@ -1,10 +1,10 @@
 # Certificate workflow
 
-The certificate module runs through the included Node.js HTTP server and SQLite database. The previous project consisted of static mock screens; it did not contain a database, passwords, or authenticated user accounts to reuse. The existing patient identifiers and sample records are retained as initial database records. Existing unrelated screens keep their layout and behavior.
+The certificate module runs through the included Node.js HTTP server and MySQL database. The previous project consisted of static mock screens; it did not contain a database, passwords, or authenticated user accounts to reuse. The existing patient identifiers and sample records are retained as initial database records. Existing unrelated screens keep their layout and behavior.
 
 ## Run locally
 
-Install Node.js 24 or newer. No npm packages or dependency installation are required.
+Install Node.js 22.9 or newer, then run `npm install` inside the `backend` folder.
 
 From the project directory, create a nurse and doctor account using their actual display names:
 
@@ -34,7 +34,7 @@ The A4 certificate includes clinic/university identification, patient and certif
 
 ## Data and configuration
 
-The default database is `data/clinic.sqlite`. It contains users, patient records, sessions, certificates, audit snapshots, and notifications. Database files and passwords are ignored by Git. Back up the database using SQLite's backup facilities or stop the server before copying it; do not copy only the main file while writes are occurring in WAL mode.
+The database is the MySQL database named by `DB_NAME` in `backend/.env`. It contains users, patient records, sessions, certificates, audit snapshots, and notifications. Database files and passwords are ignored by Git. Back up the database using SQLite's backup facilities or stop the server before copying it; do not copy only the main file while writes are occurring in WAL mode.
 
 The initial patient rows match the existing sample interface: Maria Dizon (`2026-00123`), Paolo Reyes (`2025-00456`), Angela Cruz (`2024-00789`), and Jose Ramos (`E-0098`). They are demo records, not an imported live patient registry. Other static patient screens are not a database editor. Import actual clinic patients into the `patients` table before real use; the certificate selector reads that table. Duplicate seed IDs are never overwritten at startup.
 
@@ -55,7 +55,7 @@ For network deployment, use HTTPS, `COOKIE_SECURE=true`, an explicit `CLINIC_ORI
 
 ## Backend enforcement
 
-Session cookies are random, HttpOnly, SameSite=Strict, and expire after eight hours. Only token hashes are stored in SQLite. Passwords are salted and hashed using scrypt. Each authenticated mutation requires its session's `X-CSRF-Token`; foreign origins are rejected. Login attempts are rate limited. Roles are read from the current active user record, never from submitted form fields.
+Session cookies are random, HttpOnly, SameSite=Strict, and expire after eight hours. Only token hashes are stored in MySQL. Passwords are salted and hashed using scrypt. Each authenticated mutation requires its session's `X-CSRF-Token`; foreign origins are rejected. Login attempts are rate limited. Roles are read from the current active user record, never from submitted form fields.
 
 All certificate changes use a database transaction containing the certificate write, actor/time audit snapshot, and required notifications. Submitted and approved content is locked. Every edit and transition requires the last observed integer `version`, so stale tabs and concurrent reviews cannot overwrite newer work. The database additionally rejects updates or deletion of approved certificates. Approval identity and timestamps are server-generated.
 

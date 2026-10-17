@@ -4,7 +4,7 @@ Get the clinic system running on your machine in about five minutes.
 
 ## Prerequisites
 
-- **Node.js 24 or newer**: check with `node --version`
+- **Node.js 22.9 or newer**: check with `node --version`
 - **MySQL 8.x** installed and running on port 3306 (Community Server, XAMPP, WAMP, or your OS package manager)
 - **Git**
 
@@ -77,7 +77,7 @@ You'll be prompted for a password (12-200 characters, hidden while typing).
 
     npm test
 
-**Warning:** tests truncate tables in the database named by `DB_NAME`. Point `DB_NAME` at a separate test database before running them, never at data you want to keep. After testing, run `npm run seed-users` again to restore the default accounts.
+Tests run on a separate database named `clinic_test` (set in `backend/.env.test`), never on your real data. Create and prepare it once with `npm run migrate:test`. The tests refuse to run on any database whose name does not end in `_test`.
 
 ## Troubleshooting
 

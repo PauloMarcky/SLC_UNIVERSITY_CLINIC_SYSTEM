@@ -1,13 +1,13 @@
 -- Prescription + inventory tables (MySQL 8 / MariaDB 10.5+).
 -- Tables use utf8mb4_unicode_ci to match patients/visits (mixing collations breaks JOINs on patient_id).
--- Run once:  mysql -u <user> -p <database> < 002_prescriptions.sql
+-- Applied by `npm run migrate` (this file is 003_prescriptions.sql). Do not run it by hand.
 --
 -- Notes
 -- * created_at columns are VARCHAR(32) holding ISO strings, to match how visits/sessions
 --   already store timestamps in your code (new Date().toISOString()).
--- * No FOREIGN KEY to visits/patients on purpose: I have not seen your schema, and a type
---   mismatch (INT vs BIGINT, collation) makes the whole script fail. Add them once you
---   confirm the column types.
+-- * The prescriptions table has no FOREIGN KEY to visits/patients; the service code checks them.
+--   The other tables below (batches, items, dispense lines) do have foreign keys to their
+--   parent tables.
 
 CREATE TABLE IF NOT EXISTS medicines (
   id            BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

@@ -1,11 +1,23 @@
-/* Nurse assessment: find or register a patient, record history, review past visits, record vitals and send the patient to the doctor's queue. */
+/* Nurse assessment: find a patient, record history, review past visits, record vitals and send the patient to the doctor's queue.
+   Students are registered in Student Records, so this page only looks them up.
+   The patient search is a custom dropdown: GET /api/patients?search=...&limit=8, with keyboard support. */
 (function () {
     'use strict';
     const api = window.ClinicAPI;
     const $ = id => document.getElementById(id);
-    const known = new Map();
-    let selected = null, timer;
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const PAGE = 8;                 // matches shown in the dropdown
+    const input = $('psearch');
+    const list = $('patient-results');
+    let selected = null, timer, ticket = 0;
+    let results = [], total = 0, active = -1;
 
+    const num = n => Number(n).toLocaleString('en-US');
+    function escapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char];
+        });
+    }
     function say(text, bad) {
         const box = $('flow-message');
         box.textContent = text || '';
@@ -17,87 +29,170 @@
         if (error.status === 401) window.location.assign('/index.html');
         else say(error.message, true);
     }
-    const label = p => p.id + ' \u2014 ' + p.name;
 
-    function resolveTyped() {
-        const typed = $('psearch').value.trim().toLowerCase();
-        let found = null;
-        if (typed) {
-            const all = [...known.values()];
-            found = all.find(p => label(p).toLowerCase() === typed || p.id.toLowerCase() === typed) || null;
-            if (!found) {
-                const same = all.filter(p => p.name.toLowerCase() === typed);
-                if (same.length === 1) found = same[0];
-            }
-        }
-        return found;
+    // ---------- small formatters ----------
+    function formatDate(iso) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        return m ? MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1] : '';
     }
-    async function selectPatient(patient) {
-        const changed = !selected || !patient || selected.id !== patient.id;
-        selected = patient;
-        $('triage-form').hidden = !patient;
-        $('history-box').hidden = !patient;
-        $('past-box').hidden = !patient;
-        $('open-record').hidden = !patient;
-        if (patient) $('open-record').setAttribute('href', '../nurse/record-detail.html?id=' + encodeURIComponent(patient.id));
-        if (patient && changed) {
-            $('patient-hint').textContent = 'Selected: ' + label(patient);
-            try {
-                const result = await api.request('/api/patients/' + encodeURIComponent(patient.id) + '/history');
-                fillHistory(result.history);
-                loadPastVisits(patient);
-            } catch (error) { fail(error); }
-        }
+    function ageFrom(iso) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        if (!m) return '';
+        const now = new Date();
+        const age = now.getFullYear() - Number(m[1]);
+        const before = now.getMonth() + 1 < Number(m[2]) || (now.getMonth() + 1 === Number(m[2]) && now.getDate() < Number(m[3]));
+        return before ? age - 1 : age;
     }
-    async function searchPatients() {
+    function courseYear(p) { return [p.course, p.year ? 'Year ' + p.year : ''].filter(Boolean).join(' '); }
+    function highlight(text, q) {
+        const t = String(text == null ? '' : text);
+        const i = q ? t.toLowerCase().indexOf(q.toLowerCase()) : -1;
+        if (i < 0) return escapeHtml(t);
+        return escapeHtml(t.slice(0, i)) + '<mark>' + escapeHtml(t.slice(i, i + q.length)) + '</mark>' + escapeHtml(t.slice(i + q.length));
+    }
+
+    // ---------- the dropdown ----------
+    function openList() { list.hidden = false; input.setAttribute('aria-expanded', 'true'); }
+    function closeList() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.setAttribute('aria-activedescendant', ''); }
+    function showState(text) {
+        list.innerHTML = '<li class="pt-state" role="presentation">' + text + '</li>';
+        openList();
+    }
+    function setActive(index) {
+        active = index;
+        list.querySelectorAll('[role="option"]').forEach(function (li, i) {
+            li.classList.toggle('is-active', i === index);
+            li.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        });
+        input.setAttribute('aria-activedescendant', index >= 0 ? 'pt-opt-' + index : '');
+        const el = $('pt-opt-' + index);
+        if (el) el.scrollIntoView({ block: 'nearest' });
+    }
+    function render(q) {
+        if (!results.length) {
+            showState('No student found for \u201C' + escapeHtml(q) + '\u201D. Check the spelling, or add the student in <a href="../nurse/medical-records.html">Student Records</a>.');
+            return;
+        }
+        list.innerHTML = results.map(function (p, i) {
+            const meta = [p.id, p.college, courseYear(p)].filter(Boolean).map(function (part) { return highlight(part, q); }).join(' &middot; ');
+            return '<li role="option" id="pt-opt-' + i + '" data-index="' + i + '" aria-selected="' + (i === active ? 'true' : 'false') + '"' +
+                (i === active ? ' class="is-active"' : '') + '>' +
+                '<span class="pt-main"><strong>' + highlight(p.name, q) + '</strong><small>' + meta + '</small></span>' +
+                '<span class="pt-last">' + (p.lastVisit ? 'Last visit ' + escapeHtml(formatDate(p.lastVisit)) : 'No visits yet') + '</span></li>';
+        }).join('') + (total > results.length
+            ? '<li class="pt-foot" role="presentation">Showing ' + num(results.length) + ' of ' + num(total) + ' matches. Keep typing to narrow the list.</li>'
+            : '');
+        openList();
+        setActive(active);
+    }
+    async function runSearch() {
+        const q = input.value.trim();
+        if (!q) { closeList(); return; }
+        const mine = ++ticket;
         try {
-            const result = await api.request('/api/patients?search=' + encodeURIComponent($('psearch').value.trim()));
-            $('patient-list').replaceChildren();
-            result.patients.forEach(p => {
-                known.set(p.id, p);
-                const option = document.createElement('option');
-                option.value = label(p);
-                $('patient-list').append(option);
-            });
-            const found = resolveTyped();
-            if (found) await selectPatient(found);
-            else {
-                await selectPatient(null);
-                $('patient-hint').textContent = result.patients.length
-                    ? 'Pick the patient from the list.'
-                    : ($('psearch').value.trim() ? 'No patient found. Register a new patient below.' : '');
-            }
-        } catch (error) { fail(error); }
+            const result = await api.request('/api/patients?search=' + encodeURIComponent(q) + '&limit=' + PAGE);
+            if (mine !== ticket || selected) return;      // a newer search, or a patient was already chosen
+            results = result.patients;
+            total = result.total;
+            active = results.length ? 0 : -1;
+            render(q);
+        } catch (error) {
+            if (mine === ticket) { closeList(); fail(error); }
+        }
     }
-    $('psearch').addEventListener('input', () => {
+
+    input.addEventListener('input', function () {
+        if (selected) clearSelection();
+        $('psearch-clear').hidden = !input.value;
         clearTimeout(timer);
-        timer = setTimeout(searchPatients, 250);
+        if (!input.value.trim()) { ticket++; closeList(); return; }
+        showState('Searching\u2026');
+        timer = setTimeout(runSearch, 200);
     });
-    $('toggle-register').addEventListener('click', () => { $('register-form').hidden = !$('register-form').hidden; });
+    input.addEventListener('focus', function () {
+        if (!selected && results.length && input.value.trim()) { openList(); }
+    });
+    input.addEventListener('keydown', function (event) {
+        const open = !list.hidden && results.length > 0;
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (!open && results.length) { openList(); setActive(Math.max(active, 0)); }
+            else if (open) setActive((active + 1) % results.length);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (open) setActive((active - 1 + results.length) % results.length);
+        } else if (event.key === 'Home' && open) {
+            event.preventDefault(); setActive(0);
+        } else if (event.key === 'End' && open) {
+            event.preventDefault(); setActive(results.length - 1);
+        } else if (event.key === 'Enter') {
+            if (open && active >= 0) { event.preventDefault(); choose(results[active]); }
+            else { event.preventDefault(); clearTimeout(timer); runSearch(); }
+        } else if (event.key === 'Escape') {
+            if (!list.hidden) { event.preventDefault(); closeList(); }
+        } else if (event.key === 'Tab') {
+            closeList();
+        }
+    });
+    list.addEventListener('mousedown', function (event) { event.preventDefault(); });   // keep the focus in the search box
+    list.addEventListener('mousemove', function (event) {
+        const li = event.target.closest('[role="option"]');
+        if (li && Number(li.dataset.index) !== active) setActive(Number(li.dataset.index));
+    });
+    list.addEventListener('click', function (event) {
+        const li = event.target.closest('[role="option"]');
+        if (li) choose(results[Number(li.dataset.index)]);
+    });
+    document.addEventListener('mousedown', function (event) {
+        if (!$('pt-search').contains(event.target)) closeList();
+    });
+    $('psearch-clear').addEventListener('click', function () { resetSearch(); input.focus(); });
+    $('pc-change').addEventListener('click', function () { resetSearch(); input.focus(); });
 
-    // ---------- register ----------
-    $('register-form').addEventListener('submit', async event => {
-        event.preventDefault();
-        const button = $('save-patient');
-        button.disabled = true;
+    // ---------- choosing and clearing a patient ----------
+    function showPanels(visible) {
+        $('triage-form').hidden = !visible;
+        $('history-box').hidden = !visible;
+        $('past-box').hidden = !visible;
+        $('patient-card').hidden = !visible;
+    }
+    function clearSelection() {
+        selected = null;
+        showPanels(false);
+        $('patient-hint').textContent = '';
+    }
+    function resetSearch() {
+        clearTimeout(timer);
+        ticket++;
+        clearSelection();
+        input.value = '';
+        results = [];
+        total = 0;
+        active = -1;
+        $('psearch-clear').hidden = true;
+        closeList();
+    }
+    async function choose(patient) {
+        if (!patient) return;
+        selected = patient;
+        ticket++;
+        clearTimeout(timer);
+        input.value = patient.name;
+        $('psearch-clear').hidden = false;
+        closeList();
+        $('pc-name').textContent = patient.name;
+        const age = ageFrom(patient.dateOfBirth);
+        $('pc-meta').textContent = [patient.id, patient.college, courseYear(patient), age !== '' ? age + ' yrs' : '',
+            patient.lastVisit ? 'Last visit ' + formatDate(patient.lastVisit) : 'No visits yet'].filter(Boolean).join(' \u00B7 ');
+        $('open-record').setAttribute('href', '../nurse/record-detail.html?id=' + encodeURIComponent(patient.id));
+        showPanels(true);
         try {
-            const body = {
-                id: $('r-id').value, category: $('r-cat').value, lastName: $('r-last').value,
-                firstName: $('r-first').value, middleName: $('r-middle').value, gender: $('r-gender').value,
-                dateOfBirth: $('r-dob').value, civilStatus: $('r-civil').value, college: $('r-college').value,
-                course: $('r-course').value, year: $('r-year').value, contactNumber: $('r-contact').value,
-                address: $('r-address').value, guardianName: $('r-gname').value, guardianContact: $('r-gcontact').value
-            };
-            const result = await api.request('/api/patients', { method: 'POST', body });
-            known.set(result.patient.id, { id: result.patient.id, name: result.patient.name });
-            $('psearch').value = label(result.patient);
-            $('register-form').reset();
-            $('register-form').hidden = true;
-            say('Patient registered.');
-            await selectPatient(known.get(result.patient.id));
+            const result = await api.request('/api/patients/' + encodeURIComponent(patient.id) + '/history');
+            if (!selected || selected.id !== patient.id) return;
+            fillHistory(result.history);
+            loadPastVisits(patient);
         } catch (error) { fail(error); }
-        finally { button.disabled = false; }
-    });
+    }
 
     // ---------- past visits (completed visits only; the server hides confidential ones from the nurse) ----------
     function pastCell(text) {
@@ -172,6 +267,7 @@
         event.preventDefault();
         if (!selected) return say('Select a patient first.', true);
         const button = $('save-triage');
+        const name = selected.name;
         button.disabled = true;
         try {
             await api.getSession();
@@ -184,10 +280,12 @@
                     externalLabsAttached: $('labs').checked
                 }
             });
-            say('Assessment saved. Visit #' + result.visit.id + ' for ' + selected.name + ' is in the doctor\u2019s queue.');
             ['c', 'bp', 'pulse', 'temp', 'w', 'h', 'idx'].forEach(id => { $(id).value = ''; });
             $('labs').checked = false;
             updateBmi();
+            resetSearch();                                   // ready for the next patient
+            say('Assessment saved. Visit #' + result.visit.id + ' for ' + name + ' is in the doctor\u2019s queue.');
+            input.focus();
         } catch (error) { fail(error); }
         finally { button.disabled = false; }
     });

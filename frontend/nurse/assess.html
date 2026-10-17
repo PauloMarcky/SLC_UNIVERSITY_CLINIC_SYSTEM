@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Assess - ULS Clinic System</title>
     <script src="../js/login-theme.js"></script>
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/assess-search.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/today.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/assess.js" defer></script>
 </head>
+
 <body>
     <header class="topbar">
         <h1>ULS Clinic Management System</h1>
@@ -20,14 +23,17 @@
     <div class="layout">
         <aside>
             <nav aria-label="Menu">
-                <h4>Nurse</h4><a href="../nurse/assess.html" class="on">Assess</a><a href="../nurse/medical-records.html">Student Records</a><a href="../doctor/statistics.html">Statistics</a>
+                <h4>Nurse</h4><a href="../nurse/assess.html" class="on">Assess</a><a
+                    href="../nurse/medical-records.html">Student Records</a><a
+                    href="../doctor/statistics.html">Statistics</a>
             </nav>
         </aside>
         <main>
             <div class="page-head">
                 <div>
                     <h2>Assess</h2>
-                    <p class="sub">Find or register the patient, review past visits, record vitals, and send the patient to the doctor's queue.</p>
+                    <p class="sub">Find the patient, review past visits, record vitals, and send the patient to the
+                        doctor's queue.</p>
                 </div>
             </div>
             <p class="note" id="flow-message" role="alert" tabindex="-1" hidden></p>
@@ -37,31 +43,30 @@
                 <div class="form">
                     <div class="f full">
                         <label for="psearch">Patient name or ID</label>
-                        <input id="psearch" list="patient-list" autocomplete="off" placeholder="Type the name or ID, then pick from the list">
-                        <datalist id="patient-list"></datalist>
+                        <div class="pt-search" id="pt-search">
+                            <input id="psearch" type="text" role="combobox" aria-expanded="false"
+                                aria-controls="patient-results" aria-autocomplete="list" autocomplete="off"
+                                spellcheck="false" placeholder="Search by name or ID number, e.g. 24-10545 or Aaron">
+                            <button type="button" class="pt-clear" id="psearch-clear" aria-label="Clear search"
+                                hidden>&times;</button>
+                            <ul class="pt-results" id="patient-results" role="listbox" aria-label="Matching patients"
+                                hidden></ul>
+                        </div>
+
+                        <div class="pt-card" id="patient-card" hidden>
+                            <div class="pt-card-main"><strong id="pc-name"></strong><span id="pc-meta"></span></div>
+                            <div class="pt-card-actions">
+                                <a class="btn sec" id="open-record" href="../nurse/medical-records.html">Open full
+                                    record &rsaquo;</a>
+                                <button class="btn sec" type="button" id="pc-change">Change patient</button>
+                            </div>
+                        </div>
                         <p class="field-hint" id="patient-hint"></p>
-                        <p class="field-hint"><a id="open-record" href="../nurse/medical-records.html" hidden>Open full record &rsaquo;</a></p>
+
+                        <p class="field-hint">Students are added in <a href="../nurse/medical-records.html">Student
+                                Records</a>.</p>
                     </div>
-                    <div class="f full"><button class="btn sec" type="button" id="toggle-register">Patient not found? Register a new patient</button></div>
                 </div>
-                <form class="form" id="register-form" hidden novalidate>
-                    <div class="f"><label for="r-id">Patient ID *</label><input id="r-id" maxlength="50"></div>
-                    <div class="f"><label for="r-cat">Patient type</label><select id="r-cat"><option value="student">Student</option><option value="employee">Employee</option></select></div>
-                    <div class="f"><label for="r-last">Last name *</label><input id="r-last" maxlength="100"></div>
-                    <div class="f"><label for="r-first">First name *</label><input id="r-first" maxlength="100"></div>
-                    <div class="f"><label for="r-middle">Middle name</label><input id="r-middle" maxlength="100"></div>
-                    <div class="f"><label for="r-gender">Gender</label><select id="r-gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
-                    <div class="f"><label for="r-dob">Date of birth</label><input id="r-dob" type="date"></div>
-                    <div class="f"><label for="r-civil">Civil status</label><select id="r-civil"><option value="">Select</option><option>Single</option><option>Married</option><option>Other</option></select></div>
-                    <div class="f"><label for="r-college">College / Department</label><input id="r-college" maxlength="100"></div>
-                    <div class="f"><label for="r-course">Course</label><input id="r-course" maxlength="100"></div>
-                    <div class="f"><label for="r-year">Year level</label><input id="r-year" maxlength="20"></div>
-                    <div class="f"><label for="r-contact">Contact number</label><input id="r-contact" maxlength="30"></div>
-                    <div class="f full"><label for="r-address">Address</label><input id="r-address" maxlength="300"></div>
-                    <div class="f"><label for="r-gname">Guardian name</label><input id="r-gname" maxlength="200"></div>
-                    <div class="f"><label for="r-gcontact">Guardian contact</label><input id="r-gcontact" maxlength="30"></div>
-                    <div class="f full modal-actions"><button class="btn" type="submit" id="save-patient">Save patient</button></div>
-                </form>
             </section>
 
             <section class="box visit-form" id="history-box" aria-labelledby="t2" hidden>
@@ -74,18 +79,33 @@
                         <label><input type="checkbox" id="h-fainting"> Fainting spell</label>
                         <label><input type="checkbox" id="h-epilepsy"> Epilepsy</label>
                     </div>
-                    <div class="f"><label for="h-allergy-details">Allergy details</label><input id="h-allergy-details" maxlength="300"></div>
+                    <div class="f"><label for="h-allergy-details">Allergy details</label><input id="h-allergy-details"
+                            maxlength="300"></div>
                     <div class="f"><label for="h-vaccines">Vaccines</label><input id="h-vaccines" maxlength="300"></div>
-                    <div class="f full"><label for="h-other">Other condition</label><input id="h-other" maxlength="300"></div>
-                    <div class="f full modal-actions"><button class="btn sec" type="submit" id="save-history">Save medical history</button></div>
+                    <div class="f full"><label for="h-other">Other condition</label><input id="h-other" maxlength="300">
+                    </div>
+                    <div class="f full modal-actions"><button class="btn sec" type="submit" id="save-history">Save
+                            medical history</button></div>
                 </form>
             </section>
 
             <section class="box" id="past-box" aria-labelledby="t3" hidden>
                 <h3 id="t3">3. Past visits</h3>
                 <table>
-                    <thead><tr><th>Date</th><th>Type</th><th>Complaint</th><th>Diagnosis</th><th>Action taken</th></tr></thead>
-                    <tbody id="past-rows"><tr><td colspan="5">No past visits.</td></tr></tbody>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Complaint</th>
+                            <th>Diagnosis</th>
+                            <th>Action taken</th>
+                        </tr>
+                    </thead>
+                    <tbody id="past-rows">
+                        <tr>
+                            <td colspan="5">No past visits.</td>
+                        </tr>
+                    </tbody>
                 </table>
             </section>
 
@@ -93,17 +113,29 @@
                 <section class="form-section">
                     <h3 id="t4">4. Assessment</h3>
                     <div class="form">
-                        <div class="f"><label for="t">Visit type</label><select id="t"><option value="Consultation">Consultation (sick)</option><option value="Checkup">Checkup (routine)</option></select></div>
+                        <div class="f"><label for="t">Visit type</label><select id="t">
+                                <option value="Consultation">Consultation (sick)</option>
+                                <option value="Checkup">Checkup (routine)</option>
+                            </select></div>
                         <div class="f"><label for="d">Date (auto)</label><input id="d" data-today="iso" readonly></div>
-                        <div class="f full"><label for="c">Chief complaint / purpose of visit *</label><input id="c" maxlength="500"></div>
-                        <div class="f"><label for="bp">Blood pressure *</label><input id="bp" placeholder="120/80" inputmode="numeric"></div>
-                        <div class="f"><label for="pulse">Pulse rate (bpm)</label><input id="pulse" type="number" min="20" max="250"></div>
-                        <div class="f"><label for="temp">Body temperature (&deg;C)</label><input id="temp" type="number" min="30" max="45" step="0.1"></div>
-                        <div class="f"><label for="w">Weight (kg) *</label><input id="w" type="number" min="1" max="500" step="0.1"></div>
-                        <div class="f"><label for="h">Height (cm) *</label><input id="h" type="number" min="30" max="300" step="0.1"></div>
-                        <div class="f"><label for="b">BMI (auto)</label><input id="b" value="Enter weight and height" readonly></div>
-                        <div class="f full"><label for="idx">Initial nurse diagnosis</label><input id="idx" maxlength="200"></div>
-                        <div class="f full"><label><input type="checkbox" id="labs"> External lab results or documents attached to the printed chart</label></div>
+                        <div class="f full"><label for="c">Chief complaint / purpose of visit *</label><input id="c"
+                                maxlength="500"></div>
+                        <div class="f"><label for="bp">Blood pressure *</label><input id="bp" placeholder="120/80"
+                                inputmode="numeric"></div>
+                        <div class="f"><label for="pulse">Pulse rate (bpm)</label><input id="pulse" type="number"
+                                min="20" max="250"></div>
+                        <div class="f"><label for="temp">Body temperature (&deg;C)</label><input id="temp" type="number"
+                                min="30" max="45" step="0.1"></div>
+                        <div class="f"><label for="w">Weight (kg) *</label><input id="w" type="number" min="1" max="500"
+                                step="0.1"></div>
+                        <div class="f"><label for="h">Height (cm) *</label><input id="h" type="number" min="30"
+                                max="300" step="0.1"></div>
+                        <div class="f"><label for="b">BMI (auto)</label><input id="b" value="Enter weight and height"
+                                readonly></div>
+                        <div class="f full"><label for="idx">Initial nurse diagnosis</label><input id="idx"
+                                maxlength="200"></div>
+                        <div class="f full"><label><input type="checkbox" id="labs"> External lab results or documents
+                                attached to the printed chart</label></div>
                     </div>
                 </section>
                 <div class="form-actions">
@@ -113,4 +145,5 @@
         </main>
     </div>
 </body>
+
 </html>

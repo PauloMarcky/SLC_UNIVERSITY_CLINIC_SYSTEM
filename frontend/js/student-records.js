@@ -166,6 +166,9 @@
         search.focus();
     });
 
+    // After an Excel import adds students, show them in the list.
+    window.addEventListener('students:changed', function () { fetchPage(true); });
+
     // Doctors see this page read-only: show the tag and hide Add student. Nurses see the button.
     api.getSession().then(function (session) {
         if (session.user.role === 'doctor') {

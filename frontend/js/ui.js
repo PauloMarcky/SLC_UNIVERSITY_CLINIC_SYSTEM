@@ -51,7 +51,7 @@
         toggle.setAttribute('aria-controls', sidebar.id);
         var mobile = window.matchMedia('(max-width: 760px)');
         var desktopCollapsed = false;
-        try { desktopCollapsed = localStorage.getItem('clinic-sidebar-collapsed') === 'true'; }
+        try { desktopCollapsed = false; }
         catch (error) { /* Navigation also works without browser storage. */ }
         var tooltip = document.createElement('div');
         tooltip.id = 'clinic-nav-tooltip';
@@ -86,7 +86,7 @@
                 (expanded ? 'Collapse navigation' : 'Expand navigation');
             toggle.setAttribute('aria-label', action);
             toggle.title = action;
-            toggle.innerHTML = icon(expanded ? 'M16 9l-3 3 3 3' : 'M14 9l3 3-3 3');
+            toggle.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="' + (expanded ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16') + '"/></svg><span>' + (expanded ? 'Close menu' : 'Menu') + '</span>';
             document.body.classList.toggle('drawer-open', expanded && mobile.matches);
             sidebar.inert = mobile.matches && !expanded;
             main.inert = expanded && mobile.matches;
@@ -149,7 +149,7 @@
             var brand = document.createElement('div');
             brand.className = 'clinic-sidebar-brand';
             brand.title = 'University of La Salette, Santiago City - Clinic Management System';
-            brand.innerHTML = '<img src="../assets/uls-logo.png" alt="University of La Salette seal" width="602" height="584"><span>ULS CLINIC<br>MANAGEMENT SYSTEM</span>';
+            brand.innerHTML = '<img src="../assets/uls-logo.png" alt="University of La Salette seal" width="602" height="584" onerror="this.remove()"><span>ULS CLINIC<br>MANAGEMENT SYSTEM</span>';
             sidebar.prepend(brand);
         }
         var topbarLogout = topbar && topbar.querySelector('a[data-logout]');
@@ -213,6 +213,9 @@
                 var label = group.querySelector('summary > span');
                 if (label) label.classList.add('nav-label');
                 if (group.querySelector('a.on, a[aria-current="page"]')) group.classList.add('has-active');
+                group.open = true;
+                var head = group.querySelector('summary');
+                if (head) head.tabIndex = -1;
             });
             aside.querySelectorAll('a, .nav-group > summary').forEach(function (control) {
                 var label = control.querySelector('.nav-label');

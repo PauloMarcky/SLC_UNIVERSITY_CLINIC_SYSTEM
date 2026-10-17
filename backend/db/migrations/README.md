@@ -27,6 +27,9 @@ Schema changes are applied through `npm run migrate` (run from `backend/`).
 - Never edit a migration that has already been applied. Add a new one instead.
 - Never delete a migration file that teammates may have already run.
 - Prefer idempotent SQL (`CREATE TABLE IF NOT EXISTS`, `INSERT IGNORE`, etc.).
+- To add a column, write `-- @add-column <table> <column> <definition>` on its own line instead of
+  `ALTER TABLE ... ADD COLUMN`. The runner skips it if the column already exists, so a migration that
+  stopped half-way can be run again. (MySQL has no `ADD COLUMN IF NOT EXISTS`.)
 - Never use `DROP TABLE` or `TRUNCATE` in a migration without team sign-off.
 
 ## First-time setup (fresh clone)

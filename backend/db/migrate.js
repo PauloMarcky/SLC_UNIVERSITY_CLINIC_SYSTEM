@@ -45,7 +45,7 @@ function stripDelimiters(sql) {
   return sql
     .replace(/^[ \t]*DELIMITER[ \t]+\$\$[ \t]*$/gim, '')
     .replace(/^[ \t]*DELIMITER[ \t]+;[ \t]*$/gim, '')
-    .replace(/END\$\$/g, 'END');
+    .replace(/END\$\$/g, 'END;');
 }
 
 async function ensureDatabaseExists() {
@@ -91,6 +91,38 @@ async function recordMigration(conn, name) {
   );
 }
 
+// A line like   -- @add-column <table> <column> <definition>   adds the column only if it is missing,
+// so a migration that stopped half-way can simply be run again. Everything else is sent as normal SQL.
+const ADD_COLUMN = /^[ \t]*--[ \t]*@add-column[ \t]+(\w+)[ \t]+(\w+)[ \t]+(.+?)[ \t]*;?[ \t]*\r?$/;
+
+async function columnExists(conn, table, column) {
+  const [rows] = await conn.query(
+    `SELECT COUNT(*) AS count FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = ? AND column_name = ?`,
+    [process.env.DB_NAME, table, column]
+  );
+  return rows[0].count > 0;
+}
+
+async function runMigrationSql(conn, sql) {
+  let chunk = [];
+  const flush = async () => {
+    const part = chunk.join('\n');
+    chunk = [];
+    if (part.replace(/--.*$/gm, '').trim()) await conn.query(part);
+  };
+  for (const line of sql.split('\n')) {
+    const found = ADD_COLUMN.exec(line);
+    if (!found) { chunk.push(line); continue; }
+    await flush();
+    const [, table, column, definition] = found;
+    if (!(await columnExists(conn, table, column))) {
+      await conn.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+    }
+  }
+  await flush();
+}
+
 async function run() {
   await ensureDatabaseExists();
 
@@ -129,7 +161,7 @@ async function run() {
       const sql = stripDelimiters(raw);
 
       process.stdout.write(`Applying ${file} ... `);
-      await conn.query(sql);
+      await runMigrationSql(conn, sql);
       await recordMigration(conn, file);
       appliedAny = true;
       console.log('ok');

@@ -8,5 +8,7 @@ export const visitsRoutes = Router()
   .get('/visits/screened', visits.screened)
   .post('/visits/:id/complete', visits.complete)
   .post('/visits/:id/screen', visits.screen)
+  .post('/visits/:id/cancel', visits.cancel)
+  .put('/visits/:id', visits.update)
   .get('/visits', visits.list)
   .post('/visits', visits.create);

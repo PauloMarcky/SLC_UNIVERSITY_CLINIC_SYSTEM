@@ -2,7 +2,7 @@
 
 ## Running the certificate workflow
 
-The certificate module includes staff sign-in, SQLite storage, nurse drafts, doctor approval and revision requests, notifications, and A4 printing. It requires Node.js 24 or newer. See [Certificate setup and workflow](docs/CERTIFICATES.md) for account creation, server startup, configuration, and tests.
+The certificate module includes staff sign-in, MySQL storage, nurse drafts, doctor approval and revision requests, notifications, and A4 printing. It requires Node.js 22.9 or newer. See [Certificate setup and workflow](docs/CERTIFICATES.md) for account creation, server startup, configuration, and tests.
 
 The other clinic pages retain their existing prototype behavior.
 
