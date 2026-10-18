@@ -1,11 +1,11 @@
-
 # Brud Code workspace history
 .brud/
 
-# Environment files (secrets — never commit)
+# Environment files (secrets — never commit). Templates (.env.example) are allowed.
 .env
 .env.local
 .env.*.local
+.env.docker
 
 # Legacy SQLite artifacts (pre-MySQL migration)
 *.sqlite
@@ -14,3 +14,8 @@ backend/data/
 
 # Dependencies
 node_modules/
+
+# Logs and OS junk
+*.log
+.DS_Store
+Thumbs.db

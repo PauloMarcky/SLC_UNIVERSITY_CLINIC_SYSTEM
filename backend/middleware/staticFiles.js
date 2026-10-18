@@ -19,7 +19,12 @@ const RESTRICTED_PAGES = {
   '/nurse/dashboard.html': 'nurse',
   '/shared/certificates.html': 'staff'
 };
-const BLOCKED_FOLDERS = ['backend', 'server', 'tests', 'data', 'node_modules', 'docs'];
+// 'archive' holds old prototype pages with dead links; it is never served.
+const BLOCKED_FOLDERS = ['backend', 'server', 'tests', 'data', 'node_modules', 'docs', 'archive'];
+// Every page under these folders needs a clinic-staff login before the HTML is sent.
+const STAFF_FOLDERS = ['doctor', 'nurse', 'shared'];
+// Images, fonts, stylesheets and scripts may be cached briefly; HTML is never cached.
+const CACHEABLE = new Set(['.css', '.js', '.svg', '.png', '.jpg', '.jpeg', '.ico', '.webp', '.woff', '.woff2']);
 
 /** Serves the frontend folder. Only GET and HEAD; refuses dot files, code folders and path tricks. */
 export function staticFiles(publicRootInput) {
@@ -41,7 +46,8 @@ export function staticFiles(publicRootInput) {
     const extension = extname(filePath).toLowerCase();
     if (!CONTENT_TYPES[extension]) throw new HttpError(404, 'File not found.');
 
-    const restrictedRole = RESTRICTED_PAGES[pathname.toLowerCase()];
+    const restrictedRole = RESTRICTED_PAGES[pathname.toLowerCase()] ||
+      (extension === '.html' && STAFF_FOLDERS.includes(parts[0].toLowerCase()) ? 'staff' : null);
     if (restrictedRole) {
       const current = await findSession(req.headers.cookie);
       if (!current) { res.redirect('/index.html'); return; }
@@ -57,6 +63,7 @@ export function staticFiles(publicRootInput) {
       content = await readFile(filePath);
     } catch { throw new HttpError(404, 'File not found.'); }
     res.status(200).set('Content-Type', CONTENT_TYPES[extension]);
+    if (CACHEABLE.has(extension)) res.set('Cache-Control', 'public, max-age=300');
     res.end(req.method === 'HEAD' ? undefined : content);
   };
 }

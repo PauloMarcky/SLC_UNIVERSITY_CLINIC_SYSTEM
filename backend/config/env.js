@@ -19,11 +19,44 @@ if (missing.length) {
   );
 }
 
+const isProduction = process.env.NODE_ENV === 'production';
+const isTest = /_test$/i.test(String(process.env.DB_NAME));
+
+/** TRUST_PROXY: a hop count ("1"), "true", or a comma-separated list of proxy addresses/subnets. */
+function parseTrustProxy(value) {
+  if (value === undefined || value === '' || value === 'false') return false;
+  if (value === 'true') return true;
+  if (/^\d+$/.test(value)) return Number(value);
+  return value.split(',').map(part => part.trim()).filter(Boolean);
+}
+
+// Refuse to start in production with settings that are only acceptable on a developer machine.
+if (isProduction && !isTest) {
+  const problems = [];
+  if (!process.env.DB_PASSWORD) problems.push('DB_PASSWORD is empty.');
+  if (process.env.DB_USER === 'root') problems.push('DB_USER is "root". Create a dedicated MySQL user for the app.');
+  if (/^(change-this-password|password|root|admin)$/i.test(process.env.DB_PASSWORD || '')) {
+    problems.push('DB_PASSWORD is a placeholder or a well-known default.');
+  }
+  if (problems.length) {
+    throw new Error(`Unsafe production configuration:\n  - ${problems.join('\n  - ')}`);
+  }
+  if (process.env.COOKIE_SECURE !== 'true') {
+    console.warn(
+      'WARNING: COOKIE_SECURE is not "true". Session cookies will be sent over plain HTTP. ' +
+      'Serve the site over HTTPS and set COOKIE_SECURE=true.'
+    );
+  }
+}
+
 export const env = Object.freeze({
+  production: isProduction,
   host: process.env.HOST || '127.0.0.1',
   port: Number(process.env.PORT || 3000),            // validated in server.js
   allowedOrigin: process.env.CLINIC_ORIGIN || undefined,
   cookieSecure: process.env.COOKIE_SECURE === 'true',
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+  logRequests: process.env.LOG_REQUESTS ? process.env.LOG_REQUESTS === 'true' : isProduction,
   db: Object.freeze({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT || 3306),

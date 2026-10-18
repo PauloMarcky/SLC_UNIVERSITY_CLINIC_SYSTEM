@@ -28,17 +28,14 @@ STEP 4 - CREATE THE DATABASE
   backend/db/migrations/ in order. Safe to re-run. The schema lives
   only in the migration files. Do NOT run schema.sql.
 
-STEP 5 - OPTIONAL SAMPLE PATIENTS
-  mysql -u root -p clinic < database/seed.sql
-
-STEP 6 - DEFAULT STAFF ACCOUNTS
+STEP 5 - DEFAULT STAFF ACCOUNTS (DEVELOPMENT ONLY)
   npm run seed-users
 
   nurse1  / clinic-dev-2026   (Nurse)
   doctor1 / clinic-dev-2026   (Doctor)
-  Change these before any real deployment.
+  For real deployments see DEPLOYMENT.md. seed-users refuses to run in production.
 
-STEP 7 - START
+STEP 6 - START
   npm start
   Open http://127.0.0.1:3000
 
@@ -53,8 +50,12 @@ MORE STAFF ACCOUNTS
 
 TESTS
   npm test
-  WARNING: tests truncate tables in the database named by DB_NAME. Use a
-  separate test database. Run npm run seed-users afterwards.
+  Tests run on the separate database named in backend/.env.test (clinic_test)
+  and refuse to run on any database whose name does not end in _test.
+  Create it once with: npm run migrate:test
+
+DEPLOYING FOR REAL USE
+  See DEPLOYMENT.md (Docker or systemd, HTTPS proxy, backups, checklist).
 
 TROUBLESHOOTING
   ER_ACCESS_DENIED_ERROR   Wrong DB_USER / DB_PASSWORD in .env.

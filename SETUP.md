@@ -37,11 +37,7 @@ Verify in the MySQL command line:
     USE clinic;
     SHOW TABLES;
 
-### 5. Optional: load sample patients
-
-    mysql -u root -p clinic < database/seed.sql
-
-### 6. Create the default staff accounts
+### 5. Create the default staff accounts
 
     npm run seed-users
 
@@ -52,9 +48,9 @@ This creates two accounts you can log in with immediately:
 | `nurse1` | `clinic-dev-2026` | Nurse |
 | `doctor1` | `clinic-dev-2026` | Doctor |
 
-Change these passwords before any real deployment.
+For real deployments, see [DEPLOYMENT.md](DEPLOYMENT.md). Never seed these accounts in production.
 
-### 7. Start the server
+### 6. Start the server
 
     npm start
 
@@ -105,5 +101,5 @@ Tests run on a separate database named `clinic_test` (set in `backend/.env.test`
 
 - **Each teammate has their own local database.** Records you create on your machine are not visible to anyone else.
 - **Never commit `backend/.env`.** It contains your password. `.gitignore` already excludes it.
-- **The default password `clinic-dev-2026` is for local development only.** Change it before deploying anywhere public.
+- **The default password `clinic-dev-2026` is for local development only.** `seed-users` refuses to run with `NODE_ENV=production`. See [DEPLOYMENT.md](DEPLOYMENT.md).
 - **Schema changes go in a new numbered migration**, never in an edit to an applied one.

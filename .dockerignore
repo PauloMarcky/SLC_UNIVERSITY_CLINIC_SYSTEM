@@ -1,0 +1,13 @@
+.git
+.brud
+.github
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+docs
+*.md
+*.txt
+backend/tests
+frontend/tests
+frontend/archive

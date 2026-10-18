@@ -1,0 +1,48 @@
+# One-command deployment: MySQL + the clinic app.
+#   cp .env.docker.example .env      (then edit the passwords)
+#   docker compose up -d --build
+#   docker compose exec app node scripts/create-user.js <username> doctor "Full Name"
+# Put an HTTPS reverse proxy (Caddy/nginx, see DEPLOYMENT.md) in front of port 3000.
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${DB_NAME:-clinic}
+      MYSQL_USER: ${DB_USER:-clinic_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    # log-bin-trust-function-creators lets the non-SUPER app user create the certificate triggers (migration 001).
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--log-bin-trust-function-creators=1"]
+    volumes:
+      - clinic-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-clinic_app}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-clinic}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+      CLINIC_ORIGIN: ${CLINIC_ORIGIN:-}
+      UNIVERSITY_NAME: ${UNIVERSITY_NAME:-University of La Salette, Inc.}
+      CLINIC_NAME: ${CLINIC_NAME:-Health Services Department}
+      CLINIC_ADDRESS: ${CLINIC_ADDRESS:-}
+      CLINIC_CONTACT: ${CLINIC_CONTACT:-}
+    ports:
+      - "127.0.0.1:3000:3000"   # only the local reverse proxy can reach the app
+
+volumes:
+  clinic-db:

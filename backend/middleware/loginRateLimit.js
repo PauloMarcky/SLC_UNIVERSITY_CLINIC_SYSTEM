@@ -1,10 +1,14 @@
 import { HttpError } from '../utils/http-error.js';
 
-/** Counts login attempts per address for ten minutes. One limiter per server instance. */
+/**
+ * Counts login attempts per client address for ten minutes. One limiter per server instance.
+ * req.ip honours the app's "trust proxy" setting (TRUST_PROXY), so behind a reverse proxy
+ * each visitor is counted separately instead of everyone sharing the proxy's address.
+ */
 export function createLoginRateLimit(maximumAttempts = 30) {
   const attempts = new Map();
   return function loginRateLimit(req, res, next) {
-    const key = req.socket.remoteAddress || 'unknown';
+    const key = req.ip || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
     for (const [address, attempt] of attempts) {
       if (attempt.until < now) attempts.delete(address);
