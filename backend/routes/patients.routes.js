@@ -10,4 +10,6 @@ export const patientsRoutes = Router()
   .get('/patients/:id/record', patients.record)
   .get('/patients/:id/history', patients.history)
   .put('/patients/:id/history', patients.updateHistory)
+  .get('/patients/:id/requirements', patients.requirements)
+  .put('/patients/:id/requirements', patients.updateRequirements)
   .get('/patients/:id/prescriptions', prescriptions.forPatient);

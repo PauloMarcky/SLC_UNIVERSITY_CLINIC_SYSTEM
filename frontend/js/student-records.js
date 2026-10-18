@@ -18,6 +18,8 @@
     let total = 0;              // students matching the current filters (whole database)
     let department = '';
     let query = '';
+    let requirements = '';      // '', 'incomplete' or 'complete'
+    const reqSelect = document.getElementById('mr-req');
     let busy = false;
     let ticket = 0;             // lets a newer request cancel an older one
     let sentinel = null;
@@ -47,7 +49,15 @@
     }
 
     function messageRow(text) {
-        return '<tr class="no-match"><td colspan="5">' + escapeHtml(text) + '</td></tr>';
+        return '<tr class="no-match"><td colspan="6">' + escapeHtml(text) + '</td></tr>';
+    }
+
+    // Laboratory requirements done / needed before graduating
+    function requirementsCell(s) {
+        if (s.requirementsNeeded === undefined) return '';
+        return s.requirementsDone >= s.requirementsNeeded
+            ? '<span class="pill green">Complete</span>'
+            : '<span class="pill yellow" title="Laboratory requirements done">' + num(s.requirementsDone) + '/' + num(s.requirementsNeeded) + '</span>';
     }
 
     function rowHtml(s) {
@@ -58,7 +68,7 @@
             '<td' + (s.college ? ' title="' + escapeHtml(s.college) + '"' : '') + '>' + (s.college ? escapeHtml(window.SLCDepartments ? window.SLCDepartments.short(s.college) : s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
             '<td>' + escapeHtml(ageFrom(s.dateOfBirth)) + '</td>' +
             '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">' + (year && year.value() ? 'No visits this school year' : 'No visits yet') + '</span>') + '</td>' +
-            '' +
+            '<td>' + requirementsCell(s) + '</td>' +
             '</tr>';
     }
 
@@ -73,9 +83,12 @@
     }
 
     function setCount() {
-        count.textContent = (query || department)
+        const base = (query || department || requirements)
             ? 'Showing ' + num(loaded) + ' of ' + num(total) + ' students'
             : num(total) + ' students';
+        const chosen = year && year.value() ? ' in school year ' + year.label() : '';
+        count.textContent = base + chosen + (year && year.value() && !year.isCurrent()
+            ? '. New and imported students are added to the current school year.' : '');
     }
 
     // Fetches the next 10 when the "Scroll down" row comes into view.
@@ -93,7 +106,7 @@
     function addSentinel() {
         sentinel = document.createElement('tr');
         sentinel.className = 'no-match';
-        sentinel.innerHTML = '<td colspan="5">Scroll down to load more...</td>';
+        sentinel.innerHTML = '<td colspan="6">Scroll down to load more...</td>';
         body.appendChild(sentinel);
         observer.observe(sentinel);
     }
@@ -122,7 +135,7 @@
         }
         try {
             const result = await api.request('/api/patients?search=' + encodeURIComponent(query) +
-                '&college=' + encodeURIComponent(department) + '&limit=' + PAGE + '&offset=' + loaded +
+                '&college=' + encodeURIComponent(department) + '&requirements=' + encodeURIComponent(requirements) + '&limit=' + PAGE + '&offset=' + loaded +
                 (year && year.value() ? '&schoolYear=' + encodeURIComponent(year.value()) : ''));
             if (mine !== ticket) return;
             if (reset && department && !result.colleges.some(function (c) { return c.name === department; })) {
@@ -138,7 +151,9 @@
             body.insertAdjacentHTML('beforeend', result.patients.map(rowHtml).join(''));
             loaded += result.patients.length;
             if (!loaded) {
-                body.innerHTML = messageRow(query || department ? 'No students match your filters.' : 'No students yet. Use + Add student to register one.');
+                body.innerHTML = messageRow(query || department || requirements ? 'No students match your filters.' : (year && year.value()
+                    ? 'No students are enrolled in school year ' + year.label() + ' yet. Use + Add student or Import from Excel.'
+                    : 'No students yet. Use + Add student to register one.'));
             } else if (loaded < total && result.patients.length) {
                 addSentinel();
             }
@@ -161,9 +176,15 @@
         clearTimeout(timer);
         timer = setTimeout(function () { fetchPage(true); }, 250);
     });
+    if (reqSelect) reqSelect.addEventListener('change', function () {
+        requirements = reqSelect.value;
+        fetchPage(true);
+    });
     if (clear) clear.addEventListener('click', function () {
         search.value = '';
         department = '';
+        requirements = '';
+        if (reqSelect) reqSelect.value = '';
         fetchPage(true);
         search.focus();
     });

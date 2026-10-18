@@ -134,6 +134,17 @@ async function buildList() {
 }
 
 /**
+ * Id of the school year a date falls in (the year with the latest start date not after it), or null if none exist.
+ * Read-only: unlike the lists, it never creates the next school year.
+ */
+export async function schoolYearIdFor(dateIso) {
+  const rows = await allRows();
+  if (!rows.length) return null;
+  const index = currentIndex(rows, dateIso);
+  return index < 0 ? null : rows[index].id;
+}
+
+/**
  * The school year named by a query value: '' = none (no filter), 'current', or a numeric id.
  * Returns { id, label, startDate, endDate } where endDate is the last day that counts (or null), or null for no filter.
  */
@@ -248,6 +259,10 @@ export async function deleteSchoolYear(idValue, actor) {
   const visits = await countVisits(info.startDate, info.coversUntil);
   if (visits > 0) {
     throw new HttpError(409, `School year ${info.label} has ${visits} visit record${visits === 1 ? '' : 's'}, so it cannot be deleted. Edit its dates instead.`);
+  }
+  const [enrolled] = await pool.execute('SELECT COUNT(*) AS n FROM student_enrollments WHERE school_year_id = ?', [id]);
+  if (Number(enrolled[0].n) > 0) {
+    throw new HttpError(409, `School year ${info.label} has ${enrolled[0].n} enrolled student${Number(enrolled[0].n) === 1 ? '' : 's'}, so it cannot be deleted.`);
   }
   await pool.execute('DELETE FROM school_years WHERE id = ?', [id]);
   return { id, deleted: true };

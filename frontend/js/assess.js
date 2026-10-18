@@ -90,7 +90,7 @@
         if (!q) { closeList(); return; }
         const mine = ++ticket;
         try {
-            const result = await api.request('/api/patients?search=' + encodeURIComponent(q) + '&limit=' + PAGE);
+            const result = await api.request('/api/patients?search=' + encodeURIComponent(q) + '&limit=' + PAGE + '&schoolYear=current');
             if (mine !== ticket || selected) return;      // a newer search, or a patient was already chosen
             results = result.patients;
             total = result.total;

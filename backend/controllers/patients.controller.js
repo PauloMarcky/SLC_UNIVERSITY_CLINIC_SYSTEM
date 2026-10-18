@@ -1,6 +1,6 @@
 import { readJson } from '../utils/http.js';
 import {
-  searchPatients, searchPatientsPage, getPatient, updatePatient, getPatientRecord, registerPatient, getHistory, saveHistory
+  searchPatients, searchPatientsPage, getPatient, updatePatient, getPatientRecord, registerPatient, getHistory, saveHistory, getRequirements, saveRequirements
 } from '../services/patients.service.js';
 
 export async function search(req, res) {
@@ -8,7 +8,7 @@ export async function search(req, res) {
   if (req.query.limit !== undefined) {
     return res.status(200).json(await searchPatientsPage(req.query, req.session.user));
   }
-  res.status(200).json({ patients: await searchPatients(req.query.search, req.session.user) });
+  res.status(200).json({ patients: await searchPatients(req.query.search, req.session.user, req.query.schoolYear || '') });
 }
 
 export async function record(req, res) {
@@ -34,4 +34,12 @@ export async function read(req, res) {
 
 export async function update(req, res) {
   res.status(200).json({ patient: await updatePatient(req.params.id, await readJson(req), req.session.user) });
+}
+
+export async function requirements(req, res) {
+  res.status(200).json({ requirements: await getRequirements(req.params.id) });
+}
+
+export async function updateRequirements(req, res) {
+  res.status(200).json({ requirements: await saveRequirements(req.params.id, await readJson(req), req.session.user) });
 }

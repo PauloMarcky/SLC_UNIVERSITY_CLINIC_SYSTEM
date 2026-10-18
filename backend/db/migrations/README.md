@@ -39,3 +39,6 @@ Schema changes are applied through `npm run migrate` (run from `backend/`).
     npm run migrate      # creates the DB if missing, applies all migrations
     npm run seed-users   # optional: seed initial users
     npm run dev
+
+- `014_student_enrollments.sql` — one student list per school year (`student_enrollments`). Existing students are enrolled in the school years their visits fall in.
+- `015_student_requirements.sql` — laboratory requirements (CBC, CXR-PA, Urinalysis, Fecalysis, Hepa-B Screening, Hepa-B Titer, Blood Type, Pregnancy Test, Drug Test). One row per student; kept when a new school year starts.

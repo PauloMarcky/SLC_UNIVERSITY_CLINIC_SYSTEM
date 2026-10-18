@@ -2,7 +2,7 @@ import { pool, withTransaction } from '../db/pool.js';
 import { HttpError } from '../utils/http-error.js';
 import { text, number, validDate, dateText, flag } from '../utils/validators.js';
 import { STAFF, requireAnyRole } from '../utils/authz.js';
-import { patient, assertPatient } from './patients.service.js';
+import { patient, assertPatient, enrollForVisit } from './patients.service.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions.service.js';
 import { schoolYearFilter } from './school-years.service.js';
 
@@ -198,6 +198,7 @@ export async function createVisit(body, actor) {
     } else if (!existing) {
       throw new HttpError(400, 'Select an existing patient record.');
     }
+    await enrollForVisit(patientId, visitDate, connection);   // on the student list of the school year of the visit
     const [result] = await connection.execute(
       `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
          weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,
@@ -289,6 +290,7 @@ async function recordTriage(body, actor) {
   await assertPatient(patientId);
   const t = parseTriage(body);
   const v = t.vitals;
+  await enrollForVisit(patientId, t.visitDate);   // on the student list of the school year of the visit
   const [result] = await pool.execute(
     `INSERT INTO visits(patient_id, visit_type, visit_date, complaint, systolic, diastolic,
        weight_kg, height_cm, bmi, bmi_status, bp_status, diagnosis, notes, confidential,

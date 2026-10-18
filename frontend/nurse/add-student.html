@@ -37,6 +37,7 @@
                 </div>
             </div>
             <p class="note save-result" id="form-message" role="alert" tabindex="-1" hidden></p>
+            <p class="note save-result" id="existing-note" role="status" hidden></p>
 
             <form class="box visit-form" id="student-form" novalidate>
                 <!-- Identification -->
@@ -118,6 +119,24 @@
                             <div class="full"><label for="other-text">Specify</label><input id="other-text" maxlength="300" placeholder="Describe"></div>
                         </div>
                     </div>
+                </section>
+
+                <!-- Laboratory requirements -->
+                <section class="form-section" aria-labelledby="s-req">
+                    <h3 id="s-req">Laboratory Requirements</h3>
+                    <p class="sub-note">Tick each requirement the student has completed. Every student needs all of them before graduating. They stay with the student from one school year to the next.</p>
+                    <div class="req-grid">
+                        <label class="hx-check"><input type="checkbox" id="req-cbc" data-req="cbc"> CBC</label>
+                        <label class="hx-check"><input type="checkbox" id="req-cxrPa" data-req="cxrPa"> CXR-PA</label>
+                        <label class="hx-check"><input type="checkbox" id="req-urinalysis" data-req="urinalysis"> Urinalysis</label>
+                        <label class="hx-check"><input type="checkbox" id="req-fecalysis" data-req="fecalysis"> Fecalysis</label>
+                        <label class="hx-check"><input type="checkbox" id="req-hepaBScreening" data-req="hepaBScreening"> Hepa-B Screening</label>
+                        <label class="hx-check"><input type="checkbox" id="req-hepaBTiter" data-req="hepaBTiter"> Hepa-B Titer</label>
+                        <label class="hx-check"><input type="checkbox" id="req-bloodType" data-req="bloodType"> Blood Type</label>
+                        <label class="hx-check" id="req-pregnancyTest-label"><input type="checkbox" id="req-pregnancyTest" data-req="pregnancyTest"> Pregnancy Test</label>
+                        <label class="hx-check"><input type="checkbox" id="req-drugTest" data-req="drugTest"> Drug Test</label>
+                    </div>
+                    <p class="sub-note" id="req-na" hidden>The pregnancy test does not apply to male students.</p>
                 </section>
 
                 <div class="form-actions">

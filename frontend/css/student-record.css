@@ -93,3 +93,9 @@
 .entry-panel .bp-pair input { width:100%; }
 .entry-panel .f .choice label { padding:10px 14px; }
 .entry-panel .hx-extra .full { grid-column:1/-1; }
+
+/* Laboratory requirements: checkboxes on the form, a table on the record */
+.req-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px 24px; padding:16px 24px; }
+.hx-check.na { opacity:.55; cursor:not-allowed; }
+.hx-check.na input { cursor:not-allowed; }
+@media(max-width:640px) { .req-grid { padding:16px 20px; } }

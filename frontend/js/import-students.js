@@ -2,7 +2,7 @@
    1. The file is read in a Web Worker (js/import-worker.js), so the page stays responsive on big files.
    2. A preview shows what is ready, already in the system, or has a problem. Nothing is saved yet.
    3. Saving sends one POST /api/patients per student, a few at a time, with a progress bar and a Cancel button.
-      A student whose ID already exists (409) is skipped, never overwritten.
+      A student already enrolled in the current school year (409) is skipped. A student from an earlier year is enrolled again.
    When students were added, the page is told through the "students:changed" event so the list refreshes. */
 (function () {
     'use strict';
@@ -76,14 +76,14 @@
     function loadExisting() {
         if (existingLoaded) return;
         existingLoaded = true;
-        api.request('/api/patients?search=&limit=1').then(function (result) {
+        api.request('/api/patients?search=&limit=1&schoolYear=current').then(function (result) {
             const names = (window.SLCDepartments ? window.SLCDepartments.options : []).slice();
             result.colleges.forEach(function (c) { if (names.indexOf(c.name) < 0) names.push(c.name); });
             $('imp-dept-list').innerHTML = names.map(function (n) {
                 return '<option value="' + escapeHtml(n) + '"></option>';
             }).join('');
             if (result.all >= LIST_LIMIT) { existingAll = false; return null; }
-            return api.request('/api/patients?search=').then(function (list) {
+            return api.request('/api/patients?search=&schoolYear=current').then(function (list) {
                 list.patients.forEach(function (p) { existingIds.add(String(p.id).toLowerCase()); });
                 existingAll = true;
             });
@@ -150,7 +150,7 @@
     function onParsed(data) {
         rows = data.rows.map(function (r) {
             if (r.problem) { r.status = 'problem'; r.note = r.problem; }
-            else if (existingIds.has(r.id.toLowerCase())) { r.status = 'exists'; r.note = 'Already in the system'; }
+            else if (existingIds.has(r.id.toLowerCase())) { r.status = 'exists'; r.note = 'Already enrolled this school year'; }
             else r.status = 'ready';
             return r;
         });
@@ -167,7 +167,7 @@
         ['all', 'All', null],
         ['ready', 'Ready', ['ready']],
         ['added', 'Added', ['added']],
-        ['exists', 'Already in system', ['exists']],
+        ['exists', 'Already enrolled', ['exists']],
         ['bad', 'Problems', ['problem', 'failed']],
         ['notdone', 'Not processed', ['notdone']]
     ];
@@ -186,7 +186,7 @@
         $('imp-counts').innerHTML = countBoxes([
             ['Rows in the file', rows.length, ''],
             ['Ready to import', ready, 'ok'],
-            ['Already in the system', count(['exists']), 'wn'],
+            ['Already enrolled this school year', count(['exists']), 'wn'],
             ['Problems (skipped)', count(['problem']), 'er']
         ]);
         const start = $('imp-start');
@@ -208,7 +208,7 @@
         switch (r.status) {
             case 'ready': return '<span class="pill green">Ready</span>';
             case 'added': return '<span class="pill green">Added</span>';
-            case 'exists': return '<span class="pill yellow">Already in system</span>';
+            case 'exists': return '<span class="pill yellow">Already enrolled</span>';
             case 'notdone': return '<span class="pill neutral">Not processed</span>';
             case 'failed': return '<span class="pill red">Not saved</span><span class="imp-reason c-bad">' + escapeHtml(r.note) + '</span>';
             default: return '<span class="pill red">Problem</span><span class="imp-reason c-bad">' + escapeHtml(r.note) + '</span>';
@@ -311,7 +311,7 @@
                     r.status = 'added'; existingIds.add(r.id.toLowerCase()); tally.added++; lostConnection = 0;
                 } catch (error) {
                     if (error.status === 401) { signedOut = true; cancelled = true; return; }
-                    if (error.status === 409) { r.status = 'exists'; r.note = 'Already in the system'; tally.exists++; lostConnection = 0; }
+                    if (error.status === 409) { r.status = 'exists'; r.note = 'Already enrolled this school year'; tally.exists++; lostConnection = 0; }
                     else {
                         r.status = 'failed'; r.note = error.message; tally.failed++;
                         if (error.status === undefined && ++lostConnection >= 5) {
@@ -341,14 +341,14 @@
         show('imp-run', false);
         $('imp-done-counts').innerHTML = countBoxes([
             ['Added', tally.added, 'ok'],
-            ['Already in the system', count(['exists']), 'wn'],
+            ['Already enrolled this school year', count(['exists']), 'wn'],
             ['Not saved or skipped', count(['problem', 'failed']), 'er'],
             ['Not processed', left.length, '']
         ]);
         const notAdded = rows.filter(r => r.status !== 'added').length;
         $('imp-done-note').textContent = (stopReason ? stopReason + ' ' : (left.length ? 'The import was cancelled. ' : '')) +
             (left.length ? 'Importing the same file again adds only the students that are still missing. ' : '') +
-            (notAdded ? 'The table below lists every row, with the ones that were not added under Problems, Already in system or Not processed.' : 'Every student in the file was added.');
+            (notAdded ? 'The table below lists every row, with the ones that were not added under Problems, Already enrolled or Not processed.' : 'Every student in the file was added.');
         $('imp-download').hidden = !notAdded;
         $('imp-done-title').textContent = left.length ? 'Import stopped' : 'Import finished';
         $('imp-preview-title').textContent = 'Result by row';

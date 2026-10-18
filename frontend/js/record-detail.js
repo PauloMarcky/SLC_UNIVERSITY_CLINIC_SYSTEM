@@ -1,6 +1,7 @@
 /* Student Record page: loads the real record.
    GET /api/patients/:id          identification
    GET /api/patients/:id/history  past medical history
+   GET /api/patients/:id/requirements  laboratory requirements (needed before graduating)
    GET /api/visits?search=<id>    completed visits (the server hides confidential ones from the nurse)
    Editing opens the Add / Edit form (add-student.html?id=...). Vital signs are recorded on the Assess page.
    The prescriptions box is filled by record-prescriptions.js from the same ?id= in the address. */
@@ -93,6 +94,20 @@
             historyRow('Vaccines', 'Bakuna', vaccines ? yes('ok') : no(), vaccines) +
             '<tr><th scope="row">Other</th><td class="hx-answer">' + (other ? yes('warn') : '<span class="yn no">None</span>') + '</td>' +
             '<td class="hx-detail">' + (other ? escapeHtml(other) : '<span class="empty-dash">&mdash;</span>') + '</td></tr>';
+    }
+
+    /* ---------- Laboratory requirements ---------- */
+    function renderRequirements(r) {
+        $('r-requirements').innerHTML = r.items.map(function (item) {
+            const answer = !item.applicable ? '<span class="yn no">Not needed</span>'
+                : item.done ? '<span class="yn yes-ok">&#10003; Done</span>' : '<span class="yn yes-warn">Missing</span>';
+            const detail = !item.applicable ? 'Does not apply to male students' : item.done && item.date ? 'Done ' + formatDate(item.date) : '';
+            return '<tr><th scope="row">' + escapeHtml(item.label) + '</th><td class="hx-answer">' + answer + '</td>' +
+                '<td class="hx-detail">' + (detail ? escapeHtml(detail) : '<span class="empty-dash">&mdash;</span>') + '</td></tr>';
+        }).join('');
+        $('r-req-summary').innerHTML = r.complete
+            ? '<span class="pill green">Complete</span> ' + r.completed + ' of ' + r.required
+            : r.completed + ' of ' + r.required + ' complete';
     }
 
     /* ---------- Visits (already newest first from the server) ---------- */
@@ -214,7 +229,7 @@
         return r.lastName ? r.lastName + (first ? ', ' + first : '') : r.name;
     }
 
-    function render(p, history, visits) {
+    function render(p, history, visits, requirements) {
         const name = fullName(p);
         document.title = name + ' - ULS Clinic System';
         $('r-name').textContent = name;
@@ -223,6 +238,7 @@
         $('edit-record').setAttribute('href', '../nurse/add-student.html?id=' + encodeURIComponent(p.id));
         renderIdentification(p);
         renderHistory(history);
+        renderRequirements(requirements);
         renderVisits(visits);
         view.hidden = false;
     }
@@ -245,9 +261,9 @@
             .then(function (result) { return result.visits.filter(function (v) { return v.patientId === patientId; }); });
     }
 
-    Promise.all([api.getSession(), api.request(path), api.request(path + '/history')])
+    Promise.all([api.getSession(), api.request(path), api.request(path + '/history'), api.request(path + '/requirements')])
         .then(async function (results) {
-            const session = results[0], patient = results[1].patient, history = results[2].history;
+            const session = results[0], patient = results[1].patient, history = results[2].history, requirements = results[3].requirements;
             // A student's own record shows every school year at first, so nothing in the history is hidden.
             // The picker narrows the vital signs and visits to one school year.
             const yearSelect = $('r-year');
@@ -264,7 +280,7 @@
                 });
             }
             const visits = await loadVisits(patient.id);
-            render(patient, history, visits);
+            render(patient, history, visits, requirements);
             // Doctors see the record read-only: tag shown, Edit hidden.
             if (session.user.role === 'doctor') {
                 $('readonly-tag').hidden = false;

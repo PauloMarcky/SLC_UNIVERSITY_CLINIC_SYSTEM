@@ -43,6 +43,7 @@
             <div class="filters" role="search">
                 <div class="grow"><label for="mr-search">Search by name or ID</label><input id="mr-search" type="search" placeholder="Type a name or ID number" autocomplete="off"></div>
                 <div><label for="mr-year">School year</label><select id="mr-year" autocomplete="off"></select></div>
+                <div><label for="mr-req">Requirements</label><select id="mr-req" autocomplete="off"><option value="">All students</option><option value="incomplete">Incomplete</option><option value="complete">Complete</option></select></div>
                 <div class="filters-clear"><button type="button" class="btn sec" id="mr-clear">Clear</button></div>
             </div>
             <p class="filter-count" id="mr-count" role="status" aria-live="polite"></p>
@@ -55,11 +56,12 @@
                             <th>Department</th>
                             <th>Age</th>
                             <th>Last visit</th>
+                            <th>Requirements</th>
                         </tr>
                     </thead>
                     <tbody id="mr-body">
                         <tr>
-                            <td colspan="5">Loading students...</td>
+                            <td colspan="6">Loading students...</td>
                         </tr>
                     </tbody>
                 </table>

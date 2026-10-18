@@ -154,11 +154,15 @@ test('student list shows the last visit inside the chosen school year', async t 
   const lastVisit = async id => {
     const res = await f.request(`/api/patients?search=2026-00123&limit=10&offset=0&schoolYear=${id}`, { actor: f.nurse });
     assert.equal(res.status, 200);
-    return res.data.patients[0].lastVisit;
+    return res.data.patients[0] ? res.data.patients[0].lastVisit : undefined;
   };
   assert.equal(await lastVisit(past.id), shift(-400));
-  assert.equal(await lastVisit(now.id), null);            // fresh year: the student is still listed, with no visits yet
+  assert.equal(await lastVisit(now.id), undefined);       // fresh year: the student is not on this year's list at all
   assert.equal(await lastVisit(''), shift(-400));
+  // Once the student is enrolled again for the new year, they are listed with no visits yet.
+  const again = await f.request('/api/patients', { actor: f.nurse, method: 'POST', body: { id: '2026-00123', lastName: 'Dizon', firstName: 'Maria' } });
+  assert.equal(again.status, 201);
+  assert.equal(await lastVisit(now.id), null);
 });
 
 test('editing a school year moves visits with its dates; a year with visits cannot be deleted', async t => {
@@ -184,9 +188,13 @@ test('editing a school year moves visits with its dates; a year with visits cann
   const del = await f.request(`/api/school-years/${now.id}`, { actor: f.doctor, method: 'DELETE' });
   assert.equal(del.status, 409);
   assert.match(del.data.error, /cannot be deleted/);
-  const empty = await f.request(`/api/school-years/${past.id}`, { actor: f.doctor, method: 'DELETE' });
-  assert.equal(empty.status, 200);
-  assert.equal((await f.request('/api/school-years', { actor: f.doctor })).data.schoolYears.length, 1);
+  // Past has no visits now, but the student is still enrolled in it, so it cannot be deleted either.
+  const enrolled = await f.request(`/api/school-years/${past.id}`, { actor: f.doctor, method: 'DELETE' });
+  assert.equal(enrolled.status, 409);
+  assert.match(enrolled.data.error, /enrolled student/);
+  const spare = await f.makeYear('Spare', shift(300), shift(600));
+  assert.equal((await f.request(`/api/school-years/${spare.id}`, { actor: f.doctor, method: 'DELETE' })).status, 200);
+  assert.equal((await f.request('/api/school-years', { actor: f.doctor })).data.schoolYears.length, 2);
   assert.equal((await f.request('/api/school-years/999999', { actor: f.doctor, method: 'DELETE' })).status, 404);
 });
 
