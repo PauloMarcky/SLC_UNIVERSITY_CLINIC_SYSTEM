@@ -1,6 +1,6 @@
 import { pool } from '../db/pool.js';
 import { STAFF, requireAnyRole } from '../utils/authz.js';
-import { scopeCondition } from './statistics.service.js';
+import { scopeCondition, narrowToSchoolYear } from './statistics.service.js';
 
 const isBlank = v => v === undefined || v === null || String(v).trim() === '';
 
@@ -20,8 +20,9 @@ function isoDaysAgo(days) {
  * BMI categories (as stored on each visit) and this-week vs last-week case counts per diagnosis.
  * BMI follows the period and department filters. The weekly counts always cover the last 14 days.
  */
-export async function getTrends({ startDate, endDate, college, scope } = {}, actor) {
+export async function getTrends(input = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
+  const { startDate, endDate, college, scope } = await narrowToSchoolYear(input);
 
   const bmiWhere = ["v.status = 'completed'", 'v.screened_copy_of IS NULL', 'v.bmi IS NOT NULL'];
   const scopeSql = scopeCondition(scope);

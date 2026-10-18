@@ -17,9 +17,10 @@
                 ['Exam Queue', '../doctor/queue.html'],
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Statistics', '../doctor/statistics.html'],
-                ['User Management', '../doctor/users.html']
+                ['User Management', '../doctor/users.html'],
+                ['School Years', '../doctor/school-years.html']
             ],
-            order: [['group', 0], ['link', 0], ['link', 1], ['link', 2], ['link', 3]],
+            order: [['group', 0], ['link', 0], ['link', 1], ['link', 2], ['link', 3], ['link', 4]],
             groups: [
                 {
                     title: 'Consultations & Checkups',

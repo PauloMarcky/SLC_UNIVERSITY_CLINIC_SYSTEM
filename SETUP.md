@@ -66,6 +66,16 @@ Open <http://127.0.0.1:3000> and log in.
     npm run migrate   # after pulling changes that add migrations
     npm run dev       # auto-reload on file changes
 
+## School years
+
+Records start fresh every school year, and the old years stay on file. Nothing is copied or deleted: each visit belongs to the school year its date falls in.
+
+- After `npm run migrate`, a school year **2026-2027 (Aug 3, 2026 to Jun 4, 2027)** exists. These dates are only a starting point.
+- A doctor changes them in **School Years** (doctor menu): add a year, edit its name or dates, or delete a year that has no visits. Changing the dates moves the visits with them.
+- When a school year ends, the next one is added automatically with the same dates one year later. Edit it when the real dates are announced.
+- Visits dated between one school year's end date and the next start date (the summer break) stay with the year that just ended.
+- The lists (Checkup, Consultation, Screening, Student Records) and Statistics open on the current school year. Use the **School year** picker to open an older year or **All school years**.
+
 ## Adding more staff accounts
 
     npm run create-user -- username nurse "Full Name"

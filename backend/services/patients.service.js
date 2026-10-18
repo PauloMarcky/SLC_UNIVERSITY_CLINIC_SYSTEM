@@ -2,6 +2,7 @@ import { pool } from '../db/pool.js';
 import { HttpError } from '../utils/http-error.js';
 import { text, optionalDate, flag } from '../utils/validators.js';
 import { STAFF, requireAnyRole, checkRole } from '../utils/authz.js';
+import { schoolYearFilter } from './school-years.service.js';
 
 export async function patient(id, connection = pool) {
   const [rows] = await connection.execute(
@@ -40,21 +41,24 @@ function listedPatient(r) {
  * server, so every student can be reached by scrolling, however many there are.
  * Returns { patients, total (for this filter), all (for this search), colleges: [{ name, count }] }.
  */
-export async function searchPatientsPage({ search, college, limit, offset }, actor) {
+export async function searchPatientsPage({ search, college, limit, offset, schoolYear }, actor) {
   const term = (search || '').trim().slice(0, 200);
   const chosen = (college || '').trim().slice(0, 255);
   const size = Math.min(Math.max(parseInt(limit, 10) || 10, 1), 100);
   const skip = Math.max(parseInt(offset, 10) || 0, 0);
   const hideConfidential = actor && actor.role !== 'doctor' ? 'AND v.confidential = 0' : '';
+  // With a school year chosen, "last visit" is the last visit inside that year (empty at the start of a new year).
+  const year = await schoolYearFilter(schoolYear);
+  const inYear = year.conditions.map(c => ' AND ' + c).join('');
   const [rows] = await pool.execute(
     `SELECT p.id, p.name, p.college, p.course, p.year, p.category,
             DATE_FORMAT(p.date_of_birth, '%Y-%m-%d') AS date_of_birth,
-            (SELECT MAX(v.visit_date) FROM visits v WHERE v.patient_id = p.id ${hideConfidential}) AS last_visit
+            (SELECT MAX(v.visit_date) FROM visits v WHERE v.patient_id = p.id ${hideConfidential}${inYear}) AS last_visit
      FROM patients p
      WHERE (INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0)
        AND (? = '' OR p.college = ?)
      ORDER BY p.name, p.id LIMIT ${size} OFFSET ${skip}`,
-    [term, term, chosen, chosen]
+    [...year.params, term, term, chosen, chosen]
   );
   const [groups] = await pool.execute(
     `SELECT college, COUNT(*) AS n FROM patients p
@@ -229,12 +233,13 @@ export async function saveHistory(patientId, body, actor) {
   return getHistory(patientId);
 }
 
-export async function getPatientRecord(id, actor) {
+export async function getPatientRecord(id, actor, { schoolYear = '' } = {}) {
   const patientId = text(id, 'Patient ID', 50, true);
   const record = await patient(patientId);
 
   if (!record) throw new HttpError(404, 'Patient record not found.');
 
+  const year = await schoolYearFilter(schoolYear);
   const [visits] = await pool.execute(
     `SELECT v.id, v.visit_type, v.visit_date, v.complaint,
             v.systolic, v.diastolic, v.weight_kg, v.height_cm,
@@ -244,9 +249,9 @@ export async function getPatientRecord(id, actor) {
      FROM visits v
      WHERE v.patient_id = ?
        AND (? = 'doctor' OR v.confidential = 0)
-       AND v.screened_copy_of IS NULL
+       AND v.screened_copy_of IS NULL${year.conditions.map(c => ' AND ' + c).join('')}
      ORDER BY v.visit_date DESC, v.id DESC`,
-    [patientId, actor.role]
+    [patientId, actor.role, ...year.params]
   );
 
   return {

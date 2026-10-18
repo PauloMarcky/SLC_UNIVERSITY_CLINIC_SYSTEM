@@ -35,7 +35,7 @@ export async function resetDatabase() {
     for (const table of [
       'dispense_lines', 'prescription_items', 'prescriptions', 'stock_movements',
       'medicine_batches', 'medicines',
-      'notifications', 'certificate_history', 'certificates', 'sessions', 'users', 'patients',
+      'notifications', 'certificate_history', 'certificates', 'sessions', 'school_years', 'users', 'patients',
       'visits', 'patient_medical_history'
     ]) {
       await connection.query(`TRUNCATE TABLE ${table}`);

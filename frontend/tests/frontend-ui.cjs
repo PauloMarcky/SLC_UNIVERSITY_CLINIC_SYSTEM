@@ -36,6 +36,7 @@ async function mockApi(route) {
     else if (url.pathname === '/api/visits/queue' || url.pathname === '/api/visits/screened') body = { visits: [] };
     else if (url.pathname === '/api/patients') body = { patients: [patient] };
     else if (url.pathname === '/api/users') body = { users: [] };
+    else if (url.pathname === '/api/school-years') body = { schoolYears: [{ id: 1, label: '2026-2027', startDate: '2026-08-03', endDate: '2027-06-04', coversUntil: null, status: 'current', isCurrent: true, visitCount: 0 }], currentId: 1 };
     else if (url.pathname === '/api/medicines') body = { medicines: [] };
     else if (url.pathname === '/api/prescriptions') body = { prescriptions: [] };
     else if (url.pathname === '/api/visits') {

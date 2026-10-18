@@ -14,6 +14,9 @@
     }
     var reset = document.getElementById('stat-reset');
     if (!period || !college) return;
+    // School year: records restart every year, so the page shows one year at a time (picker from school-year.js).
+    var yearSelect = document.getElementById('stat-year');
+    var year = null;
 
     while (college.options.length > 1) college.remove(1);
     if (window.SLCDepartments) window.SLCDepartments.fillSelect(college, { short: true });
@@ -147,14 +150,24 @@
         return '';
     }
 
+    // "This month" and "This week" count back from today, so they only make sense for today's school year.
+    // For an older year the page shows the whole year.
+    function syncPeriod() {
+        var older = year && year.value() && !year.isCurrent();
+        Array.prototype.forEach.call(period.options, function (o) { o.disabled = !!older && o.value !== 'all'; });
+        if (older && period.value !== 'all') period.value = 'all';
+    }
+
     function apply() {
         var chosen = college.value;
         var viewKey = view ? view.value : '';
         var title = document.getElementById('stat-title');
         if (title) title.textContent = VIEW_TITLE[viewKey] || 'Statistics';
+        syncPeriod();
         var query = [];
         if (chosen) query.push('college=' + encodeURIComponent(chosen));
         if (viewKey) query.push('scope=' + encodeURIComponent(viewKey));
+        if (year && year.value()) query.push('schoolYear=' + encodeURIComponent(year.value()));
         if (period.value === 'week') query.push('startDate=' + isoDaysAgo(7));
         else if (period.value === 'month') query.push('startDate=' + isoDaysAgo(30));
         var qs = query.length ? '?' + query.join('&') : '';
@@ -188,9 +201,10 @@
             drawAlert(conditions, trends.rule, chosen ? ' in ' + deptShort(chosen) : '');
 
             var cases = sum(conditions);
+            var periodText = period.value === 'all' && year && year.value() ? 'Whole school year' : PERIOD_LABEL[period.value];
             document.getElementById('stat-summary').textContent =
-                'Showing ' + cases + (cases === 1 ? ' case' : ' cases') + ' \u00B7 ' +
-                (chosen ? deptShort(chosen) : 'All departments') + ' \u00B7 ' + PERIOD_LABEL[period.value] + ' \u00B7 ' + (VIEW_LABEL[viewKey] || 'All combined');
+                'Showing ' + cases + (cases === 1 ? ' case' : ' cases') + ' \u00B7 ' + (year ? year.label() : 'All school years') + ' \u00B7 ' +
+                (chosen ? deptShort(chosen) : 'All departments') + ' \u00B7 ' + periodText + ' \u00B7 ' + (VIEW_LABEL[viewKey] || 'All combined');
         }).catch(function (error) { showError(error.message); });
     }
 
@@ -199,7 +213,12 @@
         period.value = 'month';
         college.value = '';
         if (view) view.value = '';
+        if (year) year.reset();
         apply();
     });
-    apply();
+    if (yearSelect && window.SchoolYear) {
+        window.SchoolYear.mount(yearSelect, { onChange: apply }).then(function (picker) { year = picker; apply(); });
+    } else {
+        apply();
+    }
 })();

@@ -11,6 +11,7 @@
     <script src="../js/ui.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
     <script src="../js/departments.js" defer></script>
+    <script src="../js/school-year.js" defer></script>
     <script src="../js/visit-log.js" defer></script>
 </head>
 
@@ -45,6 +46,7 @@
                             href="statistics-consultation.html">Statistics for Consultation</a></div>
                 </details>
                 <a href="users.html">User Management</a>
+                <a href="school-years.html">School Years</a>
             </nav>
         </aside>
         <main>
@@ -54,6 +56,9 @@
                     <p class="sub">Active sickness and treatment log</p>
                 </div>
                 <div class="toolbar"><a class="btn" href="queue.html">Queue</a></div>
+            </div>
+            <div class="filters" role="group" aria-label="School year">
+                <div><label for="log-year">School year</label><select id="log-year" autocomplete="off"></select></div>
             </div>
             <div class="diagnosis-legend" aria-label="Clinical diagnosis priority guide"><span
                     class="diagnosis-tag routine">Routine</span><span

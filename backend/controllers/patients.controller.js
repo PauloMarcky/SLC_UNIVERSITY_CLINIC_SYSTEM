@@ -12,7 +12,7 @@ export async function search(req, res) {
 }
 
 export async function record(req, res) {
-  res.status(200).json({ record: await getPatientRecord(req.params.id, req.session.user) });
+  res.status(200).json({ record: await getPatientRecord(req.params.id, req.session.user, { schoolYear: req.query.schoolYear || '' }) });
 }
 
 export async function register(req, res) {

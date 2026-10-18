@@ -12,6 +12,8 @@
     const view = $('record-view');
     const message = $('record-message');
     if (!view || !message || !api) return;
+    let year = null;      // school year picker (school-year.js)
+    let scoped = false;   // true while one school year is chosen, for the empty-table messages
 
     function escapeHtml(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
@@ -107,7 +109,7 @@
                 '<td>' + (has(v.weightKg) ? escapeHtml(v.weightKg) + ' kg' : dash('')) + '</td>' +
                 '<td>' + (has(v.bmi) ? escapeHtml(v.bmi) : dash('')) + '</td>' +
                 '<td>' + dash(bp) + '</td></tr>';
-        }).join('') : emptyRow(5, 'No vital signs recorded yet.');
+        }).join('') : emptyRow(5, scoped ? 'No vital signs recorded in this school year.' : 'No vital signs recorded yet.');
 
         $('r-findings').innerHTML = visits.length ? visits.map(function (v) {
             return '<tr><td>' + escapeHtml(formatDate(v.visitDate)) + '</td>' +
@@ -116,7 +118,7 @@
                 '<td>' + dash(v.diagnosis) + '</td>' +
                 '<td>' + dash(v.actionsTaken) + '</td>' +
                 '<td>' + dash(v.doctorName || v.createdByName) + '</td></tr>';
-        }).join('') : emptyRow(6, 'No completed visits yet.');
+        }).join('') : emptyRow(6, scoped ? 'No completed visits in this school year.' : 'No completed visits yet.');
 
         const labs = visits.filter(function (v) { return v.labSourceName; });
         $('r-labs').innerHTML = labs.length ? labs.map(function (v) {
@@ -124,7 +126,7 @@
                 '<td>' + dash(v.labSourceName) + '</td>' +
                 '<td>' + dash(v.labSourceLocation) + '</td>' +
                 '<td>' + dash(formatDate(v.labReceivedAt)) + '</td></tr>';
-        }).join('') : emptyRow(4, 'No outside laboratory results recorded yet.');
+        }).join('') : emptyRow(4, scoped ? 'No outside laboratory results in this school year.' : 'No outside laboratory results recorded yet.');
     }
 
     /* ---------- nurse: new assessment on the student's own page ---------- */
@@ -235,10 +237,33 @@
     if (!id) { showMessage('No student selected. Go back to Student Records and open one.'); return; }
     const path = '/api/patients/' + encodeURIComponent(id);
 
-    Promise.all([api.getSession(), api.request(path), api.request(path + '/history'), api.request('/api/visits?search=' + encodeURIComponent(id))])
-        .then(function (results) {
+    // Completed visits of this student, for the chosen school year (every year when none is chosen).
+    function loadVisits(patientId) {
+        const chosen = year ? year.value() : '';
+        scoped = !!chosen;
+        return api.request('/api/visits?search=' + encodeURIComponent(id) + (chosen ? '&schoolYear=' + encodeURIComponent(chosen) : ''))
+            .then(function (result) { return result.visits.filter(function (v) { return v.patientId === patientId; }); });
+    }
+
+    Promise.all([api.getSession(), api.request(path), api.request(path + '/history')])
+        .then(async function (results) {
             const session = results[0], patient = results[1].patient, history = results[2].history;
-            const visits = results[3].visits.filter(function (v) { return v.patientId === patient.id; });
+            // A student's own record shows every school year at first, so nothing in the history is hidden.
+            // The picker narrows the vital signs and visits to one school year.
+            const yearSelect = $('r-year');
+            if (yearSelect && window.SchoolYear) {
+                year = await window.SchoolYear.mount(yearSelect, {
+                    defaultAll: true,
+                    persist: false,
+                    onChange: function () {
+                        loadVisits(patient.id).then(renderVisits).catch(function (error) {
+                            if (error.status === 401) window.location.assign('/index.html');
+                            else showMessage(error.message);
+                        });
+                    }
+                });
+            }
+            const visits = await loadVisits(patient.id);
             render(patient, history, visits);
             // Doctors see the record read-only: tag shown, Edit hidden.
             if (session.user.role === 'doctor') {

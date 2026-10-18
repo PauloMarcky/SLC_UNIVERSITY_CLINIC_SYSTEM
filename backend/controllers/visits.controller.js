@@ -9,7 +9,8 @@ export async function list(req, res) {
     search: req.query.search || '',
     type: req.query.type || '',
     college: req.query.college || '',
-    copies: req.query.copies || ''
+    copies: req.query.copies || '',
+    schoolYear: req.query.schoolYear || ''
   }, req.session.user);
   res.status(200).json({ visits });
 }
@@ -27,7 +28,7 @@ export async function queue(req, res) {
 }
 
 export async function screened(req, res) {
-  res.status(200).json({ visits: await screenedVisits(req.session.user) });
+  res.status(200).json({ visits: await screenedVisits(req.session.user, { schoolYear: req.query.schoolYear || '' }) });
 }
 
 export async function complete(req, res) {

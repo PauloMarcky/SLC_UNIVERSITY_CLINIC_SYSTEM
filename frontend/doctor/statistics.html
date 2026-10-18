@@ -11,6 +11,7 @@
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/departments.js" defer></script>
+    <script src="../js/school-year.js" defer></script>
     <script src="../js/statistics-live.js" defer></script>
 </head>
 
@@ -45,6 +46,7 @@
                             href="statistics-consultation.html">Statistics for Consultation</a></div>
                 </details>
                 <a href="users.html">User Management</a>
+                <a href="school-years.html">School Years</a>
             </nav>
         </aside>
         <main>
@@ -57,6 +59,7 @@
             <!-- sample-data note removed
                 -->
             <div class="filters" role="group" aria-label="Statistics filters">
+                <div><label for="stat-year">School year</label><select id="stat-year" autocomplete="off"></select></div>
                 <div><label for="stat-view">View</label><select id="stat-view" autocomplete="off">
                         <option value="" selected>All combined</option>
                         <option value="screened">Screened</option>

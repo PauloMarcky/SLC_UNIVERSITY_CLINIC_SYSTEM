@@ -15,6 +15,7 @@ const CONTENT_TYPES = {
 const RESTRICTED_PAGES = {
   '/doctor/dashboard.html': 'doctor',
   '/doctor/users.html': 'doctor',
+  '/doctor/school-years.html': 'doctor',
   '/nurse/dashboard.html': 'nurse',
   '/shared/certificates.html': 'staff'
 };

@@ -11,6 +11,7 @@ import { certificatesRoutes } from './certificates.routes.js';
 import { inventoryRoutes } from './inventory.routes.js';
 import { prescriptionsRoutes } from './prescriptions.routes.js';
 import { statisticsRoutes } from './statistics.routes.js';
+import { schoolYearsRoutes } from './school-years.routes.js';
 
 /**
  * Everything under /api. The order is the security model:
@@ -33,5 +34,6 @@ export function createApiRouter({ allowedOrigin, loginLimiter }) {
     .use(prescriptionsRoutes)
     .use(certificatesRoutes)
     .use(statisticsRoutes)
+    .use(schoolYearsRoutes)
     .use(() => { throw new HttpError(404, 'API endpoint not found.'); });
 }

@@ -13,14 +13,16 @@
             keep: v => v.visitType === 'Consultation',
             cols: v => [v.visitDate, v.patientName, [v.course, window.SLCDepartments ? window.SLCDepartments.short(v.college) : v.college].filter(Boolean).join(' / ') || dash,
                 v.complaint, v.diagnosis, v.actionsTaken || dash],
-            empty: 'No consultations yet.'
+            empty: 'No consultations yet.',
+            emptyYear: 'No consultations in this school year yet.'
         },
         checkup: {
             url: '/api/visits',
             keep: v => v.visitType === 'Checkup' && !v.screenedCopyOf,
             cols: v => [v.visitDate, v.patientName, v.heightCm + ' cm', v.weightKg + ' kg',
                 v.bmi, v.age == null ? dash : v.age, v.course || dash, v.diagnosis],
-            empty: 'No checkups yet.'
+            empty: 'No checkups yet.',
+            emptyYear: 'No checkups in this school year yet.'
         },
         screening: {
             url: '/api/visits/screened',
@@ -28,7 +30,8 @@
             cols: v => [(v.screenedAt || v.visitDate || '').slice(0, 10), v.patientName, v.course || dash,
                 v.bmi, v.bp, dash, v.soapObjective || v.screenedNote || dash,
                 v.actionsTaken || v.screenedNote || dash],
-            empty: 'No screened records yet.'
+            empty: 'No screened records yet.',
+            emptyYear: 'No screened records in this school year yet.'
         }
     };
     const sheet = v => [v.visitDate, v.patientName, v.sex || dash, v.age == null ? dash : v.age,
@@ -67,11 +70,15 @@
         tr.append(td);
         body.append(tr);
     }
+    // School year picker (school-year.js). Records restart every school year; older years stay on file.
+    const yearSelect = document.getElementById('log-year');
+    let year = null;
     async function load() {
         try {
-            const result = await api.request(log.url);
+            const chosen = year ? year.value() : '';
+            const result = await api.request(log.url + (chosen ? '?schoolYear=' + encodeURIComponent(chosen) : ''));
             const visits = result.visits.filter(log.keep);
-            if (!visits.length) return message(log.empty);
+            if (!visits.length) return message(chosen ? log.emptyYear : log.empty);
             body.replaceChildren();
             visits.forEach(v => {
                 const tr = document.createElement('tr');
@@ -83,5 +90,9 @@
             else message(error.message);
         }
     }
-    load();
+    if (yearSelect && window.SchoolYear) {
+        window.SchoolYear.mount(yearSelect, { onChange: load }).then(function (picker) { year = picker; load(); });
+    } else {
+        load();
+    }
 })();

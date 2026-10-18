@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>School Years - ULS Clinic System</title>
+    <script src="../js/login-theme.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="../js/ui.js" defer></script>
+    <script src="../js/role-nav.js" defer></script>
+    <script src="../js/clinic-api.js" defer></script>
+    <script src="../js/school-year.js" defer></script>
+    <script src="../js/school-years.js" defer></script>
+</head>
+
+<body>
+    <header class="topbar">
+        <h1>ULS Clinic Management System</h1>
+        <nav aria-label="Account"><a href="../index.html" data-logout>Log out</a></nav>
+    </header>
+    <div class="layout">
+        <aside>
+            <nav aria-label="Menu">
+                <h4>Doctor</h4>
+                <details class="nav-group">
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="4" y="5" width="16" height="16" rx="2" />
+                            <path d="M8 3v4M16 3v4M4 11h16M9 16h6M12 13v6" />
+                        </svg><span>Consultations &amp; Checkups</span><svg class="nav-chevron" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="screening.html">Screening</a><a href="checkup.html">Checkup</a><a
+                            href="consultation.html">Consultation</a></div>
+                </details>
+                <a href="queue.html">Queue</a>
+                <a href="../nurse/medical-records.html">Student Records</a>
+                <details class="nav-group">
+                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5" />
+                        </svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m8 10 4 4 4-4" />
+                        </svg></summary>
+                    <div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a
+                            href="statistics-consultation.html">Statistics for Consultation</a></div>
+                </details>
+                <a href="users.html">User Management</a>
+                <a class="on" href="school-years.html">School Years</a>
+            </nav>
+        </aside>
+        <main>
+            <div class="page-head">
+                <div>
+                    <h2>School Years</h2>
+                    <p class="sub">Records start fresh every school year. Past years stay on file and can always be opened.</p>
+                </div>
+                <div class="toolbar"><button class="btn" type="button" id="add-year" disabled>+ Add school year</button>
+                </div>
+            </div>
+            <p class="note" id="year-message" role="status" aria-live="polite" hidden></p>
+            <p class="view-note">A visit belongs to the school year its date falls in, so changing a school year&rsquo;s
+                dates moves its visits with it. Visits dated after a school year&rsquo;s end date and before the next one
+                starts (the summer break) stay with the year that just ended. When a school year ends, the next one is
+                added automatically with the same dates one year later &mdash; edit it here when the real dates are announced.</p>
+            <section class="box" aria-labelledby="years-table-title">
+                <h3 id="years-table-title">School Years</h3>
+                <div class="table-scroll">
+                    <table class="user-management-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">School year</th>
+                                <th scope="col">Starts</th>
+                                <th scope="col">Ends</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Visits</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="year-rows">
+                            <tr>
+                                <td class="log-placeholder" colspan="6">Loading school years&hellip;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal" id="year-modal" hidden>
+        <div class="modal-backdrop" data-close-year></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="year-modal-title">
+            <div class="modal-head">
+                <h3 id="year-modal-title">Add school year</h3><button class="modal-x" type="button" data-close-year
+                    aria-label="Close">&times;</button>
+            </div>
+            <form class="form" id="year-form" novalidate>
+                <p class="note full" id="year-error" role="alert" hidden></p>
+                <div class="f full"><label for="year-label">School year name (optional)</label><input id="year-label"
+                        maxlength="50" autocomplete="off" placeholder="Filled in from the dates, e.g. 2026-2027">
+                </div>
+                <div class="f"><label for="year-start">Start date</label><input id="year-start" type="date" required>
+                </div>
+                <div class="f"><label for="year-end">End date</label><input id="year-end" type="date" required></div>
+                <p class="field-hint full" id="year-edit-note" hidden>Changing the dates moves visit records between
+                    school years. Nothing is deleted.</p>
+                <div class="full modal-actions"><button class="btn" type="submit" id="save-year">Save</button><button
+                        class="btn sec" type="button" data-close-year>Cancel</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="delete-modal" hidden>
+        <div class="modal-backdrop" data-close-delete></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-title">
+            <div class="modal-head">
+                <h3 id="delete-title">Delete school year?</h3><button class="modal-x" type="button" data-close-delete
+                    aria-label="Close">&times;</button>
+            </div>
+            <div class="user-confirm-body">
+                <p id="delete-copy"></p>
+                <p class="field-hint">Only a school year with no visit records can be deleted.</p>
+            </div>
+            <div class="form-actions"><button class="btn" type="button" id="confirm-delete">Delete school
+                    year</button><button class="btn sec" type="button" data-close-delete>Cancel</button></div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,6 +1,7 @@
 import { pool } from '../db/pool.js';
 import { STAFF, requireAnyRole } from '../utils/authz.js';
 import { HttpError } from '../utils/http-error.js';
+import { resolveSchoolYear } from './school-years.service.js';
 
 const isBlank = v => v === undefined || v === null || String(v).trim() === '';
 
@@ -20,13 +21,28 @@ export function scopeCondition(scope) {
 }
 
 /**
+ * Narrows the period to one school year (filters.schoolYear: an id or 'current'; empty = every year).
+ * The school year's dates are combined with any start/end date already chosen, so "this month" inside
+ * a school year still means this month. Returns the filters with startDate/endDate set.
+ */
+export async function narrowToSchoolYear(filters = {}) {
+  const year = await resolveSchoolYear(filters.schoolYear);
+  if (!year) return filters;
+  const startDate = isBlank(filters.startDate) || filters.startDate < year.startDate ? year.startDate : filters.startDate;
+  let endDate = filters.endDate;
+  if (year.endDate && (isBlank(endDate) || endDate > year.endDate)) endDate = year.endDate;
+  return { ...filters, startDate, endDate, schoolYear: '', schoolYearLabel: year.label };
+}
+
+/**
  * Returns top-level summary metrics:
  * Total visits, consultations, total checkups, healthy checkups (Cleared),
  * checkups elevated to screening (Needs screening), and unique patients seen.
  * Excludes cancelled visits and duplicate screening copies by default.
  */
-export async function getStatisticsSummary({ startDate, endDate, college, scope } = {}, actor) {
+export async function getStatisticsSummary(input = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required for statistics.');
+  const { startDate, endDate, college, scope } = await narrowToSchoolYear(input);
 
   const conditions = ["v.status = 'completed'", "v.screened_copy_of IS NULL"];
   const scopeSql = scopeCondition(scope);
@@ -69,11 +85,18 @@ export async function getStatisticsSummary({ startDate, endDate, college, scope 
   const cleared = Number(res.checkups_cleared) || 0;
   const screened = Number(res.checkups_screened) || 0;
 
-  // Total screening records generated
+  // Total screening records generated (inside the school year, when one is chosen)
+  const copyWhere = ["screened_copy_of IS NOT NULL", "status <> 'cancelled'"];
+  const copyParams = [];
+  if (input.schoolYear) {
+    if (!isBlank(startDate)) { copyWhere.push('visit_date >= ?'); copyParams.push(startDate); }
+    if (!isBlank(endDate)) { copyWhere.push('visit_date <= ?'); copyParams.push(endDate); }
+  }
   const [screenCopyRows] = await pool.execute(
     `SELECT COUNT(*) as screening_copies 
      FROM visits 
-     WHERE screened_copy_of IS NOT NULL AND status <> 'cancelled'`
+     WHERE ${copyWhere.join(' AND ')}`,
+    copyParams
   );
 
   return {
@@ -94,8 +117,9 @@ export async function getStatisticsSummary({ startDate, endDate, college, scope 
  * Groups all completed visits by diagnosis / illness name.
  * Ranks them by frequency and calculates morbidity percentage.
  */
-export async function getMorbidityReport({ startDate, endDate, college, type, scope } = {}, actor) {
+export async function getMorbidityReport(input = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
+  const { startDate, endDate, college, type, scope } = await narrowToSchoolYear(input);
 
   const conditions = ["v.status = 'completed'", "v.screened_copy_of IS NULL", "v.diagnosis <> ''", "v.diagnosis IS NOT NULL"];
   const scopeSql = scopeCondition(scope);
@@ -163,8 +187,9 @@ export async function getMorbidityReport({ startDate, endDate, college, type, sc
  * The "Dstrbtn" (Distribution) report:
  * Cross-tabulates clinical cases across Colleges, Courses, and Gender.
  */
-export async function getDemographicDistribution({ startDate, endDate, scope } = {}, actor) {
+export async function getDemographicDistribution(input = {}, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
+  const { startDate, endDate, scope } = await narrowToSchoolYear(input);
 
   const conditions = ["v.status = 'completed'", "v.screened_copy_of IS NULL"];
   const scopeSql = scopeCondition(scope);
@@ -243,8 +268,9 @@ export async function getDemographicDistribution({ startDate, endDate, scope } =
 /**
  * Generates formatted CSV for Excel clinic reporting.
  */
-export async function exportStatisticsCsv(filters, actor) {
+export async function exportStatisticsCsv(input, actor) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
+  const filters = await narrowToSchoolYear(input);
   const summary = await getStatisticsSummary(filters, actor);
   const morbidity = await getMorbidityReport(filters, actor);
   const distribution = await getDemographicDistribution(filters, actor);
@@ -252,6 +278,7 @@ export async function exportStatisticsCsv(filters, actor) {
   const lines = [];
   lines.push('--- UNIVERSITY CLINIC HEALTH SURVEILLANCE REPORT ---');
   lines.push(`Generated At,${new Date().toISOString()}`);
+  lines.push(`School Year,"${String(filters.schoolYearLabel || 'All school years').replace(/"/g, '""')}"`);
   lines.push(`Total Visits,${summary.totalVisits}`);
   lines.push(`Consultations,${summary.consultations}`);
   lines.push(`Checkups,${summary.checkups}`);

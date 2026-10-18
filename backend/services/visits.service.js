@@ -4,6 +4,7 @@ import { text, number, validDate, dateText, flag } from '../utils/validators.js'
 import { STAFF, requireAnyRole } from '../utils/authz.js';
 import { patient, assertPatient } from './patients.service.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions.service.js';
+import { schoolYearFilter } from './school-years.service.js';
 
 export const VISIT_TYPES = ['Consultation', 'Checkup'];
 
@@ -120,11 +121,15 @@ export const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college, p.co
                              (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.status <> 'cancelled' AND vc.id <= v.id) AS visit_number
                       FROM visits v JOIN patients p ON p.id = v.patient_id`;
 
-export async function listVisits({ search = '', type = '', college = '', copies = '' }, actor) {
+export async function listVisits({ search = '', type = '', college = '', copies = '', schoolYear = '' }, actor) {
   const where = ["v.status = 'completed'"];
   // copies=exclude hides the Screening copies, so a screened checkup is not listed twice.
   if (copies === 'exclude') where.push('v.screened_copy_of IS NULL');
   const params = [];
+  // schoolYear = an id or 'current' keeps one school year; empty keeps every year.
+  const year = await schoolYearFilter(schoolYear);
+  where.push(...year.conditions);
+  params.push(...year.params);
   const term = search.trim().slice(0, 200);
   if (term) {
     where.push('(INSTR(LOWER(p.name), LOWER(?)) > 0 OR INSTR(LOWER(p.id), LOWER(?)) > 0)');
@@ -490,10 +495,13 @@ export async function screenVisit(id, body, actor) {
   return fetchVisit(id, actor);
 }
 
-export async function screenedVisits(actor) {
+export async function screenedVisits(actor, { schoolYear = '' } = {}) {
   requireAnyRole(actor, STAFF, 'Clinic staff access required.');
+  const year = await schoolYearFilter(schoolYear);
   const [rows] = await pool.execute(
-    `${SELECT_VISIT} WHERE v.is_screened = 1 ORDER BY v.screened_at DESC, v.id DESC LIMIT 200`
+    `${SELECT_VISIT} WHERE v.is_screened = 1${year.conditions.map(c => ' AND ' + c).join('')}
+     ORDER BY v.screened_at DESC, v.id DESC LIMIT 200`,
+    year.params
   );
   return rows.map(row => rowToVisit(row, actor.role));
 }

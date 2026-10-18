@@ -22,6 +22,7 @@
     let ticket = 0;             // lets a newer request cancel an older one
     let sentinel = null;
     let timer;
+    let year = null;            // school year picker (school-year.js): the "last visit" column follows it
     const num = n => Number(n).toLocaleString('en-US');
 
     function escapeHtml(value) {
@@ -56,7 +57,7 @@
             '<td><a href="' + link + '"><strong>' + escapeHtml(s.name) + '</strong></a></td>' +
             '<td' + (s.college ? ' title="' + escapeHtml(s.college) + '"' : '') + '>' + (s.college ? escapeHtml(window.SLCDepartments ? window.SLCDepartments.short(s.college) : s.college) : '<span style="color:var(--m)">&mdash;</span>') + '</td>' +
             '<td>' + escapeHtml(ageFrom(s.dateOfBirth)) + '</td>' +
-            '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">No visits yet</span>') + '</td>' +
+            '<td>' + (s.lastVisit ? escapeHtml(formatDate(s.lastVisit)) : '<span style="color:var(--m)">' + (year && year.value() ? 'No visits this school year' : 'No visits yet') + '</span>') + '</td>' +
             '' +
             '</tr>';
     }
@@ -121,7 +122,8 @@
         }
         try {
             const result = await api.request('/api/patients?search=' + encodeURIComponent(query) +
-                '&college=' + encodeURIComponent(department) + '&limit=' + PAGE + '&offset=' + loaded);
+                '&college=' + encodeURIComponent(department) + '&limit=' + PAGE + '&offset=' + loaded +
+                (year && year.value() ? '&schoolYear=' + encodeURIComponent(year.value()) : ''));
             if (mine !== ticket) return;
             if (reset && department && !result.colleges.some(function (c) { return c.name === department; })) {
                 department = '';            // the chosen department has no match for this search
@@ -181,5 +183,10 @@
         }
     }).catch(fail);
 
-    fetchPage(true);
+    const yearSelect = document.getElementById('mr-year');
+    if (yearSelect && window.SchoolYear) {
+        window.SchoolYear.mount(yearSelect, { onChange: function () { fetchPage(true); } }).then(function (picker) { year = picker; fetchPage(true); });
+    } else {
+        fetchPage(true);
+    }
 })();
