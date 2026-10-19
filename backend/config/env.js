@@ -34,7 +34,7 @@ function parseTrustProxy(value) {
 if (isProduction && !isTest) {
   const problems = [];
   if (!process.env.DB_PASSWORD) problems.push('DB_PASSWORD is empty.');
-  if (process.env.DB_USER === 'root') problems.push('DB_USER is "root". Create a dedicated MySQL user for the app.');
+  if (process.env.DB_USER === 'root' && process.env.ALLOW_DB_ROOT !== 'true') problems.push('DB_USER is "root". Create a dedicated MySQL user for the app, or set ALLOW_DB_ROOT=true to accept the risk.');
   if (/^(change-this-password|password|root|admin)$/i.test(process.env.DB_PASSWORD || '')) {
     problems.push('DB_PASSWORD is a placeholder or a well-known default.');
   }
