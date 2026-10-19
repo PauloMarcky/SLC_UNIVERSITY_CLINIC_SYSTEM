@@ -1,0 +1,11 @@
+{
+  "name": "slc-university-clinic-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "22.x" },
+  "dependencies": {
+    "express": "^5.3.0",
+    "mysql2": "^3.24.5"
+  }
+}

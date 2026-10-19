@@ -6,7 +6,7 @@
         nurse: {
             title: 'Nurse',
             links: [
-                
+
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Statistics', '../doctor/statistics.html']
             ]

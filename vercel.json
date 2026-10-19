@@ -1,0 +1,5 @@
+{
+  "functions": {
+    "index.js": { "includeFiles": "frontend/**" }
+  }
+}

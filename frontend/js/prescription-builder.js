@@ -12,7 +12,7 @@
   const items = [];
   let qtyTouched = false;
 
-  const sel = h('select', { id: 'rx-med', 'aria-label': 'Medicine' });
+  const sel = h('input', { id: 'rx-med', 'aria-label': 'Medicine' });
   const dose = h('input', { id: 'rx-dose', type: 'number', min: '0.25', step: '0.25', placeholder: 'Dose', 'aria-label': 'Dose amount' });
   const doseUnit = h('span', { class: 'rx-unit' }, '');
   const freq = h('select', { id: 'rx-freq', 'aria-label': 'Frequency' },
@@ -113,8 +113,10 @@
     list.replaceChildren(...items.map((i, idx) => h('tr', {},
       h('td', {}, i.name), h('td', {}, i.dose), h('td', {}, i.frequency),
       h('td', {}, i.durationDays), h('td', {}, `${i.quantity} ${i.unit}`), h('td', {}, i.instructions || '—'),
-      h('td', {}, h('button', { type: 'button', class: 'btn sec rx-remove', 'aria-label': `Remove ${i.name}`,
-        onclick: () => { items.splice(idx, 1); render(); } }, 'Remove')))));
+      h('td', {}, h('button', {
+        type: 'button', class: 'btn sec rx-remove', 'aria-label': `Remove ${i.name}`,
+        onclick: () => { items.splice(idx, 1); render(); }
+      }, 'Remove')))));
   }
 
   window.PrescriptionBuilder = {
@@ -128,8 +130,10 @@
     },
     getPayload() {
       if (!items.length) return null;
-      return { items: items.map(({ medicineId, dose, frequency, durationDays, quantity, instructions }) =>
-        ({ medicineId, dose, frequency, durationDays, quantity, instructions })) };
+      return {
+        items: items.map(({ medicineId, dose, frequency, durationDays, quantity, instructions }) =>
+          ({ medicineId, dose, frequency, durationDays, quantity, instructions }))
+      };
     },
     reset() { items.length = 0; clearDraft(); render(); showError(''); loadMedicines(); }
   };
