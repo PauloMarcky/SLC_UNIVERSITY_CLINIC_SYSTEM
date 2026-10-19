@@ -8,7 +8,7 @@ import { usersRoutes } from './users.routes.js';
 import { patientsRoutes } from './patients.routes.js';
 import { visitsRoutes } from './visits.routes.js';
 import { certificatesRoutes } from './certificates.routes.js';
-import { inventoryRoutes } from './inventory.routes.js';
+// inventory routes removed
 import { prescriptionsRoutes } from './prescriptions.routes.js';
 import { statisticsRoutes } from './statistics.routes.js';
 import { schoolYearsRoutes } from './school-years.routes.js';
@@ -30,7 +30,7 @@ export function createApiRouter({ allowedOrigin, loginLimiter }) {
     .use(usersRoutes)
     .use(patientsRoutes)
     .use(visitsRoutes)
-    .use(inventoryRoutes)
+    /* inventory routes removed */
     .use(prescriptionsRoutes)
     .use(certificatesRoutes)
     .use(statisticsRoutes)

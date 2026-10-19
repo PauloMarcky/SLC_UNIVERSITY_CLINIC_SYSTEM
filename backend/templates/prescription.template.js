@@ -8,7 +8,7 @@ export function renderPrescription(rx, config) {
       <td>${n + 1}</td>
       <td><b>${esc(i.medicine)}</b><br><small>${esc(i.instructions)}</small></td>
       <td>${esc(i.dose)}<br>${esc(i.frequency)}<br>for ${i.durationDays} day${i.durationDays === 1 ? '' : 's'}</td>
-      <td>${i.quantity} ${esc(i.unit)}</td>
+      <td>${i.quantity}</td>
     </tr>`).join('');
   const state = rx.status === 'dispensed' ? `Dispensed ${esc(rx.dispensedAt?.slice(0, 10))} by ${esc(rx.dispensedBy)}`
     : rx.status === 'cancelled' ? 'CANCELLED' : 'NOT YET DISPENSED';

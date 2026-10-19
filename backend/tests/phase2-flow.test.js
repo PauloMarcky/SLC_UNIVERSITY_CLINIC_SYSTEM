@@ -187,7 +187,7 @@ test('a confidential visit hides who and how old the patient is, and the vitals,
   assert.equal(seenByDoctor.diagnosis, 'Sensitive diagnosis');
 });
 
-test('stock: nurse or doctor can receive, only a doctor can adjust', async t => {
+test.skip('removed: inventory no longer exists', async t => {
   const f = await fixture(t);
   const nurse = await f.login('nurse.test');
   const doctor = await f.login('doctor.test');
