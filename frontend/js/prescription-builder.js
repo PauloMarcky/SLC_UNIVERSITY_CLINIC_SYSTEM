@@ -12,7 +12,7 @@
   const items = [];
   let qtyTouched = false;
 
-  const sel = h('input', { id: 'rx-med', 'aria-label': 'Medicine' });
+  const sel = h('select', { id: 'rx-med', 'aria-label': 'Medicine' });
   const dose = h('input', { id: 'rx-dose', type: 'number', min: '0.25', step: '0.25', placeholder: 'Dose', 'aria-label': 'Dose amount' });
   const doseUnit = h('span', { class: 'rx-unit' }, '');
   const freq = h('select', { id: 'rx-freq', 'aria-label': 'Frequency' },
