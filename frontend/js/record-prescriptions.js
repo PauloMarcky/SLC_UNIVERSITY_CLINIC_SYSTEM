@@ -16,7 +16,7 @@
         h('header', {}, h('b', {}, `RX-${rx.id} · ${String(rx.visitDate).slice(0, 10)}`),
           h('span', { class: `pill ${colour}` }, label)),
         h('ul', {}, ...rx.items.map(i => h('li', {},
-          `${i.medicine} — ${i.dose}, ${i.frequency}, ${i.durationDays}d (qty ${i.quantity} ${i.unit})`))),
+          `${i.medicine} — ${i.dose}, ${i.frequency}, ${i.durationDays}d (qty ${i.quantity})`))),
         h('span', { class: 'inv-sub' }, `Dr. ${rx.prescribedBy}${rx.dispensedBy ? ` · dispensed by ${rx.dispensedBy}` : ''}`),
         rx.status !== 'cancelled' ? h('div', {}, h('a', { href: `/prescriptions/${rx.id}/print`, target: '_blank', rel: 'noopener' }, 'Print slip')) : null);
     }) : [h('p', { class: 'rx-empty' }, 'No prescriptions on record.')]));

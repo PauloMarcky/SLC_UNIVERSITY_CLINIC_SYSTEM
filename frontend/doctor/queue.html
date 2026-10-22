@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/prescription.css">
     <link rel="stylesheet" href="../css/exam-modal.css">
+    <link rel="stylesheet" href="../css/confirm-modal.css">
     <script src="../js/ui.js" defer></script>
     <script src="../js/role-nav.js" defer></script>
     <script src="../js/clinic-api.js" defer></script>
@@ -128,6 +129,19 @@
                     <button class="btn sec" type="button" data-close-exam>Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+    <div class="modal confirm-modal" id="confirm-modal" hidden>
+        <div class="modal-backdrop" data-confirm-no></div>
+        <div class="modal-card" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+            <div class="modal-head">
+                <h3 id="confirm-title">Discard examination?</h3>
+            </div>
+            <p class="confirm-text" id="confirm-text">What you typed will be lost.</p>
+            <div class="form-actions">
+                <button class="btn danger" type="button" id="confirm-yes">Discard</button>
+                <button class="btn sec" type="button" id="confirm-no" data-confirm-no>Keep editing</button>
+            </div>
         </div>
     </div>
 </body>

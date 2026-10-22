@@ -145,10 +145,37 @@
         lastTrigger = null;
     }
 
+    // In-page confirmation modal (replaces the browser's window.confirm).
+    function askDiscard() {
+        return new Promise(resolve => {
+            const box = $('confirm-modal');
+            const yes = $('confirm-yes');
+            const no = $('confirm-no');
+            function done(result) {
+                box.hidden = true;
+                box.removeEventListener('click', onClick);
+                document.removeEventListener('keydown', onKey, true);
+                yes.removeEventListener('click', onYes);
+                resolve(result);
+            }
+            function onYes() { done(true); }
+            function onClick(event) { if (event.target.closest('[data-confirm-no]')) done(false); }
+            function onKey(event) {
+                if (event.key === 'Escape') { event.stopImmediatePropagation(); event.preventDefault(); done(false); }
+            }
+            yes.addEventListener('click', onYes);
+            box.addEventListener('click', onClick);
+            document.addEventListener('keydown', onKey, true);
+            box.hidden = false;
+            no.focus();
+        });
+    }
+
     // Closing with typed text asks first, so a stray click or Escape does not lose the examination.
-    function requestClose() {
+    async function requestClose() {
         if (!current) return;
-        if (hasInput() && !window.confirm('Discard this examination? What you typed will be lost.')) return;
+        if (!$('confirm-modal').hidden) return;
+        if (hasInput() && !(await askDiscard())) return;
         closeExam();
     }
 

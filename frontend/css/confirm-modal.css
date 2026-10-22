@@ -1,0 +1,7 @@
+/* In-page confirmation modal (sits above the exam modal). */
+.confirm-modal { z-index: 140; }
+.confirm-modal .modal-card { width: min(440px, 100%); }
+.confirm-modal .confirm-text { margin: 0; padding: 18px 24px 4px; color: var(--m); }
+.confirm-modal .form-actions { padding: 16px 24px 22px; display: flex; gap: 10px; flex-wrap: wrap; }
+.btn.danger { background: #b42318; border-color: #b42318; color: #fff; }
+.btn.danger:hover { background: #912018; border-color: #912018; }

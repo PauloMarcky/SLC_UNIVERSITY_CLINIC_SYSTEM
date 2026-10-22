@@ -13,7 +13,7 @@ const pages = ['index.html', 'doctor/dashboard.html', 'doctor/visits.html',
     'doctor/screening.html', 'doctor/checkup.html', 'doctor/consultation.html',
     'doctor/consultation-form.html', 'doctor/statistics.html',
     'doctor/statistics-checkup.html', 'doctor/statistics-consultation.html', 'doctor/users.html', 'nurse/dashboard.html',
-    'nurse/medical-records.html', 'nurse/record-detail.html', 'nurse/inventory.html',
+    'nurse/medical-records.html', 'nurse/record-detail.html',
     'shared/certificates.html',
 const pages = ['index.html', 'doctor/queue.html', 'doctor/checkup.html', 'doctor/consultation.html',
     'doctor/screening.html', 'doctor/statistics.html', 'doctor/statistics-checkup.html',
@@ -37,7 +37,7 @@ async function mockApi(route) {
     else if (url.pathname === '/api/patients') body = { patients: [patient] };
     else if (url.pathname === '/api/users') body = { users: [] };
     else if (url.pathname === '/api/school-years') body = { schoolYears: [{ id: 1, label: '2026-2027', startDate: '2026-08-03', endDate: '2027-06-04', coversUntil: null, status: 'current', isCurrent: true, visitCount: 0 }], currentId: 1 };
-    else if (url.pathname === '/api/medicines') body = { medicines: [] };
+
     else if (url.pathname === '/api/prescriptions') body = { prescriptions: [] };
     else if (url.pathname === '/api/visits') {
         lastVisitQuery = url.search;
