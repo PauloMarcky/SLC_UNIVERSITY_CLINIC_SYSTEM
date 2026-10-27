@@ -2,6 +2,7 @@ import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClinicServer } from '../app.js';
 import { resetDatabase, closePool } from '../db/pool.js';
+import { clinicToday } from '../utils/clinic-date.js';
 
 after(async () => {
   await closePool();
@@ -41,7 +42,7 @@ async function fixture(t) {
   return { request, login };
 }
 
-const TODAY = new Date().toISOString().slice(0, 10);
+const TODAY = clinicToday();
 const TRIAGE = {
   patientId: '2026-00123', visitDate: TODAY, complaint: 'Headache and dizziness',
   bp: '118/76', weight: 60, height: 165

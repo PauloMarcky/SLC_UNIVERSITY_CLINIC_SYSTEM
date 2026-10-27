@@ -2,6 +2,7 @@ import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClinicServer } from '../app.js';
 import { resetDatabase, closePool } from '../db/pool.js';
+import { clinicToday as localToday } from '../utils/clinic-date.js';   // the clinic's "today", as the server uses it
 
 after(async () => {
   await closePool();
@@ -41,11 +42,6 @@ async function fixture(t) {
   return { request, login };
 }
 
-const localToday = () => {
-  const d = new Date();
-  const two = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
-};
 const BASE = { patientId: '2026-00123', visitDate: localToday() };
 const CONSULT = { ...BASE, visitType: 'Consultation', complaint: 'Cough', bp: '118/76', weight: 60, height: 165 };
 
@@ -67,7 +63,8 @@ test('vitals are required for a Consultation and optional for a Checkup', async 
   assert.equal(weightOnly.data.visit.bmi, null);
   const all = await post({ ...BASE, visitType: 'Checkup', weight: 60, height: 165, bp: '118/76' });
   assert.equal(all.data.visit.bmi, 22);
-  assert.equal(all.data.visit.bpStatus, 'Normal');
+  assert.equal(all.data.visit.bp, '118/76');
+  assert.equal(all.data.visit.bpStatus, '');   // the system never works out the BP status; the doctor does
 
   // A typed value must still be realistic, even for a Checkup.
   assert.equal((await post({ ...BASE, visitType: 'Checkup', bp: 'abc' })).status, 400);

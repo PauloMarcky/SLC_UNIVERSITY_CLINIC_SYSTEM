@@ -42,3 +42,4 @@ Schema changes are applied through `npm run migrate` (run from `backend/`).
 
 - `014_student_enrollments.sql` — one student list per school year (`student_enrollments`). Existing students are enrolled in the school years their visits fall in.
 - `015_student_requirements.sql` — laboratory requirements (CBC, CXR-PA, Urinalysis, Fecalysis, Hepa-B Screening, Hepa-B Titer, Blood Type, Pregnancy Test, Drug Test). One row per student; kept when a new school year starts.
+- `016_requeue_and_missed.sql` — adds the `missed` visit status and the re-queue fields (`original_visit_date`, `requeued_by`, `requeued_by_name`, `requeued_at`, `missed_at`). A triaged visit not examined within 2 calendar days (`MISSED_AFTER_DAYS`) is saved on the student record as missed.

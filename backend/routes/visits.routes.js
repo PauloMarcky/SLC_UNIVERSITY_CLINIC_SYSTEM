@@ -9,6 +9,7 @@ export const visitsRoutes = Router()
   .post('/visits/:id/complete', visits.complete)
   .post('/visits/:id/screen', visits.screen)
   .post('/visits/:id/cancel', visits.cancel)
+  .post('/visits/:id/requeue', visits.requeue)
   .put('/visits/:id', visits.update)
   .get('/visits', visits.list)
   .post('/visits', visits.create);

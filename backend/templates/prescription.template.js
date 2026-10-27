@@ -1,6 +1,14 @@
 const esc = value => String(value ?? '').replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+// "2026-10-27" -> "October 27, 2026"
+const longDate = value => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value ?? ''));
+  if (!m) return String(value ?? '');
+  const names = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  return `${names[Number(m[2]) - 1]} ${Number(m[3])}, ${m[1]}`;
+};
+
 /** Printable prescription slip (open /prescriptions/:id/print, then Ctrl+P). */
 export function renderPrescription(rx, config) {
   const rows = rx.items.map((i, n) => `
@@ -28,7 +36,7 @@ export function renderPrescription(rx, config) {
 <header><h1>${esc(config.universityName)}</h1><h2>${esc(config.clinicName)} &mdash; Prescription</h2></header>
 <div class="meta">
   <div><b>Patient:</b> ${esc(rx.patientName)} (${esc(rx.patientId)})<br><b>College:</b> ${esc(rx.college) || '&mdash;'}</div>
-  <div><b>Rx no.:</b> RX-${rx.id}<br><b>Date:</b> ${esc(String(rx.visitDate).slice(0, 10))}</div>
+  <div><b>Rx no.:</b> RX-${rx.id}<br><b>Date:</b> ${esc(longDate(rx.visitDate))}</div>
 </div>
 <table><thead><tr><th>#</th><th>Medicine</th><th>Dose / frequency</th><th>Qty</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="sign">${esc(rx.prescribedBy)}<br><small>Prescribing doctor</small></div>

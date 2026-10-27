@@ -3,6 +3,7 @@ import { HttpError } from '../utils/http-error.js';
 import { text, optionalDate, flag } from '../utils/validators.js';
 import { STAFF, requireAnyRole, checkRole } from '../utils/authz.js';
 import { schoolYearFilter, resolveSchoolYear, schoolYearIdFor, localDate } from './school-years.service.js';
+import { closeExpiredVisits } from './missed.service.js';
 
 export async function patient(id, connection = pool) {
   const [rows] = await connection.execute(
@@ -410,9 +411,10 @@ export async function getPatientRecord(id, actor, { schoolYear = '' } = {}) {
 
   if (!record) throw new HttpError(404, 'Patient record not found.');
 
+  await closeExpiredVisits();   // visits that waited too long are saved as missed before the record is shown
   const year = await schoolYearFilter(schoolYear);
   const [visits] = await pool.execute(
-    `SELECT v.id, v.visit_type, v.visit_date, v.complaint,
+    `SELECT v.id, v.visit_type, v.visit_date, v.complaint, v.status, v.original_visit_date, v.missed_at,
             v.systolic, v.diastolic, v.weight_kg, v.height_cm,
             v.bmi, v.bmi_status, v.bp_status, v.diagnosis,
             v.notes, v.confidential, v.created_by_name, v.created_at,
@@ -431,6 +433,9 @@ export async function getPatientRecord(id, actor, { schoolYear = '' } = {}) {
       id: row.id,
       visitType: row.visit_type,
       visitDate: row.visit_date,
+      status: row.status,   // 'missed' = the patient was triaged but did not see the doctor in time
+      originalVisitDate: row.original_visit_date || null,
+      missedAt: row.missed_at || null,
       complaint: Number(row.confidential) === 1 ? 'Confidential' : row.complaint,
       bp: row.systolic == null || row.diastolic == null ? '' : `${row.systolic}/${row.diastolic}`,
       bpStatus: row.bp_status || '',

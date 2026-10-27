@@ -1,7 +1,7 @@
 import { readJson } from '../utils/http.js';
 import { routeId } from '../utils/validators.js';
 import {
-  listVisits, createVisit, triageVisit, updateTriage, cancelVisit, queueVisits, screenedVisits, completeVisit, screenVisit
+  listVisits, createVisit, triageVisit, updateTriage, cancelVisit, queueSections, requeueVisit, screenedVisits, completeVisit, screenVisit
 } from '../services/visits.service.js';
 
 export async function list(req, res) {
@@ -24,7 +24,13 @@ export async function triage(req, res) {
 }
 
 export async function queue(req, res) {
-  res.status(200).json({ visits: await queueVisits(req.session.user) });
+  const { visits, didNotProceed, windowDays } = await queueSections(req.session.user);
+  res.status(200).json({ visits, didNotProceed, windowDays });
+}
+
+export async function requeue(req, res) {
+  const id = routeId(req.params.id);
+  res.status(200).json({ visit: await requeueVisit(id, req.session.user) });
 }
 
 export async function screened(req, res) {

@@ -2,6 +2,7 @@ import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createClinicServer } from '../app.js';
 import { resetDatabase, closePool } from '../db/pool.js';
+import { clinicToday as localToday } from '../utils/clinic-date.js';   // the clinic's "today", as the server uses it
 
 after(async () => {
   await closePool();
@@ -41,11 +42,6 @@ async function fixture(t) {
   return { request, login };
 }
 
-const localToday = () => {
-  const d = new Date();
-  const two = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())}`;
-};
 
 test('statistics summary accurately counts consultations and checkups, excluding screening copies', async t => {
   const f = await fixture(t);

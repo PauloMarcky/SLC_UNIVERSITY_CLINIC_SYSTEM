@@ -108,7 +108,7 @@ async function countVisits(startDate, coversUntil) {
   if (coversUntil) { upper = ' AND visit_date <= ?'; params.push(coversUntil); }
   const [rows] = await pool.execute(
     `SELECT COUNT(*) AS n FROM visits
-      WHERE status <> 'cancelled' AND screened_copy_of IS NULL AND visit_date >= ?${upper}`,
+      WHERE status NOT IN ('cancelled', 'missed') AND screened_copy_of IS NULL AND visit_date >= ?${upper}`,
     params
   );
   return Number(rows[0].n);

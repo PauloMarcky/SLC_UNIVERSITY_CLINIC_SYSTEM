@@ -5,6 +5,8 @@ import { STAFF, requireAnyRole } from '../utils/authz.js';
 import { patient, assertPatient, enrollForVisit } from './patients.service.js';
 import { parseItems, createPrescriptionInTx, getPrescription } from './prescriptions.service.js';
 import { schoolYearFilter } from './school-years.service.js';
+import { closeExpiredVisits } from './missed.service.js';
+import { clinicToday, calendarDaysBetween, MISSED_AFTER_DAYS } from '../utils/clinic-date.js';
 
 export const VISIT_TYPES = ['Consultation', 'Checkup'];
 
@@ -47,7 +49,7 @@ export function parseVitals(body, required) {
     const { systolic, diastolic } = parseBp(body.bp);
     vitals.systolic = systolic;
     vitals.diastolic = diastolic;
-    vitals.bpStatus = bpStatusOf(systolic, diastolic);
+    // The BP status (Normal, Elevated, ...) is NOT worked out here. The doctor identifies it at the examination.
   }
   if (required || !isBlank(body.weight)) vitals.weight = number(body.weight, 'Weight', 1, 500);
   if (required || !isBlank(body.height)) vitals.height = number(body.height, 'Height', 30, 300);
@@ -57,13 +59,6 @@ export function parseVitals(body, required) {
     vitals.bmiStatus = status;
   }
   return vitals;
-}
-
-export function bpStatusOf(systolic, diastolic) {
-  if (systolic >= 140 || diastolic >= 90) return 'Hypertension Stage 2';
-  if (systolic >= 130 || diastolic >= 80) return 'Hypertension Stage 1';
-  if (systolic >= 120) return 'Elevated';
-  return 'Normal';
 }
 
 // Confidential visits are hidden from everyone except doctors.
@@ -113,12 +108,16 @@ export function rowToVisit(row, role) {
     labSourceLocation: hidden ? '' : row.lab_source_location || '',
     checkupResult: row.checkup_result || null,
     isScreeningCopy: row.screened_copy_of != null,
+    originalVisitDate: row.original_visit_date || null,   // set when the visit was re-queued: the day the vitals were taken
+    requeuedByName: row.requeued_by_name || null,
+    requeuedAt: row.requeued_at || null,
+    missedAt: row.missed_at || null,
     createdAt: row.created_at
   };
 }
 
 export const SELECT_VISIT = `SELECT v.*, p.name AS patient_name, p.college, p.course, p.year, p.gender, p.date_of_birth,
-                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.status <> 'cancelled' AND vc.id <= v.id) AS visit_number
+                             (SELECT COUNT(*) FROM visits vc WHERE vc.patient_id = v.patient_id AND vc.screened_copy_of IS NULL AND vc.status NOT IN ('cancelled','missed') AND vc.id <= v.id) AS visit_number
                       FROM visits v JOIN patients p ON p.id = v.patient_id`;
 
 export async function listVisits({ search = '', type = '', college = '', copies = '', schoolYear = '' }, actor) {
@@ -168,6 +167,7 @@ export async function createVisit(body, actor) {
   const weight = number(body.weight, 'Weight', 1, 500);
   const height = number(body.height, 'Height', 30, 300);
   const { bmi, status } = bmiOf(weight, height);
+  const bpStatus = text(body.bpStatus, 'BP status', 30);   // typed by the doctor, never worked out by the system
   const visitDate = validDate(body.visitDate);
   const complaint = text(body.complaint, 'Complaint', 500, true);
   const notes = text(body.notes, 'Notes', 5000);
@@ -206,7 +206,7 @@ export async function createVisit(body, actor) {
        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         patientId, visitType, visitDate, complaint, systolic, diastolic, weight, height,
-        bmi, status, bpStatusOf(systolic, diastolic), diagnosis, notes, confidential,
+        bmi, status, bpStatus, diagnosis, notes, confidential,
         actor.id, actor.name, new Date().toISOString(),
         actor.id, actor.name, new Date().toISOString()
       ]
@@ -300,7 +300,7 @@ async function recordTriage(body, actor) {
      VALUES(?,?,?,?,?,?,?,?,?,?,?,'','',0,?,?,?,'triaged',?,?,?,?,?,?,?,?,?,?)`,
     [
       patientId, t.visitType, t.visitDate, t.complaint, v.systolic, v.diastolic, v.weight, v.height,
-      v.bmi, v.bmiStatus, v.bpStatus,
+      v.bmi, v.bmiStatus, null,   // BP status is left empty for the doctor
       actor.id, actor.name, new Date().toISOString(),
       actor.id, actor.name, t.pulse, t.initialDiagnosis, t.labSourceName ? 1 : t.externalLabsAttached, t.temperature,
       t.nurseNotes, t.labSourceName, t.labReceivedAt, t.urgent
@@ -323,13 +323,13 @@ export async function updateTriage(id, body, actor) {
     const labDate = isBlank(body.labReceivedAt) && sameLab && found[0].lab_received_at ? found[0].lab_received_at : t.labReceivedAt;
     await connection.execute(
       `UPDATE visits SET visit_type = ?, visit_date = ?, complaint = ?, systolic = ?, diastolic = ?,
-         weight_kg = ?, height_cm = ?, bmi = ?, bmi_status = ?, bp_status = ?, pulse_rate = ?,
+         weight_kg = ?, height_cm = ?, bmi = ?, bmi_status = ?, pulse_rate = ?,
          initial_diagnosis = ?, external_labs_attached = ?, body_temperature = ?, nurse_notes = ?,
          lab_source_name = ?, lab_source_location = ?, lab_received_at = ?, urgent = ?
        WHERE id = ?`,
       [
         t.visitType, t.visitDate, t.complaint, v.systolic, v.diastolic, v.weight, v.height,
-        v.bmi, v.bmiStatus, v.bpStatus, t.pulse, t.initialDiagnosis,
+        v.bmi, v.bmiStatus, t.pulse, t.initialDiagnosis,
         t.labSourceName ? 1 : t.externalLabsAttached, t.temperature, t.nurseNotes,
         t.labSourceName, t.labSourceLocation, labDate, t.urgent, id
       ]
@@ -385,7 +385,7 @@ async function oldTriageVisit(body, actor) {
      VALUES(?,?,?,?,?,?,?,?,?,?,?,'','',0,?,?,?,'triaged',?,?,?,?,?,?,?,?,?,?)`,
     [
       patientId, visitType, visitDate, complaint, systolic, diastolic, weight, height,
-      bmi, status, bpStatusOf(systolic, diastolic),
+      bmi, status, null,
       actor.id, actor.name, new Date().toISOString(),
       actor.id, actor.name, pulse, initialDiagnosis, labSourceName ? 1 : flag(body.externalLabsAttached), temperature,
       nurseNotes, labSourceName, labReceivedAt, urgent
@@ -395,12 +395,82 @@ async function oldTriageVisit(body, actor) {
 }
 
 // ---------- doctor queue ----------
-export async function queueVisits(actor) {
+/**
+ * The doctor's queue, in two lists:
+ *  - visits: triaged today, waiting for the examination.
+ *  - didNotProceed: triaged on an earlier day, still inside the window. These can be re-queued.
+ * A triaged visit that is MISSED_AFTER_DAYS calendar days old or more is first saved as "missed"
+ * (see missed.service.js) and so appears in neither list.
+ */
+export async function queueSections(actor) {
   requireAnyRole(actor, ['doctor'], 'Only a doctor can view the exam queue.');
+  await closeExpiredVisits();
+  const today = clinicToday();
   const [rows] = await pool.execute(
-    `${SELECT_VISIT} WHERE v.status = 'triaged' ORDER BY v.urgent DESC, v.visit_date ASC, v.id ASC LIMIT 200`
+    `${SELECT_VISIT} WHERE v.status = 'triaged' ORDER BY v.urgent DESC, v.visit_date ASC, v.id ASC LIMIT 400`
   );
-  return rows.map(row => rowToVisit(row, actor.role));
+  const visits = [];
+  const didNotProceed = [];
+  for (const row of rows) {
+    const visit = rowToVisit(row, actor.role);
+    // Only the most recent earlier visit of a patient can be re-queued; older ones will simply expire.
+    // daysAgo: days since the vitals were taken. It decides when the visit is saved as missed.
+    visit.daysAgo = calendarDaysBetween(visit.originalVisitDate || visit.visitDate, today);
+    visit.daysLeft = Math.max(0, MISSED_AFTER_DAYS - visit.daysAgo);
+    (calendarDaysBetween(visit.visitDate, today) >= 1 ? didNotProceed : visits).push(visit);
+  }
+  const newest = new Map();
+  for (const v of didNotProceed) newest.set(v.patientId, Math.max(newest.get(v.patientId) || 0, v.id));
+  for (const v of didNotProceed) v.canRequeue = newest.get(v.patientId) === v.id && !visits.some(t => t.patientId === v.patientId);
+  return { visits, didNotProceed, windowDays: MISSED_AFTER_DAYS };
+}
+
+export async function queueVisits(actor) {
+  return (await queueSections(actor)).visits;
+}
+
+/**
+ * Puts a "did not proceed" visit back in today's queue. The vitals are kept and visit_date becomes today;
+ * the day the vitals were taken stays in original_visit_date, with who re-queued it and when.
+ * Only possible inside the window; a patient who comes back later has already been saved as missed.
+ */
+export async function requeueVisit(id, actor) {
+  requireAnyRole(actor, ['doctor', 'nurse'], 'Only the nurse or the doctor can re-queue a visit.');
+  await withTransaction(async connection => {
+    const [found] = await connection.execute(
+      'SELECT id, patient_id, status, visit_date, original_visit_date FROM visits WHERE id = ? FOR UPDATE', [id]
+    );
+    const visit = found[0];
+    if (!visit) throw new HttpError(404, 'Visit not found.');
+    if (visit.status === 'missed') {
+      throw new HttpError(409, `This visit is ${MISSED_AFTER_DAYS} days old or more, so it was saved as missed. Record a new visit instead.`);
+    }
+    if (visit.status !== 'triaged') throw new HttpError(409, 'Only a visit that is waiting for the doctor can be re-queued.');
+    const today = clinicToday();
+    const age = calendarDaysBetween(visit.original_visit_date || visit.visit_date, today);   // days since the vitals were taken
+    if (age >= MISSED_AFTER_DAYS) {
+      await closeExpiredVisits(connection);
+      throw new HttpError(409, `This visit is ${MISSED_AFTER_DAYS} days old or more, so it was saved as missed. Record a new visit instead.`);
+    }
+    if (calendarDaysBetween(visit.visit_date, today) < 1) throw new HttpError(409, 'This visit is already in today\'s queue.');
+    // One active visit per patient per day, and only the newest earlier visit is re-queued.
+    const [others] = await connection.execute(
+      "SELECT id, visit_date FROM visits WHERE patient_id = ? AND status = 'triaged' AND id <> ? AND (visit_date >= ? OR id > ?) LIMIT 1",
+      [visit.patient_id, id, today, id]
+    );
+    if (others[0]) {
+      throw new HttpError(409, others[0].visit_date >= today
+        ? 'This patient already has a visit in today\'s queue.'
+        : 'This patient has a more recent visit that did not proceed. Re-queue that one instead.');
+    }
+    await connection.execute(
+      `UPDATE visits SET visit_date = ?, original_visit_date = COALESCE(original_visit_date, visit_date),
+         requeued_by = ?, requeued_by_name = ?, requeued_at = ?
+       WHERE id = ?`,
+      [today, actor.id, actor.name, new Date().toISOString(), id]
+    );
+  });
+  return fetchVisit(id, actor);
 }
 
 export async function completeVisit(id, body, actor) {
@@ -410,6 +480,8 @@ export async function completeVisit(id, body, actor) {
   const soapObjective = text(body.soapObjective, 'Pertinent P.E. and laboratory findings', 5000);
   const actionsTaken = text(body.actionsTaken, 'Action taken', 5000);
   const confidential = flag(body.confidential) ? 1 : 0;
+  // The doctor identifies the blood pressure status. Left as it was when the field is not sent.
+  const bpStatus = body.bpStatus === undefined ? null : text(body.bpStatus, 'BP status', 30);
   const rxItems = parseItems(body.prescription);   // validated before anything is saved
   const screenedNote = text(body.screenedNote, 'Screening note', 300);
   const wantsScreening = body.putToScreening === true;
@@ -430,11 +502,11 @@ export async function completeVisit(id, body, actor) {
     await connection.execute(
       `UPDATE visits SET diagnosis = ?, confidential = ?, status = 'completed', checkup_result = ?,
          doctor_id = ?, doctor_name = ?, completed_at = ?,
-         soap_objective = ?, actions_taken = ?, sent_to_hospital = ?
+         soap_objective = ?, actions_taken = ?, sent_to_hospital = ?, bp_status = COALESCE(?, bp_status)
        WHERE id = ?`,
       [
         diagnosis, confidential, visit.visit_type === 'Checkup' ? checkupResult : null, actor.id, actor.name, now,
-        soapObjective, actionsTaken, flag(body.sentToHospital),
+        soapObjective, actionsTaken, flag(body.sentToHospital), bpStatus,
         id
       ]
     );
