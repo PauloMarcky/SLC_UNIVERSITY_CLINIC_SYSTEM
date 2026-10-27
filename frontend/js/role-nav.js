@@ -14,7 +14,7 @@
         doctor: {
             title: 'Doctor',
             links: [
-                ['Exam Queue', '../doctor/queue.html'],
+                ['Queue', '../doctor/queue.html'],
                 ['Student Records', '../nurse/medical-records.html'],
                 ['Statistics', '../doctor/statistics.html'],
                 ['User Management', '../doctor/users.html'],

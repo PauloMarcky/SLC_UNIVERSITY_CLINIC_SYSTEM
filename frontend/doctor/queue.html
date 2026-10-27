@@ -40,15 +40,7 @@
                 </details>
                 <a class="on" href="queue.html">Queue</a>
                 <a href="../nurse/medical-records.html">Student Records</a>
-                <details class="nav-group">
-                    <summary><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M4 3v17h17M8 16v-4M13 16V8M18 16V5" />
-                        </svg><span>Statistics</span><svg class="nav-chevron" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="m8 10 4 4 4-4" />
-                        </svg></summary>
-                    <div class="nav-children"><a href="statistics-checkup.html">Statistics for Check up</a><a
-                            href="statistics-consultation.html">Statistics for Consultation</a></div>
-                </details>
+                <a href="statistics.html">Statistics</a>
                 <a href="users.html">User Management</a>
                 <a href="school-years.html">School Years</a>
             </nav>
@@ -85,6 +77,28 @@
                     </tbody>
                 </table>
             </section>
+            <section class="box" id="late-box">
+                <h3>Did not proceed <span class="pill yellow" id="late-count">0</span></h3>
+                <p class="sub" id="late-sub">Triaged on an earlier day and not examined. Re-queue puts the patient back in today's queue with the same vitals.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Vitals taken</th>
+                            <th>Patient</th>
+                            <th>Type</th>
+                            <th>Complaint</th>
+                            <th>BP</th>
+                            <th>Closes as missed</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="late-rows">
+                        <tr>
+                            <td colspan="7">Loading…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
         </main>
     </div>
@@ -101,6 +115,13 @@
                 <section class="form-section">
                     <div class="form">
                         <div class="f full"><label for="purpose">Purpose of visit</label><input id="purpose" readonly>
+                        </div>
+                        <div class="f full"><label for="bps">Blood pressure status</label><input id="bps"
+                                maxlength="30" list="bps-list" autocomplete="off"
+                                placeholder="Identified by the doctor, e.g. Normal">
+                            <datalist id="bps-list"><option value="Normal"></option><option value="Elevated"></option>
+                                <option value="Hypertension Stage 1"></option><option value="Hypertension Stage 2"></option>
+                            </datalist>
                         </div>
                         <div class="f full"><label for="o">Pertinent P.E. &amp; laboratory findings</label><textarea
                                 id="o" rows="4" maxlength="5000"></textarea></div>

@@ -7,7 +7,7 @@
    The prescriptions box is filled by record-prescriptions.js from the same ?id= in the address. */
 (function () {
     'use strict';
-    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const $ = function (id) { return document.getElementById(id); };
     const api = window.ClinicAPI;
     const view = $('record-view');
@@ -22,7 +22,7 @@
         });
     }
 
-    // "2026-10-12" -> "Oct 12, 2026" (no Date object, so no timezone shift)
+    // "2026-10-12" -> "October 12, 2026" (no Date object, so no timezone shift)
     function formatDate(iso) {
         const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
         return m ? MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1] : '';
@@ -123,14 +123,17 @@
                 '<td>' + (has(v.heightCm) ? escapeHtml(v.heightCm) + ' cm' : dash('')) + '</td>' +
                 '<td>' + (has(v.weightKg) ? escapeHtml(v.weightKg) + ' kg' : dash('')) + '</td>' +
                 '<td>' + (has(v.bmi) ? escapeHtml(v.bmi) : dash('')) + '</td>' +
-                '<td>' + dash(bp) + '</td></tr>';
-        }).join('') : emptyRow(5, scoped ? 'No vital signs recorded in this school year.' : 'No vital signs recorded yet.');
+                '<td>' + dash(bp) + '</td>' +
+                '<td>' + dash(v.bpStatus) + '</td></tr>';   // identified by the doctor, never filled in automatically
+        }).join('') : emptyRow(6, scoped ? 'No vital signs recorded in this school year.' : 'No vital signs recorded yet.');
 
         $('r-findings').innerHTML = visits.length ? visits.map(function (v) {
+            // A visit saved as missed: the patient was triaged but did not see the doctor in time.
+            const missed = v.status === 'missed';
             return '<tr><td>' + escapeHtml(formatDate(v.visitDate)) + '</td>' +
                 '<td>' + dash(v.visitType) + '</td>' +
                 '<td>' + dash(v.complaint) + '</td>' +
-                '<td>' + dash(v.diagnosis) + '</td>' +
+                '<td>' + (missed ? '<span class="pill neutral">Missed</span> Did not see the doctor' : dash(v.diagnosis)) + '</td>' +
                 '<td>' + dash(v.actionsTaken) + '</td>' +
                 '<td>' + dash(v.doctorName || v.createdByName) + '</td></tr>';
         }).join('') : emptyRow(6, scoped ? 'No completed visits in this school year.' : 'No completed visits yet.');

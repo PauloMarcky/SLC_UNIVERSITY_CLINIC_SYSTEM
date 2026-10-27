@@ -10,10 +10,10 @@
 (function () {
     'use strict';
     const KEY = 'clinic-school-year';
-    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     let loading = null;
 
-    // "2026-08-03" -> "Aug 3, 2026" (no Date object, so no timezone shift)
+    // "2026-08-03" -> "August 3, 2026" (no Date object, so no timezone shift)
     function formatDate(iso) {
         const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
         return m ? MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1] : '';

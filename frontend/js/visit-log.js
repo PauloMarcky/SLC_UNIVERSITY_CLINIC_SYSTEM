@@ -6,12 +6,13 @@
     if (!api || !body) return;
     const kind = body.dataset.log;
     const dash = '\u2014';
+    const fmt = value => (window.ClinicDate ? window.ClinicDate.format(value) : value) || dash;   // "October 27, 2026"
 
     const LOGS = {
         consultation: {
             url: '/api/visits',
             keep: v => v.visitType === 'Consultation',
-            cols: v => [v.visitDate, v.patientName, [v.course, window.SLCDepartments ? window.SLCDepartments.short(v.college) : v.college].filter(Boolean).join(' / ') || dash,
+            cols: v => [fmt(v.visitDate), v.patientName, [v.course, window.SLCDepartments ? window.SLCDepartments.short(v.college) : v.college].filter(Boolean).join(' / ') || dash,
                 v.complaint, v.diagnosis, v.actionsTaken || dash],
             empty: 'No consultations yet.',
             emptyYear: 'No consultations in this school year yet.'
@@ -19,7 +20,7 @@
         checkup: {
             url: '/api/visits',
             keep: v => v.visitType === 'Checkup' && !v.screenedCopyOf,
-            cols: v => [v.visitDate, v.patientName, v.heightCm + ' cm', v.weightKg + ' kg',
+            cols: v => [fmt(v.visitDate), v.patientName, v.heightCm + ' cm', v.weightKg + ' kg',
                 v.bmi, v.age == null ? dash : v.age, v.course || dash, v.diagnosis],
             empty: 'No checkups yet.',
             emptyYear: 'No checkups in this school year yet.'
@@ -27,14 +28,14 @@
         screening: {
             url: '/api/visits/screened',
             keep: () => true,
-            cols: v => [(v.screenedAt || v.visitDate || '').slice(0, 10), v.patientName, v.course || dash,
+            cols: v => [fmt(v.screenedAt || v.visitDate), v.patientName, v.course || dash,
                 v.bmi, v.bp, dash, v.soapObjective || v.screenedNote || dash,
                 v.actionsTaken || v.screenedNote || dash],
             empty: 'No screened records yet.',
             emptyYear: 'No screened records in this school year yet.'
         }
     };
-    const sheet = v => [v.visitDate, v.patientName, v.sex || dash, v.age == null ? dash : v.age,
+    const sheet = v => [fmt(v.visitDate), v.patientName, v.sex || dash, v.age == null ? dash : v.age,
         [v.course, v.yearLevel].filter(Boolean).join('-') || dash,
         (v.heightCm / 100).toFixed(2), v.weightKg, v.bmi, v.bp,
         v.bodyTemperature == null ? dash : v.bodyTemperature, v.visitNumber || 1,

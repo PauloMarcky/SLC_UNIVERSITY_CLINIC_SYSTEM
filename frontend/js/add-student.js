@@ -60,6 +60,21 @@
     }
 
     if (window.SLCDepartments) window.SLCDepartments.fillSelect($('dept'), { short: true });
+    // The department follows the course until the nurse picks one by hand.
+    let deptByHand = false;
+    $('dept').addEventListener('change', function () { deptByHand = true; });
+    $('course').addEventListener('input', function () {
+        if (deptByHand || !window.SLCDepartments) return;
+        const d = window.SLCDepartments.forCourse($('course').value);
+        if (!d) { $('dept').value = ''; return; }
+        if (!Array.prototype.some.call($('dept').options, function (o) { return o.value === d; })) {
+            const option = document.createElement('option');
+            option.value = d;
+            option.textContent = window.SLCDepartments.short(d);
+            $('dept').appendChild(option);
+        }
+        $('dept').value = d;
+    });
 
     $('dob').max = TODAY;
     $('dob').addEventListener('input', function () {

@@ -36,5 +36,13 @@
             else window.alert(error.message);
         }
     });
+    // Dates are shown the way the doctor reads them: "October 27, 2026" (never 10/27/26).
+    // Accepts "2026-10-27" or a full ISO timestamp. Plain dates are not run through Date, so there is no timezone shift.
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    function formatDate(value) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value || ''));
+        return m ? MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1] : '';
+    }
+    window.ClinicDate = { format: formatDate };
     window.ClinicAPI = { request, getSession };
 })();

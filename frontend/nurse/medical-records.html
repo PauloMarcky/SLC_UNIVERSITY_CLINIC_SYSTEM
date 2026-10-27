@@ -89,13 +89,13 @@
                         <input id="imp-file" type="file" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
                     </div>
                     <div class="f">
-                        <label for="imp-dept">Department for every student in this file (optional)</label>
-                        <input id="imp-dept" maxlength="100" list="imp-dept-list" placeholder="e.g. College of Arts and Sciences" autocomplete="off">
+                        <label for="imp-dept">Department for courses the system does not recognise (optional)</label>
+                        <input id="imp-dept" maxlength="100" list="imp-dept-list" placeholder="Usually left empty: the department is set from each student's course" autocomplete="off">
                         <datalist id="imp-dept-list"></datalist>
                     </div>
                     <div class="f">
                         <span class="label-text">Columns the file needs</span>
-                        <p class="imp-hint"><strong>Code</strong>, <strong>Last Name</strong> and <strong>First Name</strong> are required. <strong>Middle Name</strong>, <strong>Sex</strong> (M or F), <strong>Course</strong> and <strong>Year</strong> are optional. The columns can be in any order.</p>
+                        <p class="imp-hint"><strong>Code</strong>, <strong>Last Name</strong> and <strong>First Name</strong> are required. <strong>Middle Name</strong>, <strong>Sex</strong> (M or F), <strong>Course</strong> and <strong>Year</strong> are optional. The department is filled in automatically from the course. The columns can be in any order.</p>
                     </div>
                 </div>
                 <div class="imp-reading" id="imp-reading" role="status" aria-live="polite" hidden>

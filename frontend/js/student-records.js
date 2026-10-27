@@ -12,7 +12,7 @@
     const api = window.ClinicAPI;
     if (!body || !api) return;
 
-    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const PAGE = 10;            // students fetched and drawn at a time
     let loaded = 0;             // students drawn so far
     let total = 0;              // students matching the current filters (whole database)
@@ -33,7 +33,7 @@
         });
     }
 
-    // "2026-10-12" -> "Oct 12, 2026" (no Date object, so no timezone shift)
+    // "2026-10-12" -> "October 12, 2026" (no Date object, so no timezone shift)
     function formatDate(iso) {
         const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
         return m ? MONTHS[Number(m[2]) - 1] + ' ' + Number(m[3]) + ', ' + m[1] : '';

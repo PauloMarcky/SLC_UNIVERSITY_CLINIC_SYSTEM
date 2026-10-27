@@ -44,9 +44,44 @@
         c[1].forEach(function (p) { SHORT_BY_VALUE[c[0] + ' - ' + p] = shortLabel(c[0], p); });
     });
 
+    // ---- Course -> department, so the department fills itself from the course ----
+    const norm = function (text) { return String(text || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+    // Other ways a course is commonly written. The value is the start of the program name(s) it stands for.
+    const ALIASES = { BSCRIM: 'Bachelor of Science in Criminology', BEED: 'Bachelor of Elementary Education', BSED: 'Bachelor of Secondary Education (' };
+    const INDEX = [];   // one entry per program: its saved department value, its college and the spellings that identify it
+    LIST.forEach(function (c) {
+        c[1].forEach(function (p) {
+            const keys = [norm(p), norm(abbr(p))];
+            Object.keys(ALIASES).forEach(function (a) { if (p.indexOf(ALIASES[a]) === 0) keys.push(a); });
+            INDEX.push({ value: c[0] + ' - ' + p, college: c[0], keys: keys });
+        });
+    });
+    // One program -> "College - Program". Several programs of one college (e.g. "BSBA", "BSED") -> the college.
+    // Programs of different colleges, or no match at all -> '' (the department is then left for the nurse).
+    const settle = function (found) {
+        if (!found.length) return '';
+        if (found.every(function (e) { return e.value === found[0].value; })) return found[0].value;
+        return found.every(function (e) { return e.college === found[0].college; }) ? found[0].college : '';
+    };
+    const forCourse = function (course) {
+        const key = norm(course);
+        if (key.length < 2) return '';
+        const exact = INDEX.filter(function (e) { return e.keys.indexOf(key) !== -1; });
+        if (exact.length) return settle(exact);
+        if (key.length < 3) return '';
+        // "BS Information Technology" is short for "Bachelor of Science in Information Technology".
+        const long = key.indexOf('BS') === 0 ? 'BACHELOROFSCIENCEIN' + key.slice(2) : key;
+        return settle(INDEX.filter(function (e) {
+            return e.keys.some(function (k) { return k.indexOf(key) === 0; }) ||
+                (key.length >= 6 && (e.keys[0].indexOf(key) !== -1 || e.keys[0].indexOf(long) !== -1));
+        }));
+    };
+
     window.SLCDepartments = {
         list: LIST,
         options: OPTIONS,
+        // Department for a course typed or imported as "BSIT", "BS Information Technology", ... ('' when unknown).
+        forCourse: forCourse,
         // Short label for a saved department. Anything not in the list (old or custom values) is returned unchanged.
         short: function (value) {
             return Object.prototype.hasOwnProperty.call(SHORT_BY_VALUE, value) ? SHORT_BY_VALUE[value] : value;

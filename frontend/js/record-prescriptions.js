@@ -13,7 +13,7 @@
     host.replaceChildren(h('h3', {}, 'Prescriptions'), ...(prescriptions.length ? prescriptions.map(rx => {
       const [colour, label] = STATUS[rx.status] || ['', rx.status];
       return h('article', { class: 'rx-card' },
-        h('header', {}, h('b', {}, `RX-${rx.id} · ${String(rx.visitDate).slice(0, 10)}`),
+        h('header', {}, h('b', {}, `RX-${rx.id} · ${(window.ClinicDate && window.ClinicDate.format(rx.visitDate)) || String(rx.visitDate).slice(0, 10)}`),
           h('span', { class: `pill ${colour}` }, label)),
         h('ul', {}, ...rx.items.map(i => h('li', {},
           `${i.medicine} — ${i.dose}, ${i.frequency}, ${i.durationDays}d (qty ${i.quantity})`))),

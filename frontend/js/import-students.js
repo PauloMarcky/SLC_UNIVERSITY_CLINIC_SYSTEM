@@ -215,6 +215,12 @@
         }
     }
 
+    // Under the course in the preview: the department it will be saved under.
+    function departmentNote(course) {
+        const d = window.SLCDepartments ? window.SLCDepartments.forCourse(course) : '';
+        return d ? '<br><small title="' + escapeHtml(d) + '">Department: ' + escapeHtml(window.SLCDepartments.short(d)) + '</small>' : '';
+    }
+
     function renderTable() {
         const group = GROUPS.filter(g => g[0] === filter)[0] || GROUPS[0];
         const list = group[2] === null ? rows : rows.filter(r => group[2].indexOf(r.status) !== -1);
@@ -223,7 +229,7 @@
             const cls = r.status === 'problem' || r.status === 'failed' ? ' class="imp-row-bad"' : r.status === 'exists' ? ' class="imp-row-skip"' : '';
             return '<tr' + cls + '><td>' + r.row + '</td><td>' + escapeHtml(r.id) + '</td><td>' + escapeHtml(r.lastName) + '</td><td>' +
                 escapeHtml(r.firstName) + '</td><td>' + escapeHtml(r.middleName) + '</td><td>' + escapeHtml(r.gender) + '</td><td>' +
-                escapeHtml(r.course) + '</td><td>' + escapeHtml(r.year) + '</td><td class="imp-status">' + statusCell(r) + '</td></tr>';
+                escapeHtml(r.course) + departmentNote(r.course) + '</td><td>' + escapeHtml(r.year) + '</td><td class="imp-status">' + statusCell(r) + '</td></tr>';
         }).join('') || '<tr class="no-match"><td colspan="9">No rows in this view.</td></tr>';
         const limit = $('imp-limit');
         limit.hidden = list.length <= SHOW_LIMIT;
@@ -306,7 +312,9 @@
                 try {
                     const body = { id: r.id, lastName: r.lastName, firstName: r.firstName, middleName: r.middleName,
                         gender: r.gender, course: r.course, year: r.year, category: 'student' };
-                    if (dept) body.college = dept;
+                    // The department is taken from the course. The typed department is only used when the course is not recognised.
+                    const department = (window.SLCDepartments && window.SLCDepartments.forCourse(r.course)) || dept;
+                    if (department) body.college = department;
                     await api.request('/api/patients', { method: 'POST', body: body });
                     r.status = 'added'; existingIds.add(r.id.toLowerCase()); tally.added++; lostConnection = 0;
                 } catch (error) {

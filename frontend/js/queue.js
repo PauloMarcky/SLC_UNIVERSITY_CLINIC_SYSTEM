@@ -5,6 +5,8 @@
     const $ = id => document.getElementById(id);
     const TYPES = ['Checkup', 'Consultation'];
     let visits = [];
+    let late = [];            // triaged on an earlier day, still inside the window (can be re-queued)
+    let windowDays = 2;
     let filter = '';          // '' = all, otherwise 'Checkup' or 'Consultation'
     let current = null;
     let lastTrigger = null;
@@ -27,6 +29,8 @@
         else if (current) sayInModal(error.message);
         else say(error.message, true);
     }
+    // "2026-10-27" -> "October 27, 2026"
+    const fmt = value => (window.ClinicDate ? window.ClinicDate.format(value) : value) || '';
     function cell(text) {
         const td = document.createElement('td');
         td.textContent = text == null ? '' : String(text);
@@ -77,19 +81,73 @@
             button.addEventListener('click', () => openExam(v, button));
             const action = document.createElement('td');
             action.append(button);
-            tr.append(cell(v.visitDate), cell(v.patientName + ' (' + v.patientId + ')'), typeCell(v.visitType),
-                cell(v.complaint), cell(v.bp + ' ' + v.bpStatus), cell(v.bmi + ' ' + v.bmiStatus),
+            // The blood pressure status is the doctor's call, so only the reading is shown here.
+            const when = v.originalVisitDate
+                ? fmt(v.visitDate) + ' (re-queued; vitals taken ' + fmt(v.originalVisitDate) + ')'
+                : fmt(v.visitDate);
+            tr.append(cell(when), cell(v.patientName + ' (' + v.patientId + ')'), typeCell(v.visitType),
+                cell(v.complaint), cell(v.bp), cell(v.bmi + ' ' + v.bmiStatus),
                 cell(v.nurseName), action);
             rows.append(tr);
         });
+    }
+
+    function renderLate() {
+        const rows = $('late-rows');
+        rows.replaceChildren();
+        $('late-count').textContent = late.length;
+        $('late-sub').textContent = 'Triaged on an earlier day and not examined. Re-queue puts the patient back in today\'s queue ' +
+            'with the same vitals. After ' + windowDays + ' days the visit is removed from here and saved on the student record as missed.';
+        if (!late.length) {
+            const tr = document.createElement('tr');
+            const td = cell('No patients waiting to be re-queued.');
+            td.colSpan = 7;
+            tr.append(td);
+            rows.append(tr);
+            return;
+        }
+        late.forEach(v => {
+            const tr = document.createElement('tr');
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn sec';
+            button.textContent = 'Re-queue';
+            if (!v.canRequeue) {
+                button.disabled = true;
+                button.title = 'This patient already has a visit in today\'s queue, or a more recent visit that did not proceed.';
+            }
+            button.addEventListener('click', () => requeue(v, button));
+            const action = document.createElement('td');
+            action.append(button);
+            const left = v.daysLeft <= 1 ? 'After today' : 'In ' + v.daysLeft + ' days';
+            tr.append(cell(fmt(v.originalVisitDate || v.visitDate)), cell(v.patientName + ' (' + v.patientId + ')'), typeCell(v.visitType),
+                cell(v.complaint), cell(v.bp), cell(left), action);
+            rows.append(tr);
+        });
+    }
+
+    async function requeue(v, button) {
+        button.disabled = true;
+        try {
+            await api.getSession();
+            await api.request('/api/visits/' + v.id + '/requeue', { method: 'POST', body: {} });
+            say(v.patientName + ' is back in today\'s queue.');
+            await loadQueue();
+        } catch (error) {
+            fail(error);
+            await loadQueue();   // the list may have changed (for example the visit was just saved as missed)
+        }
     }
 
     async function loadQueue() {
         try {
             const result = await api.request('/api/visits/queue');
             visits = result.visits;
+            late = result.didNotProceed || [];
+            windowDays = result.windowDays || windowDays;
             renderTabs();
             renderRows();
+            renderLate();
         } catch (error) { fail(error); }
     }
 
@@ -111,13 +169,14 @@
         sayInModal('');
         say('');
         $('exam-title').textContent = 'Examination: ' + v.patientName + ' (visit #' + v.id + ')';
-        $('exam-summary').textContent = v.visitType + ' \u00B7 ' + v.visitDate +
+        $('exam-summary').textContent = v.visitType + ' \u00B7 ' + fmt(v.visitDate) +
+            (v.originalVisitDate ? ' \u00B7 Vitals taken ' + fmt(v.originalVisitDate) : '') +
             ' \u00B7 BP ' + v.bp + ' \u00B7 Weight ' + v.weightKg + ' kg \u00B7 Height ' + v.heightCm + ' cm \u00B7 BMI ' + v.bmi +
             (v.pulseRate ? ' \u00B7 Pulse ' + v.pulseRate : '') +
             (v.bodyTemperature != null ? ' \u00B7 Temp ' + v.bodyTemperature + ' \u00B0C' : '') +
             (v.initialDiagnosis ? ' \u00B7 Nurse dx: ' + v.initialDiagnosis : '') +
             (v.labSourceName
-                ? ' \u00B7 Outside lab: ' + v.labSourceName + (v.labSourceLocation ? ', ' + v.labSourceLocation : '') + (v.labReceivedAt ? ' (received ' + v.labReceivedAt + ')' : '')
+                ? ' \u00B7 Outside lab: ' + v.labSourceName + (v.labSourceLocation ? ', ' + v.labSourceLocation : '') + (v.labReceivedAt ? ' (received ' + fmt(v.labReceivedAt) + ')' : '')
                 : v.externalLabsAttached ? ' \u00B7 External labs attached' : '');
         $('purpose').value = v.complaint || '';
         // Screening is only for a Checkup, and its note only appears once the box is ticked.
@@ -131,7 +190,7 @@
 
     function hasInput() {
         const rx = window.PrescriptionBuilder;
-        return Boolean($('o').value.trim() || $('x').value.trim() || $('act').value.trim() ||
+        return Boolean($('bps').value.trim() || $('o').value.trim() || $('x').value.trim() || $('act').value.trim() ||
             $('screen').checked ||
             (rx && rx.getPayload()));
     }
@@ -219,6 +278,7 @@
                 method: 'POST',
                 body: {
                     diagnosis: $('x').value, soapObjective: $('o').value, actionsTaken: $('act').value,
+                    bpStatus: $('bps').value,   // identified by the doctor
                     sentToHospital: false, confidential: false,
                     putToScreening: screening, screenedNote: screening ? $('screen-note').value : '',
                     prescription: rx && rxOn ? rx.getPayload() : null
